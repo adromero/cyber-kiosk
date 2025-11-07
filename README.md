@@ -246,6 +246,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Acknowledgments
 
 - Inspired by William Gibson's *Neuromancer*
+- Cyberdeck hardware based on [HOSAKA MK I - Sprawl Edition](https://hackaday.io/project/187128-hosaka-mk-i-sprawl-edition) by back7
 - Built for the Raspberry Pi community
 - Thanks to all API providers (OpenWeatherMap, NY Times, YouTube, Alpha Vantage)
 
