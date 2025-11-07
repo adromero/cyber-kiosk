@@ -1,0 +1,39 @@
+# Configuration with secrets
+config.json
+.env
+
+# Logs
+*.log
+launch-kiosk.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*~
+*.bak
+
+# Node modules
+node_modules/
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code
+CLAUDE.md
+.claude/
+
+# Personal systemd service files
+*.service
+
+# Backup files and scripts
+*.backup
+setup-financial-api.sh
+
+# Keep screenshots but ignore upload server
+screenshots/upload-server.py

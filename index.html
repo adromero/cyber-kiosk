@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER TERMINAL</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- CRT Overlay Effects -->
+    <div class="crt"></div>
+    <div class="scanlines"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <span class="system-name">CYBER//TERMINAL_v2.1</span>
+            </div>
+            <div class="header-right">
+                <span id="current-time" class="time-display"></span>
+                <span id="current-date" class="date-display"></span>
+            </div>
+        </header>
+
+        <div class="separator"></div>
+
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Left Column: Weather & Image -->
+            <div class="left-column">
+                <!-- Info Widget -->
+                <div class="widget weather-widget">
+                    <div class="widget-header">
+                        <span class="widget-title">&gt; INFO_FEED</span>
+                        <span class="widget-status" id="weather-status">SYNCING...</span>
+                        <span class="widget-source" id="weather-source" style="margin-left: 10px; opacity: 0.7;"></span>
+                    </div>
+                    <div class="widget-content" id="weather-content">
+                        <div class="weather-current">
+                            <div class="weather-temp" id="temp">--°</div>
+                            <div class="weather-condition" id="condition">CONNECTING...</div>
+                            <div class="weather-details">
+                                <div class="weather-detail">
+                                    <span class="label">FEELS_LIKE:</span>
+                                    <span id="feels-like">--°</span>
+                                </div>
+                                <div class="weather-detail">
+                                    <span class="label">HUMIDITY:</span>
+                                    <span id="humidity">--%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="weather-forecast" id="forecast">
+                            <!-- Forecast items will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: System Status + Image Display -->
+                <div class="bottom-row">
+                    <!-- System Status Widget -->
+                    <div class="widget system-widget">
+                        <div class="widget-header">
+                            <span class="widget-title">&gt; SYS_STATUS</span>
+                            <span class="widget-status" id="system-status">SYNCING...</span>
+                        </div>
+                        <div class="widget-content system-content">
+                            <div class="system-section">
+                                <div class="system-label">CPU_TEMP:</div>
+                                <div class="system-value" id="cpu-temp">--°C</div>
+                            </div>
+                            <div class="system-section">
+                                <div class="system-label">GPU_TEMP:</div>
+                                <div class="system-value" id="gpu-temp">--°C</div>
+                            </div>
+                            <div class="system-section">
+                                <div class="system-label">CPU_USAGE:</div>
+                                <div class="system-value" id="cpu-usage">--%</div>
+                            </div>
+                            <div class="system-section">
+                                <div class="system-label">MEMORY:</div>
+                                <div class="system-value" id="memory-usage">-- / -- MB</div>
+                            </div>
+                            <div class="system-section">
+                                <div class="system-label">DISK:</div>
+                                <div class="system-value" id="disk-usage">-- / --</div>
+                            </div>
+                            <div class="system-section">
+                                <div class="system-label">LOAD_AVG:</div>
+                                <div class="system-value" id="load-avg">-- -- --</div>
+                            </div>
+                            <div class="system-section">
+                                <div class="system-label">UPTIME:</div>
+                                <div class="system-value" id="uptime">--</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video Display -->
+                    <div class="widget video-widget">
+                        <div class="widget-header">
+                            <span class="widget-title">&gt; VID</span>
+                            <span class="widget-status" id="video-status">ACTIVE</span>
+                        </div>
+                        <div class="widget-content video-content">
+                            <img id="video-thumbnail" src="" alt="YouTube Video">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Hacker News Feed -->
+            <div class="right-column">
+                <div class="widget news-widget">
+                    <div class="widget-header">
+                        <span class="widget-title">&gt; NEWS_FEED</span>
+                        <span class="widget-status" id="news-status">STREAMING...</span>
+                        <span class="widget-source" id="news-source" style="margin-left: 10px; opacity: 0.7;"></span>
+                    </div>
+                    <div class="widget-content news-content" id="news-feed">
+                        <!-- News items will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="separator"></div>
+        <footer class="footer">
+            <span class="footer-text">
+                <span id="connection-status" style="cursor: pointer;">CONNECTION: SECURE</span> |
+                LOCATION: <span id="location-display">-----</span> |
+                <span id="network-status" style="cursor: pointer;">STATUS: ONLINE</span>
+            </span>
+        </footer>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span class="modal-title" id="modal-title"></span>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-content" id="modal-content">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Exit Button (bottom right corner) -->
+    <div id="exit-button" class="exit-button"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
