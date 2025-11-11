@@ -4,10 +4,12 @@
     --neon-magenta: #ff00ff;
     --neon-amber: #ffaa00;
     --neon-green: #00ff00;
+    --neon-purple: #8a2be2;
     --dark-bg: #0a0a0a;
     --darker-bg: #050505;
     --terminal-green: #00ff41;
     --error-red: #ff0040;
+    --text-primary: #e0e0e0;
 }
 
 * {
@@ -135,6 +137,22 @@ body {
 .header-right {
     display: flex;
     gap: 30px;
+    align-items: center;
+}
+
+.temp-display {
+    color: var(--neon-green);
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-shadow: 0 0 5px var(--neon-green);
+}
+
+.temp-display:hover {
+    color: var(--terminal-green);
+    text-shadow: 0 0 10px var(--terminal-green),
+                 0 0 20px var(--terminal-green);
+    transform: scale(1.05);
 }
 
 .time-display {

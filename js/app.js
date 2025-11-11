@@ -74,6 +74,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateDateTime();
     setInterval(updateDateTime, 1000);
 
+    // Initialize system temperature monitoring
+    updateSystemTemperature();
+    setInterval(updateSystemTemperature, 15000); // Update every 15 seconds
+
     loadVideos();
     fetchWeatherOrFinancial();
     fetchNews();
@@ -110,6 +114,32 @@ function updateDateTime() {
 
     document.getElementById('current-time').textContent = timeString;
     document.getElementById('current-date').textContent = dateString.replace(/\//g, '.');
+}
+
+// Update System Temperature
+async function updateSystemTemperature() {
+    try {
+        const response = await fetch(CONFIG.systemMonitorUrl);
+        if (!response.ok) {
+            throw new Error('Failed to fetch system stats');
+        }
+
+        const stats = await response.json();
+        const tempElement = document.getElementById('system-temp');
+
+        // Use CPU temperature, display in Celsius
+        if (stats.temperature && stats.temperature.cpu) {
+            tempElement.textContent = `${stats.temperature.cpu}°C`;
+        } else {
+            tempElement.textContent = '--°C';
+        }
+
+        // Store stats for modal
+        currentSystemData = stats;
+    } catch (error) {
+        console.error('> ERROR FETCHING SYSTEM TEMPERATURE:', error);
+        document.getElementById('system-temp').textContent = '--°C';
+    }
 }
 
 // Load and Display YouTube Videos
@@ -742,6 +772,11 @@ document.querySelector('#connection-status').addEventListener('click', async () 
 // STATUS:ONLINE footer click handler
 document.querySelector('#network-status').addEventListener('click', async () => {
     await showNetworkModal();
+});
+
+// System temperature click handler
+document.querySelector('#system-temp').addEventListener('click', async () => {
+    await showSystemStatusModal();
 });
 
 // Show Weather Modal with 5-day forecast
@@ -1454,6 +1489,107 @@ async function showNetworkModal() {
     } catch (error) {
         console.error('> ERROR LOADING NETWORK MONITOR:', error);
         modalContent.innerHTML = '<div class="error-message">ERROR LOADING NETWORK MONITOR DATA</div>';
+    }
+}
+
+// Show System Status Modal
+async function showSystemStatusModal() {
+    try {
+        const statusMsg = '<div style="text-align: center; font-size: 1.5rem; color: var(--neon-cyan);">LOADING SYSTEM STATUS...</div>';
+        openModal('&gt; SYSTEM_STATUS', statusMsg);
+
+        // Fetch fresh system stats
+        const response = await fetch(CONFIG.systemMonitorUrl);
+        if (!response.ok) throw new Error('Failed to fetch system stats');
+        const stats = await response.json();
+
+        // Helper function to get status color
+        function getStatusColor(value, threshold, inverted = false) {
+            const isHigh = value > threshold;
+            if (inverted) {
+                return isHigh ? 'var(--neon-green)' : 'var(--error-red)';
+            }
+            return isHigh ? 'var(--error-red)' : 'var(--neon-green)';
+        }
+
+        // Calculate memory percentage for color
+        const memPercent = stats.memory ? stats.memory.usedPercent : 0;
+        const cpuPercent = stats.cpu ? stats.cpu.usage : 0;
+        const diskPercent = stats.disk ? parseInt(stats.disk.percent) : 0;
+
+        const content = `
+            <div style="padding: 1rem;">
+                <!-- Temperature Section -->
+                <div style="margin-bottom: 2rem; text-align: center;">
+                    <div style="font-size: 4rem; color: ${getStatusColor(parseFloat(stats.temperature?.cpu || 0), 70)}; text-shadow: 0 0 10px ${getStatusColor(parseFloat(stats.temperature?.cpu || 0), 70)};">
+                        ${stats.temperature?.cpu || '--'}°C
+                    </div>
+                    <div style="font-size: 1.3rem; color: var(--neon-cyan); margin-top: 0.5rem;">
+                        CPU TEMPERATURE
+                    </div>
+                </div>
+
+                <!-- Main Stats Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <!-- CPU Usage -->
+                    <div style="border: 1px solid var(--neon-cyan); padding: 1rem; background: rgba(0, 255, 255, 0.05);">
+                        <div style="color: var(--neon-cyan); font-size: 1rem; margin-bottom: 0.5rem;">CPU USAGE</div>
+                        <div style="color: ${getStatusColor(cpuPercent, 80)}; font-size: 2.2rem;">${cpuPercent}%</div>
+                    </div>
+
+                    <!-- GPU Temperature -->
+                    <div style="border: 1px solid var(--neon-purple); padding: 1rem; background: rgba(138, 43, 226, 0.05);">
+                        <div style="color: var(--neon-purple); font-size: 1rem; margin-bottom: 0.5rem;">GPU TEMPERATURE</div>
+                        <div style="color: ${getStatusColor(parseFloat(stats.temperature?.gpu || 0), 70)}; font-size: 2.2rem;">${stats.temperature?.gpu || '--'}°C</div>
+                    </div>
+
+                    <!-- Memory Usage -->
+                    <div style="border: 1px solid var(--neon-green); padding: 1rem; background: rgba(0, 255, 0, 0.05);">
+                        <div style="color: var(--neon-green); font-size: 1rem; margin-bottom: 0.5rem;">MEMORY USAGE</div>
+                        <div style="color: ${getStatusColor(memPercent, 80)}; font-size: 2.2rem;">${memPercent}%</div>
+                        <div style="color: var(--text-primary); font-size: 1.1rem; margin-top: 0.3rem;">${stats.memory?.used || '--'}MB / ${stats.memory?.total || '--'}MB</div>
+                    </div>
+
+                    <!-- Disk Usage -->
+                    <div style="border: 1px solid var(--neon-amber); padding: 1rem; background: rgba(255, 170, 0, 0.05);">
+                        <div style="color: var(--neon-amber); font-size: 1rem; margin-bottom: 0.5rem;">DISK USAGE</div>
+                        <div style="color: ${getStatusColor(diskPercent, 80)}; font-size: 2.2rem;">${diskPercent}%</div>
+                        <div style="color: var(--text-primary); font-size: 1.1rem; margin-top: 0.3rem;">${stats.disk?.used || '--'} / ${stats.disk?.total || '--'}</div>
+                    </div>
+                </div>
+
+                <!-- System Info Section -->
+                <div style="border-top: 1px solid var(--neon-cyan); padding-top: 1rem; font-size: 1.3rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span style="color: var(--neon-cyan);">UPTIME:</span>
+                        <span style="color: var(--text-primary); font-family: monospace;">${stats.uptime || 'N/A'}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span style="color: var(--neon-cyan);">LOAD AVERAGE:</span>
+                        <span style="color: var(--text-primary); font-family: monospace;">
+                            ${stats.load?.load1 || '--'} / ${stats.load?.load5 || '--'} / ${stats.load?.load15 || '--'}
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--neon-cyan);">SYSTEM STATUS:</span>
+                        <span style="color: var(--neon-green); font-family: monospace;">● OPERATIONAL</span>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div style="margin-top: 2rem; padding: 1rem; border: 1px solid var(--neon-green); background: rgba(0, 255, 0, 0.1); text-align: center;">
+                    <div style="color: var(--neon-green); font-size: 1.1rem;">
+                        SYSTEM MONITOR ACTIVE<br>
+                        <span style="font-size: 0.9rem; opacity: 0.8;">Raspberry Pi | Real-time Metrics</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        modalContent.innerHTML = content;
+    } catch (error) {
+        console.error('> ERROR LOADING SYSTEM STATUS:', error);
+        modalContent.innerHTML = '<div class="error-message">ERROR LOADING SYSTEM STATUS</div>';
     }
 }
 

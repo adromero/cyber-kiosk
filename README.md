@@ -9,12 +9,13 @@ A Neuromancer-inspired cyberpunk dashboard for Raspberry Pi with touchscreen. Fe
 ## Features
 
 - **Retro CRT Display** - Scanlines, phosphor glow, and authentic terminal aesthetics
+- **Live Temperature Display** - Real-time CPU temperature shown in header (updates every 15 seconds)
 - **Weather & Financial Data** - Cycles between current weather/forecast and live market data (DOW, S&P 500, NASDAQ, Gold, USD/EUR)
 - **YouTube Integration** - Rotating cyberpunk-themed video thumbnails with full player and search modal
 - **Multi-Source News** - Rotates through Hacker News, NY Times Tech, and Dev.to every 5 minutes
-- **System Monitor** - Real-time Raspberry Pi stats (CPU/GPU temp, memory, disk, load avg, uptime)
+- **System Status Modal** - Click temperature to view full diagnostics (CPU/GPU temp, memory, disk, load avg, uptime)
 - **Interactive Modals** - Click any widget for expanded detailed view
-- **Cyberpunk Aesthetic** - Neon cyan/magenta/amber color scheme with glowing text
+- **Cyberpunk Aesthetic** - Neon cyan/magenta/amber/green color scheme with glowing text
 - **Burn-in Prevention** - Auto-dimming and subtle pixel shifting for 24/7 operation
 - **Hidden Exit** - Click bottom-right corner to exit kiosk mode
 
@@ -171,8 +172,11 @@ cyber-kiosk/
 
 The system monitor runs as a Node.js server on port 3001 and provides:
 
-- `/stats` - CPU/GPU temp, memory, disk, load average, uptime
+- `/stats` - CPU/GPU temp, memory, disk, load average, uptime (powers the header temperature display and system status modal)
 - `/financial` - Market data (requires Alpha Vantage API key)
+- `/pihole` - Pi-hole network statistics (requires Pi-hole installation)
+- `/network` - Network bandwidth and connection stats (requires vnstat)
+- `/config` - Configuration loaded from .env file
 - `/health` - Health check
 
 ### Running as a Service
