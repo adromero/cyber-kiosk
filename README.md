@@ -58,7 +58,7 @@ A Neuromancer-inspired cyberpunk dashboard for Raspberry Pi with touchscreen. Fe
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/cyber-kiosk.git
+   git clone https://github.com/adromero/cyber-kiosk.git
    cd cyber-kiosk
    ```
 
@@ -70,21 +70,23 @@ A Neuromancer-inspired cyberpunk dashboard for Raspberry Pi with touchscreen. Fe
    This will:
    - Check dependencies
    - Install npm packages
-   - Create your config.json
+   - Create your `.env` file from template
    - Prompt for API keys (optional)
    - Test the system monitor
 
 3. **Configure your API keys:**
 
-   Edit `config.json` with your API keys (all free):
+   Edit `.env` with your API keys (all free):
 
-   ```json
-   {
-     "zipCode": "90210",
-     "weatherApiKey": "YOUR_KEY_HERE",
-     "nytApiKey": "YOUR_KEY_HERE",
-     "youtubeApiKey": "YOUR_KEY_HERE"
-   }
+   ```bash
+   # Configuration
+   ZIP_CODE=45249
+
+   # API Keys
+   OPENWEATHER_API_KEY=your_openweathermap_api_key
+   NYT_API_KEY=your_nytimes_api_key
+   YOUTUBE_API_KEY=your_youtube_api_key
+   ALPHA_VANTAGE_API_KEY=your_alphavantage_api_key
    ```
 
    Get your free API keys:
@@ -92,6 +94,8 @@ A Neuromancer-inspired cyberpunk dashboard for Raspberry Pi with touchscreen. Fe
    - **News:** https://developer.nytimes.com/
    - **YouTube:** https://console.cloud.google.com/apis/credentials (Enable YouTube Data API v3)
    - **Financial (optional):** https://www.alphavantage.co/support/#api-key
+
+   **Note:** The `.env` file is git-ignored to keep your API keys secure.
 
 4. **Start the system monitor:**
    ```bash
@@ -107,21 +111,20 @@ A Neuromancer-inspired cyberpunk dashboard for Raspberry Pi with touchscreen. Fe
 
 ## Configuration
 
-All settings are in `config.json`:
+All settings are in `.env`:
 
-```json
-{
-  "zipCode": "90210",
-  "weatherApiKey": "YOUR_KEY",
-  "nytApiKey": "YOUR_KEY",
-  "youtubeApiKey": "YOUR_KEY",
-  "imageChangeInterval": 30000,
-  "weatherCycleInterval": 300000,
-  "newsUpdateInterval": 300000,
-  "systemMonitorUrl": "http://localhost:3001/stats",
-  "systemUpdateInterval": 30000
-}
+```bash
+# Configuration
+ZIP_CODE=45249
+
+# API Keys
+OPENWEATHER_API_KEY=your_key_here
+NYT_API_KEY=your_key_here
+YOUTUBE_API_KEY=your_key_here
+ALPHA_VANTAGE_API_KEY=your_key_here
 ```
+
+Timing intervals are configured in `system-monitor.js` and `js/app.js`.
 
 ### Customize YouTube Videos
 
@@ -151,8 +154,8 @@ cyber-kiosk/
 ├── js/
 │   └── app.js                # Application logic
 ├── system-monitor.js         # Node.js backend (port 3001)
-├── config.json               # Your config (gitignored)
-├── config.example.json       # Config template
+├── .env                      # Your config with API keys (gitignored)
+├── .env.example              # Config template
 ├── launch-kiosk.sh           # Kiosk launcher script
 ├── setup.sh                  # Interactive setup
 ├── package.json              # Node dependencies
@@ -200,13 +203,14 @@ The color scheme is defined in `css/style.css`:
 
 ### Intervals
 
-Adjust update frequencies in `config.json` (values in milliseconds).
+Adjust update frequencies in `js/app.js` configuration section (values in milliseconds).
 
 ## Troubleshooting
 
 ### Dashboard shows "API_KEY_REQUIRED"
-- Copy `config.example.json` to `config.json`
-- Add your API keys to `config.json`
+- Copy `.env.example` to `.env`
+- Add your API keys to `.env`
+- Restart the system monitor: `sudo systemctl restart cyber-kiosk-monitor`
 
 ### System stats showing ERROR
 - Ensure system monitor is running: `npm start`
@@ -214,15 +218,16 @@ Adjust update frequencies in `config.json` (values in milliseconds).
 - View logs: `sudo journalctl -u cyber-kiosk-monitor -f`
 
 ### Financial data shows simulated values
-- Add Alpha Vantage API key to environment:
+- Add Alpha Vantage API key to `.env`:
   ```bash
-  export ALPHA_VANTAGE_API_KEY=your_key_here
+  ALPHA_VANTAGE_API_KEY=your_key_here
   ```
-- Or add to systemd service file (see docs)
+- Restart the system monitor service
 
 ### News/Weather not updating
 - Verify internet connection
-- Check API keys in `config.json`
+- Check API keys in `.env`
+- Restart system monitor: `sudo systemctl restart cyber-kiosk-monitor`
 - Open browser console (F12) to see errors
 
 For more help, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)

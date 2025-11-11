@@ -58,5 +58,6 @@ chromium-browser \
     --no-first-run \
     --password-store=basic \
     --check-for-update-interval=31536000 \
-    --app="file://$SCRIPT_DIR/index.html" \
+    --enable-logging --v=1 \
+    --app="http://localhost:3001" \
     >> "$LOG_FILE" 2>&1

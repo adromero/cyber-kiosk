@@ -8,9 +8,43 @@ const path = require('path');
 
 const PORT = 3001;
 
+// Load environment variables from .env file
+function loadEnvFile() {
+    const envPath = path.join(__dirname, '.env');
+    const env = {};
+
+    try {
+        const envContent = fs.readFileSync(envPath, 'utf8');
+        const lines = envContent.split('\n');
+
+        for (const line of lines) {
+            // Skip empty lines and comments
+            if (!line || line.trim().startsWith('#')) continue;
+
+            // Parse KEY=VALUE
+            const match = line.match(/^\s*([A-Z_]+)\s*=\s*(.*)$/);
+            if (match) {
+                const key = match[1];
+                let value = match[2].trim();
+                // Remove quotes if present
+                value = value.replace(/^["']|["']$/g, '');
+                env[key] = value;
+            }
+        }
+
+        console.log('> Environment variables loaded from .env');
+        return env;
+    } catch (error) {
+        console.error('> Warning: Could not load .env file:', error.message);
+        return env;
+    }
+}
+
+const ENV = loadEnvFile();
+
 // Financial API Configuration
 // Get free API key from: https://www.alphavantage.co/support/#api-key
-const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY || 'demo';
+const ALPHA_VANTAGE_API_KEY = ENV.ALPHA_VANTAGE_API_KEY || 'demo';
 
 // Helper function to execute shell commands
 function execCommand(command) {
@@ -544,6 +578,21 @@ const server = http.createServer(async (req, res) => {
         res.setHeader('Content-Type', 'application/json');
         res.writeHead(200);
         res.end(JSON.stringify({ status: 'ok' }));
+    } else if (req.url === '/config' && req.method === 'GET') {
+        res.setHeader('Content-Type', 'application/json');
+        res.writeHead(200);
+        res.end(JSON.stringify({
+            zipCode: ENV.ZIP_CODE || '90210',
+            weatherApiKey: ENV.OPENWEATHER_API_KEY || '',
+            nytApiKey: ENV.NYT_API_KEY || '',
+            youtubeApiKey: ENV.YOUTUBE_API_KEY || '',
+            imageChangeInterval: 30000,
+            weatherUpdateInterval: 600000,
+            newsUpdateInterval: 300000,
+            weatherCycleInterval: 300000,
+            systemMonitorUrl: 'http://localhost:3001/stats',
+            systemUpdateInterval: 30000
+        }));
     } else {
         // Serve static files
         let filePath = '.' + req.url;

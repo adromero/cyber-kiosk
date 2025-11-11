@@ -1,13 +1,13 @@
 // Cyber Kiosk Application
 // Neuromancer-inspired dashboard
 
-// Configuration - loaded from config.json
+// Configuration - loaded from server /config endpoint
 let CONFIG = {
-    // Default values (will be overridden by config.json if present)
+    // Default values (will be overridden by server config)
     zipCode: '90210',
-    weatherApiKey: 'YOUR_OPENWEATHERMAP_API_KEY',
-    nytApiKey: 'YOUR_NYT_API_KEY',
-    youtubeApiKey: 'YOUR_YOUTUBE_API_KEY',
+    weatherApiKey: '',
+    nytApiKey: '',
+    youtubeApiKey: '',
     imageChangeInterval: 30000, // 30 seconds
     weatherUpdateInterval: 600000, // 10 minutes
     newsUpdateInterval: 300000, // 5 minutes (cycles through sources)
@@ -16,19 +16,20 @@ let CONFIG = {
     systemUpdateInterval: 30000, // 30 seconds
 };
 
-// Load configuration from external file
+// Load configuration from server
 async function loadConfig() {
     try {
-        const response = await fetch('config.json');
+        // Fetch config from server (which loads from .env file)
+        const response = await fetch('/config');
         if (response.ok) {
             const config = await response.json();
             // Merge loaded config with defaults
             CONFIG = { ...CONFIG, ...config };
-            console.log('> CONFIG LOADED FROM config.json');
+            console.log('> CONFIG LOADED FROM SERVER');
+            console.log('> WEATHER API KEY:', CONFIG.weatherApiKey ? CONFIG.weatherApiKey.substring(0, 8) + '...' : 'NOT SET');
             return true;
         } else {
-            console.warn('> CONFIG FILE NOT FOUND - USING DEFAULTS');
-            console.warn('> COPY config.example.json TO config.json AND ADD YOUR API KEYS');
+            console.warn('> CONFIG ENDPOINT NOT AVAILABLE - USING DEFAULTS');
             return false;
         }
     } catch (error) {
@@ -76,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadVideos();
     fetchWeatherOrFinancial();
     fetchNews();
-    fetchSystemStats();
+    initCyberspace();
 
     // Set update intervals
     setInterval(() => {
@@ -88,8 +89,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentNewsSourceIndex = (currentNewsSourceIndex + 1) % NEWS_SOURCES.length;
         fetchNews();
     }, CONFIG.newsUpdateInterval);
-
-    setInterval(fetchSystemStats, CONFIG.systemUpdateInterval);
 });
 
 // Update Time and Date
@@ -596,58 +595,22 @@ function escapeHtml(text) {
     return text.replace(/[&<>"']/g, m => map[m]);
 }
 
-// Fetch System Statistics
-async function fetchSystemStats() {
-    const statusEl = document.getElementById('system-status');
+// Initialize Cyberspace Widget
+function initCyberspace() {
+    const statusEl = document.getElementById('cyberspace-status');
+    const iframe = document.getElementById('cyberspace-preview');
 
-    try {
-        statusEl.textContent = 'SYNCING...';
-
-        const response = await fetch(CONFIG.systemMonitorUrl);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const stats = await response.json();
-
-        // Update temperature displays
-        if (stats.temperature) {
-            document.getElementById('cpu-temp').textContent = stats.temperature.cpu ? `${stats.temperature.cpu}°C` : '--°C';
-            document.getElementById('gpu-temp').textContent = stats.temperature.gpu ? `${stats.temperature.gpu}°C` : '--°C';
-        }
-
-        // Update CPU usage
-        if (stats.cpu && stats.cpu.usage !== null) {
-            document.getElementById('cpu-usage').textContent = `${stats.cpu.usage}%`;
-        }
-
-        // Update memory
-        if (stats.memory) {
-            document.getElementById('memory-usage').textContent = `${stats.memory.used}MB / ${stats.memory.total}MB (${stats.memory.usedPercent}%)`;
-        }
-
-        // Update disk usage
-        if (stats.disk) {
-            document.getElementById('disk-usage').textContent = `${stats.disk.used} / ${stats.disk.total} (${stats.disk.percent}%)`;
-        }
-
-        // Update load average
-        if (stats.load) {
-            document.getElementById('load-avg').textContent = `${stats.load.load1} ${stats.load.load5} ${stats.load.load15}`;
-        }
-
-        // Update uptime
-        if (stats.uptime) {
-            document.getElementById('uptime').textContent = stats.uptime;
-        }
-
+    // Update status when iframe loads
+    iframe.addEventListener('load', () => {
         statusEl.textContent = 'ONLINE';
-    } catch (error) {
-        console.error('> ERROR FETCHING SYSTEM STATS:', error);
+        console.log('> CYBERSPACE CONNECTED');
+    });
+
+    // Update status on error
+    iframe.addEventListener('error', () => {
         statusEl.textContent = 'ERROR';
-        // Don't update values on error, keep showing last known values
-    }
+        console.error('> CYBERSPACE CONNECTION FAILED');
+    });
 }
 
 // Burn-in Prevention
@@ -756,9 +719,9 @@ document.querySelector('.weather-widget').addEventListener('click', async () => 
     }
 });
 
-// SYS_STATUS panel click handler
-document.querySelector('.system-widget').addEventListener('click', () => {
-    showSystemModal();
+// CY_SPC panel click handler
+document.querySelector('.cyberspace-widget').addEventListener('click', () => {
+    showCyberspaceModal();
 });
 
 // VID panel click handler
@@ -982,81 +945,39 @@ async function showMarketsModal() {
     }
 }
 
-// Show System Modal
-async function showSystemModal() {
-    try {
-        const statusMsg = '<div style="text-align: center; font-size: 1.5rem; color: var(--neon-cyan);">LOADING SYSTEM DIAGNOSTICS...</div>';
-        openModal('&gt; SYSTEM_DIAGNOSTICS', statusMsg);
+// Show Cyberspace Modal
+function showCyberspaceModal() {
+    const content = `
+        <iframe id="cyberspace-modal-iframe"
+                src="https://cyberspace.online"
+                frameborder="0"
+                allow="clipboard-write; clipboard-read"
+                style="width: 100%; height: 100%; border: none; background: #000;">
+        </iframe>
+    `;
 
-        const response = await fetch(CONFIG.systemMonitorUrl);
-        if (!response.ok) throw new Error('Failed to fetch system stats');
-        const stats = await response.json();
+    openModal('&gt; CYBERSPACE_PORTAL', content);
 
-        const content = `
-            <div class="modal-system-grid">
-                <div class="modal-system-section">
-                    <div class="modal-system-label">CPU_TEMP:</div>
-                    <div class="modal-system-value">${stats.temperature?.cpu || '--'}°C</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">GPU_TEMP:</div>
-                    <div class="modal-system-value">${stats.temperature?.gpu || '--'}°C</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">CPU_USAGE:</div>
-                    <div class="modal-system-value">${stats.cpu?.usage || '--'}%</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">MEMORY_USED:</div>
-                    <div class="modal-system-value">${stats.memory?.used || '--'}MB</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">MEMORY_TOTAL:</div>
-                    <div class="modal-system-value">${stats.memory?.total || '--'}MB</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">MEMORY_PERCENT:</div>
-                    <div class="modal-system-value">${stats.memory?.usedPercent || '--'}%</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">DISK_USED:</div>
-                    <div class="modal-system-value">${stats.disk?.used || '--'}</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">DISK_TOTAL:</div>
-                    <div class="modal-system-value">${stats.disk?.total || '--'}</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">DISK_PERCENT:</div>
-                    <div class="modal-system-value">${stats.disk?.percent || '--'}%</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">LOAD_AVG_1MIN:</div>
-                    <div class="modal-system-value">${stats.load?.load1 || '--'}</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">LOAD_AVG_5MIN:</div>
-                    <div class="modal-system-value">${stats.load?.load5 || '--'}</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">LOAD_AVG_15MIN:</div>
-                    <div class="modal-system-value">${stats.load?.load15 || '--'}</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">UPTIME:</div>
-                    <div class="modal-system-value">${stats.uptime || '--'}</div>
-                </div>
-                <div class="modal-system-section">
-                    <div class="modal-system-label">HOSTNAME:</div>
-                    <div class="modal-system-value">${stats.hostname || 'CYBER-KIOSK'}</div>
-                </div>
-            </div>
-        `;
+    // Add RELOAD button to modal header (next to close button)
+    const modalHeader = document.querySelector('.modal-header');
+    const closeButton = document.getElementById('modal-close');
 
-        modalContent.innerHTML = content;
-    } catch (error) {
-        console.error('> ERROR SHOWING SYSTEM MODAL:', error);
-        modalContent.innerHTML = '<div class="error-message">FAILED TO LOAD SYSTEM DIAGNOSTICS</div>';
+    const reloadButton = document.createElement('button');
+    reloadButton.textContent = 'RELOAD';
+    reloadButton.className = 'modal-reload';
+    reloadButton.onclick = reloadCyberspaceIframe;
+
+    modalHeader.insertBefore(reloadButton, closeButton);
+
+    console.log('> CYBERSPACE PORTAL OPENED');
+}
+
+// Helper function to reload the cyberspace iframe
+function reloadCyberspaceIframe() {
+    const iframe = document.getElementById('cyberspace-modal-iframe');
+    if (iframe) {
+        iframe.src = iframe.src;
+        console.log('> CYBERSPACE IFRAME RELOADED');
     }
 }
 

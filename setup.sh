@@ -60,30 +60,30 @@ else
     echo -e "${GREEN}✓ Chromium browser found${NC}"
 fi
 
-# Step 5: Create config.json
+# Step 5: Create .env file
 echo -e "${CYAN}[5/7] Configuring API keys...${NC}"
-if [ -f "config.json" ]; then
-    echo -e "${YELLOW}⚠ config.json already exists. Skipping...${NC}"
+if [ -f ".env" ]; then
+    echo -e "${YELLOW}⚠ .env already exists. Skipping...${NC}"
     read -p "Do you want to reconfigure? (y/N): " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${GREEN}✓ Using existing config${NC}"
+        echo -e "${GREEN}✓ Using existing .env${NC}"
     else
-        rm config.json
+        rm .env
     fi
 fi
 
-if [ ! -f "config.json" ]; then
-    echo -e "${YELLOW}Creating config.json from template...${NC}"
-    cp config.example.json config.json
+if [ ! -f ".env" ]; then
+    echo -e "${YELLOW}Creating .env from template...${NC}"
+    cp .env.example .env
 
     echo ""
     echo -e "${CYAN}Let's configure your API keys (press Enter to skip):${NC}"
     echo ""
 
     # Zip Code
-    read -p "Enter your ZIP code (default: 90210): " ZIP_CODE
-    ZIP_CODE=${ZIP_CODE:-90210}
+    read -p "Enter your ZIP code (default: 45249): " ZIP_CODE
+    ZIP_CODE=${ZIP_CODE:-45249}
 
     # OpenWeatherMap API Key
     echo -e "${YELLOW}Get OpenWeatherMap API key: https://openweathermap.org/api${NC}"
@@ -97,23 +97,19 @@ if [ ! -f "config.json" ]; then
     echo -e "${YELLOW}Get YouTube API key: https://console.cloud.google.com/apis/credentials${NC}"
     read -p "Enter YouTube API key (optional): " YOUTUBE_KEY
 
-    # Update config.json
-    if [ "$(uname)" == "Darwin" ]; then
-        # macOS
-        sed -i '' "s/90210/$ZIP_CODE/g" config.json
-        [ ! -z "$WEATHER_KEY" ] && sed -i '' "s/YOUR_OPENWEATHERMAP_API_KEY/$WEATHER_KEY/g" config.json
-        [ ! -z "$NYT_KEY" ] && sed -i '' "s/YOUR_NYT_API_KEY/$NYT_KEY/g" config.json
-        [ ! -z "$YOUTUBE_KEY" ] && sed -i '' "s/YOUR_YOUTUBE_API_KEY/$YOUTUBE_KEY/g" config.json
-    else
-        # Linux
-        sed -i "s/90210/$ZIP_CODE/g" config.json
-        [ ! -z "$WEATHER_KEY" ] && sed -i "s/YOUR_OPENWEATHERMAP_API_KEY/$WEATHER_KEY/g" config.json
-        [ ! -z "$NYT_KEY" ] && sed -i "s/YOUR_NYT_API_KEY/$NYT_KEY/g" config.json
-        [ ! -z "$YOUTUBE_KEY" ] && sed -i "s/YOUR_YOUTUBE_API_KEY/$YOUTUBE_KEY/g" config.json
-    fi
+    # Alpha Vantage API Key
+    echo -e "${YELLOW}Get Alpha Vantage API key: https://www.alphavantage.co/support/#api-key${NC}"
+    read -p "Enter Alpha Vantage API key (optional, for financial data): " ALPHA_KEY
 
-    echo -e "${GREEN}✓ config.json created${NC}"
-    echo -e "${YELLOW}You can edit config.json anytime to update your settings${NC}"
+    # Update .env file
+    sed -i "s/ZIP_CODE=.*/ZIP_CODE=$ZIP_CODE/g" .env
+    [ ! -z "$WEATHER_KEY" ] && sed -i "s/OPENWEATHER_API_KEY=.*/OPENWEATHER_API_KEY=$WEATHER_KEY/g" .env
+    [ ! -z "$NYT_KEY" ] && sed -i "s/NYT_API_KEY=.*/NYT_API_KEY=$NYT_KEY/g" .env
+    [ ! -z "$YOUTUBE_KEY" ] && sed -i "s/YOUTUBE_API_KEY=.*/YOUTUBE_API_KEY=$YOUTUBE_KEY/g" .env
+    [ ! -z "$ALPHA_KEY" ] && sed -i "s/ALPHA_VANTAGE_API_KEY=.*/ALPHA_VANTAGE_API_KEY=$ALPHA_KEY/g" .env
+
+    echo -e "${GREEN}✓ .env created${NC}"
+    echo -e "${YELLOW}You can edit .env anytime to update your settings${NC}"
 fi
 
 # Step 6: Test system monitor
@@ -182,7 +178,7 @@ echo -e "  2. Launch dashboard: ${YELLOW}./launch-kiosk.sh${NC}"
 echo -e "  3. Or test in browser: ${YELLOW}chromium-browser index.html${NC}"
 echo ""
 echo -e "${CYAN}Configuration:${NC}"
-echo -e "  - Edit ${YELLOW}config.json${NC} to update API keys"
+echo -e "  - Edit ${YELLOW}.env${NC} to update API keys and settings"
 echo -e "  - Edit ${YELLOW}js/app.js${NC} to customize YouTube videos"
 echo -e "  - See ${YELLOW}docs/${NC} for more information"
 echo ""
