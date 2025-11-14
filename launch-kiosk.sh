@@ -45,8 +45,18 @@ else
     echo "Wayland detected" >> "$LOG_FILE"
 fi
 
+# Get PORT from .env file (default to 3001 if not set)
+PORT=3001
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    PORT_FROM_ENV=$(grep "^PORT=" "$SCRIPT_DIR/.env" | cut -d '=' -f2 | tr -d ' ')
+    if [ ! -z "$PORT_FROM_ENV" ]; then
+        PORT=$PORT_FROM_ENV
+        echo "Using PORT from .env: $PORT" >> "$LOG_FILE"
+    fi
+fi
+
 # Launch Chromium in kiosk mode (works in both X11 and Wayland)
-echo "Launching Chromium in kiosk mode..." >> "$LOG_FILE"
+echo "Launching Chromium in kiosk mode on port $PORT..." >> "$LOG_FILE"
 cd "$SCRIPT_DIR"
 chromium-browser \
     --kiosk \
@@ -59,5 +69,5 @@ chromium-browser \
     --password-store=basic \
     --check-for-update-interval=31536000 \
     --enable-logging --v=1 \
-    --app="http://localhost:3001" \
+    --app="http://localhost:$PORT" \
     >> "$LOG_FILE" 2>&1

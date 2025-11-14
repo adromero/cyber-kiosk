@@ -5,15 +5,16 @@
 let CONFIG = {
     // Default values (will be overridden by server config)
     zipCode: '90210',
-    weatherApiKey: '',
-    nytApiKey: '',
-    youtubeApiKey: '',
+    hasWeatherKey: false,
+    hasNytKey: false,
+    hasYoutubeKey: false,
     imageChangeInterval: 30000, // 30 seconds
     weatherUpdateInterval: 600000, // 10 minutes
     newsUpdateInterval: 300000, // 5 minutes (cycles through sources)
     weatherCycleInterval: 300000, // 5 minutes (cycles between weather and financial)
     systemMonitorUrl: 'http://localhost:3001/stats',
     systemUpdateInterval: 30000, // 30 seconds
+    port: 3001
 };
 
 // Load configuration from server
@@ -26,7 +27,14 @@ async function loadConfig() {
             // Merge loaded config with defaults
             CONFIG = { ...CONFIG, ...config };
             console.log('> CONFIG LOADED FROM SERVER');
-            console.log('> WEATHER API KEY:', CONFIG.weatherApiKey ? CONFIG.weatherApiKey.substring(0, 8) + '...' : 'NOT SET');
+            console.log('> Weather API:', CONFIG.hasWeatherKey ? 'CONFIGURED' : 'NOT SET');
+            console.log('> NY Times API:', CONFIG.hasNytKey ? 'CONFIGURED' : 'NOT SET');
+            console.log('> YouTube API:', CONFIG.hasYoutubeKey ? 'CONFIGURED' : 'NOT SET');
+            console.log('> PORT:', CONFIG.port);
+
+            // Update systemMonitorUrl with correct port
+            CONFIG.systemMonitorUrl = `http://localhost:${CONFIG.port}/stats`;
+
             return true;
         } else {
             console.warn('> CONFIG ENDPOINT NOT AVAILABLE - USING DEFAULTS');
@@ -93,6 +101,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentNewsSourceIndex = (currentNewsSourceIndex + 1) % NEWS_SOURCES.length;
         fetchNews();
     }, CONFIG.newsUpdateInterval);
+
+    // Initialize screensaver button - click lower left corner to activate screensaver
+    const screensaverButton = document.getElementById('screensaver-button');
+    if (screensaverButton) {
+        screensaverButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            screensaverButton.blur();
+            if (!isScreensaverActive) {
+                console.log('> SCREENSAVER BUTTON CLICKED - STARTING SCREENSAVER');
+                startScreensaver();
+            }
+        });
+    }
+
+    // Initialize screensaver timer (after config is loaded)
+    resetScreensaverTimer();
+    console.log('> SCREENSAVER TIMER INITIALIZED');
 });
 
 // Update Time and Date
@@ -188,13 +214,13 @@ async function fetchWeather() {
     const statusEl = document.getElementById('weather-status');
     const contentEl = document.getElementById('weather-content');
 
-    // Check if API key is set
-    if (CONFIG.weatherApiKey === 'YOUR_OPENWEATHERMAP_API_KEY') {
+    // Check if API key is configured on backend
+    if (!CONFIG.hasWeatherKey) {
         statusEl.textContent = 'API_KEY_REQUIRED';
         contentEl.innerHTML = `
             <div class="weather-current">
                 <div class="weather-temp">--°</div>
-                <div class="weather-condition">SET API KEY IN js/app.js</div>
+                <div class="weather-condition">API KEY NOT CONFIGURED</div>
             </div>
         `;
         return;
@@ -203,8 +229,8 @@ async function fetchWeather() {
     try {
         statusEl.textContent = 'SYNCING...';
 
-        // Current weather
-        const currentUrl = `https://api.openweathermap.org/data/2.5/weather?zip=${CONFIG.zipCode},us&units=imperial&appid=${CONFIG.weatherApiKey}`;
+        // Current weather - using backend API proxy
+        const currentUrl = `http://localhost:${CONFIG.port}/api/weather?zip=${encodeURIComponent(CONFIG.zipCode)}`;
         const currentResponse = await fetch(currentUrl);
 
         if (!currentResponse.ok) {
@@ -213,8 +239,12 @@ async function fetchWeather() {
 
         const currentData = await currentResponse.json();
 
-        // Forecast
-        const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?zip=${CONFIG.zipCode},us&units=imperial&appid=${CONFIG.weatherApiKey}`;
+        if (currentData.error) {
+            throw new Error(currentData.error);
+        }
+
+        // Forecast - using backend API proxy
+        const forecastUrl = `http://localhost:${CONFIG.port}/api/weather/forecast?zip=${encodeURIComponent(CONFIG.zipCode)}`;
         const forecastResponse = await fetch(forecastUrl);
 
         if (!forecastResponse.ok) {
@@ -222,6 +252,10 @@ async function fetchWeather() {
         }
 
         const forecastData = await forecastResponse.json();
+
+        if (forecastData.error) {
+            throw new Error(forecastData.error);
+        }
 
         // Get forecast for next 3 days (at noon)
         const forecastItems = [];
@@ -366,7 +400,7 @@ async function fetchFinancial() {
 // Fetch financial data from local system monitor server
 async function fetchFinancialData() {
     try {
-        const response = await fetch('http://localhost:3001/financial');
+        const response = await fetch(`http://localhost:${CONFIG.port}/financial`);
 
         if (!response.ok) {
             throw new Error('Failed to fetch financial data');
@@ -471,14 +505,15 @@ async function fetchNYTimes() {
     try {
         statusEl.textContent = 'STREAMING...';
 
-        // Check if API key is set
-        if (CONFIG.nytApiKey === 'YOUR_NYT_API_KEY') {
+        // Check if API key is configured on backend
+        if (!CONFIG.hasNytKey) {
             statusEl.textContent = 'API_KEY_REQUIRED';
-            feedEl.innerHTML = '<div class="news-item">NYT API KEY REQUIRED - SET IN js/app.js<br>Get free key at: developer.nytimes.com</div>';
+            feedEl.innerHTML = '<div class="news-item">NYT API KEY NOT CONFIGURED<br>Add to .env file on server</div>';
             return;
         }
 
-        const url = `https://api.nytimes.com/svc/topstories/v2/technology.json?api-key=${CONFIG.nytApiKey}`;
+        // Use backend API proxy
+        const url = `http://localhost:${CONFIG.port}/api/nytimes`;
         const response = await fetch(url);
 
         if (!response.ok) {
@@ -486,6 +521,10 @@ async function fetchNYTimes() {
         }
 
         const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
         const stories = data.results.slice(0, 15);
 
         feedEl.innerHTML = stories.map((story, index) => {
@@ -683,6 +722,443 @@ setInterval(() => {
     document.querySelector('.container').style.transform = `translate(${randomX}px, ${randomY}px)`;
 }, 300000); // Every 5 minutes
 
+// Screensaver functionality
+let screensaverTimer;
+let screensaverImageTimer;
+let screensaverAutoPlayTimer;
+let isScreensaverActive = false;
+let screensaverDeviceId = null;
+let screensaverImages = [];
+let currentScreensaverIndex = 0;
+let isScreensaverManualMode = false;
+
+function resetScreensaverTimer() {
+    clearTimeout(screensaverTimer);
+    if (isScreensaverActive) {
+        exitScreensaver();
+    }
+    screensaverTimer = setTimeout(startScreensaver, CONFIG.screensaverTimeout);
+}
+
+async function startScreensaver() {
+    if (!CONFIG.epaperServerUrl) {
+        console.error('> SCREENSAVER: No e-paper server URL configured');
+        return;
+    }
+
+    if (isScreensaverActive) {
+        console.log('> SCREENSAVER: Already active, ignoring');
+        return;
+    }
+
+    console.log('> SCREENSAVER ACTIVATING...');
+    console.log('> E-PAPER SERVER:', CONFIG.epaperServerUrl);
+    isScreensaverActive = true;
+
+    try {
+        // Register device if not already registered
+        if (!screensaverDeviceId) {
+            console.log('> No device ID, registering...');
+            await registerScreensaverDevice();
+        } else {
+            console.log('> Using existing device ID:', screensaverDeviceId);
+        }
+
+        // Fetch available images
+        console.log('> Fetching images...');
+        await fetchScreensaverImages();
+
+        console.log('> Images fetched:', screensaverImages.length);
+
+        if (screensaverImages.length === 0) {
+            console.warn('> NO SCREENSAVER IMAGES AVAILABLE FOR DEVICE:', screensaverDeviceId);
+            isScreensaverActive = false;
+            return;
+        }
+
+        // Create screensaver overlay
+        console.log('> Creating overlay...');
+        const screensaverOverlay = document.createElement('div');
+        screensaverOverlay.id = 'screensaver-overlay';
+        screensaverOverlay.innerHTML = `
+            <img id="screensaver-image" src="" alt="Screensaver">
+            <div id="screensaver-info"></div>
+        `;
+        document.body.appendChild(screensaverOverlay);
+
+        // Show first image
+        console.log('> Displaying first image...');
+        displayScreensaverImage();
+
+        // Start auto-rotation
+        startScreensaverAutoPlay();
+
+        // Add keyboard navigation
+        addScreensaverKeyboardControls();
+
+        console.log('> SCREENSAVER ACTIVE - Use arrow keys to navigate, any other key to exit');
+    } catch (error) {
+        console.error('> ERROR STARTING SCREENSAVER:', error);
+        isScreensaverActive = false;
+    }
+}
+
+async function getOrCreateDeviceId() {
+    try {
+        // Try to get stored device ID from server
+        const response = await fetch('/device-id');
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('> Using existing device ID:', data.device_id);
+            return data.device_id;
+        }
+    } catch (error) {
+        console.log('> No existing device ID found');
+    }
+
+    // If no stored ID exists, create one and save it
+    const deviceId = 'cyber-kiosk-001';
+
+    try {
+        const saveResponse = await fetch('/device-id', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ device_id: deviceId })
+        });
+
+        if (saveResponse.ok) {
+            console.log('> Device ID saved to file:', deviceId);
+        }
+    } catch (error) {
+        console.error('> Error saving device ID:', error);
+    }
+
+    return deviceId;
+}
+
+async function registerScreensaverDevice() {
+    try {
+        // Get or create device ID from persistent storage
+        const deviceId = await getOrCreateDeviceId();
+
+        console.log('> Registering with device ID:', deviceId);
+
+        const response = await fetch(`${CONFIG.epaperServerUrl}/api/devices/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                device_id: deviceId,
+                name: 'Cyber Kiosk',
+                type: 'kiosk_screensaver'
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            screensaverDeviceId = data.device_id;
+            console.log('> SCREENSAVER DEVICE REGISTERED:', screensaverDeviceId, data.is_new ? '(NEW)' : '(EXISTING)');
+        } else {
+            const errorText = await response.text();
+            console.error('> ERROR REGISTERING DEVICE:', response.status, errorText);
+        }
+    } catch (error) {
+        console.error('> ERROR REGISTERING SCREENSAVER DEVICE:', error);
+    }
+}
+
+async function fetchScreensaverImages() {
+    if (!screensaverDeviceId) return;
+
+    try {
+        const response = await fetch(`${CONFIG.epaperServerUrl}/api/devices/${screensaverDeviceId}/images`);
+        if (response.ok) {
+            const data = await response.json();
+            screensaverImages = data.images || [];
+
+            // Shuffle images randomly
+            shuffleArray(screensaverImages);
+
+            console.log(`> LOADED ${screensaverImages.length} SCREENSAVER IMAGES FOR DEVICE ${screensaverDeviceId} (RANDOMIZED)`);
+        } else {
+            console.error('> ERROR FETCHING IMAGES:', response.status, await response.text());
+        }
+    } catch (error) {
+        console.error('> ERROR FETCHING SCREENSAVER IMAGES:', error);
+    }
+}
+
+// Fisher-Yates shuffle algorithm
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function displayScreensaverImage() {
+    if (screensaverImages.length === 0) return;
+
+    const image = screensaverImages[currentScreensaverIndex];
+    const imageUrl = `${CONFIG.epaperServerUrl}/uploads/${image.filename}`;
+
+    const imgElement = document.getElementById('screensaver-image');
+    const infoElement = document.getElementById('screensaver-info');
+
+    if (imgElement) {
+        // Fade out
+        imgElement.style.opacity = '0';
+
+        // Wait for fade, then change image
+        setTimeout(() => {
+            imgElement.src = imageUrl;
+            if (infoElement) {
+                const timestamp = image.uploaded ? new Date(image.uploaded).toLocaleDateString() : '';
+                const uploader = image.uploader_name || 'Unknown';
+                infoElement.textContent = `${uploader}${timestamp ? ' • ' + timestamp : ''}`;
+            }
+
+            // Fade in
+            setTimeout(() => {
+                imgElement.style.opacity = '1';
+            }, 100);
+        }, 500);
+    }
+}
+
+function nextScreensaverImage() {
+    if (screensaverImages.length === 0) return;
+    currentScreensaverIndex = (currentScreensaverIndex + 1) % screensaverImages.length;
+    displayScreensaverImage();
+}
+
+function previousScreensaverImage() {
+    if (screensaverImages.length === 0) return;
+    currentScreensaverIndex = (currentScreensaverIndex - 1 + screensaverImages.length) % screensaverImages.length;
+    displayScreensaverImage();
+}
+
+function startScreensaverAutoPlay() {
+    isScreensaverManualMode = false;
+    clearInterval(screensaverImageTimer);
+    screensaverImageTimer = setInterval(nextScreensaverImage, CONFIG.screensaverImageInterval);
+    console.log('> Auto-play started');
+}
+
+function pauseScreensaverAutoPlay() {
+    isScreensaverManualMode = true;
+    clearInterval(screensaverImageTimer);
+    clearTimeout(screensaverAutoPlayTimer);
+
+    // Resume auto-play after 10 seconds of inactivity
+    screensaverAutoPlayTimer = setTimeout(() => {
+        console.log('> Resuming auto-play after inactivity');
+        startScreensaverAutoPlay();
+    }, 10000);
+}
+
+function addScreensaverKeyboardControls() {
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
+
+    const handleKeyPress = (e) => {
+        if (!isScreensaverActive) {
+            document.removeEventListener('keydown', handleKeyPress);
+            return;
+        }
+
+        if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            pauseScreensaverAutoPlay();
+            nextScreensaverImage();
+            console.log('> Next image (manual)');
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            pauseScreensaverAutoPlay();
+            previousScreensaverImage();
+            console.log('> Previous image (manual)');
+        } else {
+            // Any other key exits the screensaver
+            exitScreensaver();
+        }
+    };
+
+    const handleTouchStart = (e) => {
+        if (!isScreensaverActive) return;
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    };
+
+    const handleTouchEnd = (e) => {
+        if (!isScreensaverActive) {
+            document.removeEventListener('touchstart', handleTouchStart);
+            document.removeEventListener('touchend', handleTouchEnd);
+            return;
+        }
+
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        handleSwipeOrTap();
+    };
+
+    const handleSwipeOrTap = () => {
+        const swipeThreshold = 50; // Minimum swipe distance in pixels
+        const tapThreshold = 20; // Allow some movement for taps (more forgiving)
+        const horizontalDistance = touchEndX - touchStartX;
+        const verticalDistance = touchEndY - touchStartY;
+
+        console.log('> Touch: dx=' + horizontalDistance + ', dy=' + verticalDistance);
+
+        // Check if it's a swipe (significant horizontal movement)
+        if (Math.abs(horizontalDistance) > swipeThreshold && Math.abs(verticalDistance) < swipeThreshold) {
+            pauseScreensaverAutoPlay();
+            if (horizontalDistance > 0) {
+                // Swipe right - go to previous image
+                previousScreensaverImage();
+                console.log('> Previous image (swipe)');
+            } else {
+                // Swipe left - go to next image
+                nextScreensaverImage();
+                console.log('> Next image (swipe)');
+            }
+        }
+        // Check if it's a tap (minimal movement - increased threshold)
+        else if (Math.abs(horizontalDistance) < tapThreshold && Math.abs(verticalDistance) < tapThreshold) {
+            const screenWidth = window.innerWidth;
+            const edgeZoneWidth = 150; // Fixed width for edge tap zones
+
+            console.log('> Tap detected at x=' + touchEndX + ', screen width=' + screenWidth);
+
+            if (touchEndX < edgeZoneWidth) {
+                // Tap on left edge - previous image
+                pauseScreensaverAutoPlay();
+                previousScreensaverImage();
+                console.log('> Previous image (tap left)');
+            } else if (touchEndX > screenWidth - edgeZoneWidth) {
+                // Tap on right edge - next image
+                pauseScreensaverAutoPlay();
+                nextScreensaverImage();
+                console.log('> Next image (tap right)');
+            } else {
+                // Tap in center or anywhere else - exit screensaver
+                console.log('> EXIT SCREENSAVER (tap center)');
+                exitScreensaver();
+            }
+        } else {
+            console.log('> Movement too large for tap, too small for swipe');
+        }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+}
+
+function exitScreensaver() {
+    if (!isScreensaverActive) return;
+
+    console.log('> SCREENSAVER EXITING');
+    isScreensaverActive = false;
+    isScreensaverManualMode = false;
+
+    clearInterval(screensaverImageTimer);
+    clearTimeout(screensaverAutoPlayTimer);
+
+    const overlay = document.getElementById('screensaver-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+
+    resetScreensaverTimer();
+}
+
+// Add event listeners for screensaver exit (excluding keyboard and touch - handled separately)
+// Handle mouse movement separately - it should exit screensaver with threshold
+let lastMouseX = 0;
+let lastMouseY = 0;
+let mouseMovementThreshold = 50; // Pixels of movement required to exit
+
+document.addEventListener('mousemove', (e) => {
+    if (e.target && e.target.id === 'screensaver-button') {
+        return;
+    }
+
+    if (isScreensaverActive) {
+        // Calculate movement distance
+        const deltaX = Math.abs(e.clientX - lastMouseX);
+        const deltaY = Math.abs(e.clientY - lastMouseY);
+        const totalMovement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        if (totalMovement > mouseMovementThreshold) {
+            console.log('> Significant mouse movement detected (' + Math.round(totalMovement) + 'px) - exiting');
+            exitScreensaver();
+        }
+
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+    } else {
+        // Track mouse position and reset timer
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        resetScreensaverTimer();
+    }
+}, true);
+
+// Handle mouse clicks - should exit screensaver (but not touch events on overlay)
+document.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'screensaver-button') {
+        return;
+    }
+
+    if (isScreensaverActive) {
+        const overlay = document.getElementById('screensaver-overlay');
+        // Only exit if click is NOT on the screensaver overlay (for mouse users)
+        // Touch taps on overlay are handled by the touch handler
+        if (overlay && (e.target === overlay || overlay.contains(e.target))) {
+            // This is a click on the overlay - check if it's a real mouse click or synthetic touch event
+            // Only exit for real mouse clicks (which have specific properties)
+            if (e.screenX !== 0 || e.screenY !== 0) {
+                console.log('> Mouse click on screensaver - exiting');
+                exitScreensaver();
+            } else {
+                console.log('> Touch event on screensaver - ignoring (handled by touch handler)');
+            }
+            return;
+        }
+        // Click outside overlay - exit
+        console.log('> Click outside screensaver overlay - exiting');
+        exitScreensaver();
+    } else {
+        resetScreensaverTimer();
+    }
+}, true);
+
+// Handle other events that shouldn't exit when on overlay
+['mousedown', 'scroll'].forEach(event => {
+    document.addEventListener(event, (e) => {
+        // Don't exit/reset if clicking the screensaver button
+        if (e.target && e.target.id === 'screensaver-button') {
+            return;
+        }
+
+        // If screensaver is active, check if event is from screensaver overlay
+        if (isScreensaverActive) {
+            // Ignore events that originate from within the screensaver overlay
+            const overlay = document.getElementById('screensaver-overlay');
+            if (overlay && (e.target === overlay || overlay.contains(e.target))) {
+                return; // Don't exit - this is a screensaver internal event
+            }
+            // Event is from outside the screensaver, so exit
+            exitScreensaver();
+        } else {
+            // Otherwise just reset the timer
+            resetScreensaverTimer();
+        }
+    }, true);
+});
+
 // Modal functionality
 const modalOverlay = document.getElementById('modal-overlay');
 const modalTitle = document.getElementById('modal-title');
@@ -785,23 +1261,25 @@ async function showWeatherModal() {
         const statusMsg = '<div style="text-align: center; font-size: 1.5rem; color: var(--neon-cyan);">LOADING WEATHER DATA...</div>';
         openModal('&gt; WEATHER_EXPANDED', statusMsg);
 
-        // Check if API key is set
-        if (CONFIG.weatherApiKey === 'YOUR_OPENWEATHERMAP_API_KEY') {
-            modalContent.innerHTML = '<div class="error-message">API KEY REQUIRED - SET IN js/app.js</div>';
+        // Check if API key is configured on backend
+        if (!CONFIG.hasWeatherKey) {
+            modalContent.innerHTML = '<div class="error-message">API KEY NOT CONFIGURED</div>';
             return;
         }
 
-        // Fetch current weather
-        const currentUrl = `https://api.openweathermap.org/data/2.5/weather?zip=${CONFIG.zipCode},us&units=imperial&appid=${CONFIG.weatherApiKey}`;
+        // Fetch current weather using backend API proxy
+        const currentUrl = `http://localhost:${CONFIG.port}/api/weather?zip=${encodeURIComponent(CONFIG.zipCode)}`;
         const currentResponse = await fetch(currentUrl);
         if (!currentResponse.ok) throw new Error('Failed to fetch weather');
         const currentData = await currentResponse.json();
+        if (currentData.error) throw new Error(currentData.error);
 
-        // Fetch 5-day forecast
-        const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?zip=${CONFIG.zipCode},us&units=imperial&appid=${CONFIG.weatherApiKey}`;
+        // Fetch 5-day forecast using backend API proxy
+        const forecastUrl = `http://localhost:${CONFIG.port}/api/weather/forecast?zip=${encodeURIComponent(CONFIG.zipCode)}`;
         const forecastResponse = await fetch(forecastUrl);
         if (!forecastResponse.ok) throw new Error('Failed to fetch forecast');
         const forecastData = await forecastResponse.json();
+        if (forecastData.error) throw new Error(forecastData.error);
 
         // Process 5-day forecast (one entry per day, preferably around noon)
         // Group forecast items by date
@@ -1093,14 +1571,13 @@ async function searchYouTubeVideos() {
         return;
     }
 
-    // Check if API key is set
-    if (CONFIG.youtubeApiKey === 'YOUR_YOUTUBE_API_KEY') {
+    // Check if API key is configured on backend
+    if (!CONFIG.hasYoutubeKey) {
         const gridEl = document.getElementById('video-selector-grid');
         gridEl.innerHTML = `
             <div class="error-message" style="grid-column: 1 / -1;">
-                YOUTUBE API KEY REQUIRED<br>
-                Get free key at: console.cloud.google.com/apis/credentials<br>
-                Enable YouTube Data API v3 and set key in js/app.js
+                YOUTUBE API KEY NOT CONFIGURED<br>
+                Add to .env file on server
             </div>
         `;
         return;
@@ -1112,7 +1589,8 @@ async function searchYouTubeVideos() {
     try {
         titleEl.textContent = '> SEARCHING...';
 
-        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=12&key=${CONFIG.youtubeApiKey}`;
+        // Use backend API proxy
+        const url = `http://localhost:${CONFIG.port}/api/youtube/search?q=${encodeURIComponent(query)}`;
         const response = await fetch(url);
 
         if (!response.ok) {
@@ -1120,6 +1598,10 @@ async function searchYouTubeVideos() {
         }
 
         const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
 
         if (data.items && data.items.length > 0) {
             titleEl.textContent = `> SEARCH RESULTS: "${query}"`;
@@ -1248,21 +1730,23 @@ async function fetchNewsForModal(source) {
                 break;
 
             case 'NYTIMES':
-                if (CONFIG.nytApiKey === 'YOUR_NYT_API_KEY') {
+                if (!CONFIG.hasNytKey) {
                     cachedNewsData.nytimes = [{
-                        title: 'NYT API KEY REQUIRED',
+                        title: 'NYT API KEY NOT CONFIGURED',
                         url: 'https://developer.nytimes.com/',
-                        abstract: 'Get a free API key at developer.nytimes.com',
+                        abstract: 'Add API key to .env file on server',
                         section: 'CONFIG',
                         byline: 'SYSTEM'
                     }];
                     break;
                 }
 
-                const nytUrl = `https://api.nytimes.com/svc/topstories/v2/technology.json?api-key=${CONFIG.nytApiKey}`;
+                // Use backend API proxy
+                const nytUrl = `http://localhost:${CONFIG.port}/api/nytimes`;
                 const nytResponse = await fetch(nytUrl);
                 if (!nytResponse.ok) throw new Error('NYT fetch failed');
                 const nytData = await nytResponse.json();
+                if (nytData.error) throw new Error(nytData.error);
 
                 cachedNewsData.nytimes = nytData.results.slice(0, 10).map(story => ({
                     title: story.title,
@@ -1300,7 +1784,7 @@ async function showPiholeModal() {
         openModal('&gt; NETWORK_SHIELD', statusMsg);
 
         // Fetch Pi-hole stats from backend
-        const response = await fetch('http://localhost:3001/pihole');
+        const response = await fetch(`http://localhost:${CONFIG.port}/pihole`);
         if (!response.ok) throw new Error('Failed to fetch Pi-hole stats');
         const data = await response.json();
 
@@ -1399,7 +1883,7 @@ async function showNetworkModal() {
         openModal('&gt; NETWORK_MONITOR', statusMsg);
 
         // Fetch network stats from backend
-        const response = await fetch('http://localhost:3001/network');
+        const response = await fetch(`http://localhost:${CONFIG.port}/network`);
         if (!response.ok) throw new Error('Failed to fetch network stats');
         const data = await response.json();
 

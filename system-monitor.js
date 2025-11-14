@@ -1,12 +1,13 @@
 // Lightweight System Monitor Server for Raspberry Pi
 // Exposes system statistics via HTTP API
+// SECURITY HARDENED VERSION
 
 const http = require('http');
+const https = require('https');
 const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-
-const PORT = 3001;
+const { URL } = require('url');
 
 // Load environment variables from .env file
 function loadEnvFile() {
@@ -42,14 +43,56 @@ function loadEnvFile() {
 
 const ENV = loadEnvFile();
 
-// Financial API Configuration
-// Get free API key from: https://www.alphavantage.co/support/#api-key
+// Configuration
+const PORT = parseInt(ENV.PORT) || 3001;
+const NETWORK_INTERFACE = ENV.NETWORK_INTERFACE || 'auto';
 const ALPHA_VANTAGE_API_KEY = ENV.ALPHA_VANTAGE_API_KEY || 'demo';
 
-// Helper function to execute shell commands
-function execCommand(command) {
+// Platform detection
+const IS_RASPBERRY_PI = fs.existsSync('/sys/firmware/devicetree/base/model');
+const HAS_VCGENCMD = fs.existsSync('/usr/bin/vcgencmd') || fs.existsSync('/opt/vc/bin/vcgencmd');
+const HAS_PIHOLE = fs.existsSync('/etc/pihole/pihole-FTL.db');
+const HAS_VNSTAT = fs.existsSync('/usr/bin/vnstat');
+
+console.log('> Platform Detection:');
+console.log('  - Raspberry Pi:', IS_RASPBERRY_PI);
+console.log('  - vcgencmd available:', HAS_VCGENCMD);
+console.log('  - Pi-hole installed:', HAS_PIHOLE);
+console.log('  - vnStat installed:', HAS_VNSTAT);
+
+// Command whitelist for security
+const ALLOWED_COMMANDS = {
+    CPU_TEMP: 'cat /sys/class/thermal/thermal_zone0/temp',
+    GPU_TEMP: 'vcgencmd measure_temp',
+    UPTIME: 'cat /proc/uptime | awk \'{print $1}\'',
+    LOADAVG: 'cat /proc/loadavg | awk \'{print $1, $2, $3}\'',
+    MEMINFO: 'free -m | grep Mem:',
+    CPU_STAT_1: 'cat /proc/stat | grep "^cpu " | awk \'{print $2, $3, $4, $5}\'',
+    DISK_USAGE: 'df -h / | tail -1 | awk \'{print $2, $3, $5}\'',
+    IP_ADDR: 'ip addr show {{interface}} | grep "inet " | awk \'{print $2}\'',
+    GATEWAY: 'ip route | grep default | awk \'{print $3}\'',
+    VNSTAT_JSON: 'vnstat --json',
+    SS_SUMMARY: 'ss -s'
+};
+
+// Helper function to execute whitelisted shell commands
+function execCommand(commandKey, params = {}) {
     return new Promise((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
+        let command = ALLOWED_COMMANDS[commandKey];
+
+        if (!command) {
+            reject(new Error(`Command ${commandKey} not whitelisted`));
+            return;
+        }
+
+        // Replace parameters safely
+        for (const [key, value] of Object.entries(params)) {
+            // Sanitize parameter values - only allow alphanumeric, dash, underscore
+            const sanitized = value.replace(/[^a-zA-Z0-9_-]/g, '');
+            command = command.replace(`{{${key}}}`, sanitized);
+        }
+
+        exec(command, { timeout: 5000 }, (error, stdout, stderr) => {
             if (error) {
                 reject(error);
                 return;
@@ -62,10 +105,13 @@ function execCommand(command) {
 // Get CPU temperature
 async function getCPUTemp() {
     try {
-        const temp = await execCommand('cat /sys/class/thermal/thermal_zone0/temp');
+        if (!IS_RASPBERRY_PI) {
+            return null;
+        }
+        const temp = await execCommand('CPU_TEMP');
         return (parseInt(temp) / 1000).toFixed(1);
     } catch (error) {
-        console.error('Error getting CPU temp:', error);
+        console.error('Error getting CPU temp:', error.message);
         return null;
     }
 }
@@ -73,11 +119,14 @@ async function getCPUTemp() {
 // Get GPU temperature
 async function getGPUTemp() {
     try {
-        const output = await execCommand('vcgencmd measure_temp');
+        if (!HAS_VCGENCMD) {
+            return null;
+        }
+        const output = await execCommand('GPU_TEMP');
         const match = output.match(/temp=([0-9.]+)/);
         return match ? parseFloat(match[1]).toFixed(1) : null;
     } catch (error) {
-        console.error('Error getting GPU temp:', error);
+        console.error('Error getting GPU temp:', error.message);
         return null;
     }
 }
@@ -85,7 +134,7 @@ async function getGPUTemp() {
 // Get system uptime
 async function getUptime() {
     try {
-        const uptimeSeconds = parseFloat(await execCommand('cat /proc/uptime | awk \'{print $1}\''));
+        const uptimeSeconds = parseFloat(await execCommand('UPTIME'));
         const days = Math.floor(uptimeSeconds / 86400);
         const hours = Math.floor((uptimeSeconds % 86400) / 3600);
         const minutes = Math.floor((uptimeSeconds % 3600) / 60);
@@ -98,7 +147,7 @@ async function getUptime() {
             return `${minutes}m`;
         }
     } catch (error) {
-        console.error('Error getting uptime:', error);
+        console.error('Error getting uptime:', error.message);
         return null;
     }
 }
@@ -106,11 +155,11 @@ async function getUptime() {
 // Get load average
 async function getLoadAverage() {
     try {
-        const loadavg = await execCommand('cat /proc/loadavg | awk \'{print $1, $2, $3}\'');
+        const loadavg = await execCommand('LOADAVG');
         const [load1, load5, load15] = loadavg.split(' ');
         return { load1, load5, load15 };
     } catch (error) {
-        console.error('Error getting load average:', error);
+        console.error('Error getting load average:', error.message);
         return null;
     }
 }
@@ -118,7 +167,7 @@ async function getLoadAverage() {
 // Get memory usage
 async function getMemoryUsage() {
     try {
-        const memInfo = await execCommand('free -m | grep Mem:');
+        const memInfo = await execCommand('MEMINFO');
         const parts = memInfo.split(/\s+/);
         const total = parseInt(parts[1]);
         const used = parseInt(parts[2]);
@@ -132,7 +181,7 @@ async function getMemoryUsage() {
             usedPercent
         };
     } catch (error) {
-        console.error('Error getting memory usage:', error);
+        console.error('Error getting memory usage:', error.message);
         return null;
     }
 }
@@ -141,9 +190,9 @@ async function getMemoryUsage() {
 async function getCPUUsage() {
     try {
         // Read CPU stats twice with a small delay to calculate usage
-        const stat1 = await execCommand('cat /proc/stat | grep "^cpu " | awk \'{print $2, $3, $4, $5}\'');
+        const stat1 = await execCommand('CPU_STAT_1');
         await new Promise(resolve => setTimeout(resolve, 200));
-        const stat2 = await execCommand('cat /proc/stat | grep "^cpu " | awk \'{print $2, $3, $4, $5}\'');
+        const stat2 = await execCommand('CPU_STAT_1');
 
         const [user1, nice1, system1, idle1] = stat1.split(' ').map(Number);
         const [user2, nice2, system2, idle2] = stat2.split(' ').map(Number);
@@ -156,7 +205,7 @@ async function getCPUUsage() {
         const usage = Math.round(100 * (total - idle) / total);
         return usage;
     } catch (error) {
-        console.error('Error getting CPU usage:', error);
+        console.error('Error getting CPU usage:', error.message);
         return null;
     }
 }
@@ -164,7 +213,7 @@ async function getCPUUsage() {
 // Get disk usage
 async function getDiskUsage() {
     try {
-        const output = await execCommand('df -h / | tail -1 | awk \'{print $2, $3, $5}\'');
+        const output = await execCommand('DISK_USAGE');
         const [total, used, percent] = output.split(' ');
         return {
             total,
@@ -172,7 +221,7 @@ async function getDiskUsage() {
             percent: percent.replace('%', '')
         };
     } catch (error) {
-        console.error('Error getting disk usage:', error);
+        console.error('Error getting disk usage:', error.message);
         return null;
     }
 }
@@ -212,7 +261,7 @@ async function getSystemStats() {
 // Financial data cache
 let financialCache = null;
 let lastFetchTime = 0;
-const CACHE_DURATION = 1800000; // 30 minute cache (to stay within API limits)
+const CACHE_DURATION = 1800000; // 30 minute cache
 
 // Realistic base values for financial data
 const baseValues = {
@@ -226,7 +275,6 @@ const baseValues = {
 // Fetch quote from Alpha Vantage
 async function fetchAlphaVantageQuote(symbol) {
     return new Promise((resolve) => {
-        const https = require('https');
         const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`;
 
         https.get(url, (response) => {
@@ -254,7 +302,6 @@ async function fetchAlphaVantageQuote(symbol) {
 // Fetch forex rate from Alpha Vantage
 async function fetchAlphaVantageForex(from, to) {
     return new Promise((resolve) => {
-        const https = require('https');
         const url = `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${from}&to_currency=${to}&apikey=${ALPHA_VANTAGE_API_KEY}`;
 
         https.get(url, (response) => {
@@ -265,7 +312,7 @@ async function fetchAlphaVantageForex(from, to) {
                     const parsed = JSON.parse(data);
                     if (parsed['Realtime Currency Exchange Rate']) {
                         const rate = parseFloat(parsed['Realtime Currency Exchange Rate']['5. Exchange Rate']);
-                        resolve({ rate: rate, change: 0 }); // Alpha Vantage doesn't provide change %
+                        resolve({ rate: rate, change: 0 });
                     } else {
                         resolve(null);
                     }
@@ -295,12 +342,6 @@ async function getFinancialData() {
             return generateSimulatedData();
         }
 
-        // Use ETFs that track the indices (Alpha Vantage free tier doesn't support indices directly)
-        // DIA = SPDR Dow Jones Industrial Average ETF (tracks DOW)
-        // SPY = SPDR S&P 500 ETF (tracks S&P 500)
-        // QQQ = Invesco QQQ Trust (tracks NASDAQ-100)
-        // GLD = SPDR Gold Shares (tracks gold price)
-
         // Fetch data with delays to avoid rate limiting (5 calls/minute limit)
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -319,11 +360,6 @@ async function getFinancialData() {
         }
 
         // Convert ETF prices to approximate index values
-        // DIA tracks DOW at roughly 1/100th (multiply by ~100)
-        // SPY tracks S&P at roughly 1/10th (multiply by ~10)
-        // QQQ tracks NASDAQ-100 at roughly 1/40th (multiply by ~40)
-        // GLD tracks gold at roughly 1/10th (multiply by ~10)
-
         const dowPrice = (dow.price * 100).toFixed(2);
         const sp500Price = (sp500.price * 10).toFixed(2);
         const nasdaqPrice = (nasdaq.price * 40).toFixed(2);
@@ -363,7 +399,6 @@ async function getFinancialData() {
 
 // Generate simulated financial data with realistic variations
 function generateSimulatedData() {
-    // Small random variations (-0.5% to +0.5%)
     const variation = () => (Math.random() - 0.5) * 1;
 
     return {
@@ -390,43 +425,133 @@ function generateSimulatedData() {
     };
 }
 
-// Get Pi-hole statistics
+// Get Pi-hole statistics (using sqlite3 library for security)
 async function getPiholeStats() {
-    try {
-        // Query Pi-hole FTL database for statistics
-        const totalQueries = await execCommand('sudo sqlite3 /etc/pihole/pihole-FTL.db "SELECT value FROM counters WHERE id=0;"');
-        const blockedQueries = await execCommand('sudo sqlite3 /etc/pihole/pihole-FTL.db "SELECT value FROM counters WHERE id=1;"');
-        const uniqueClients = await execCommand('sudo sqlite3 /etc/pihole/pihole-FTL.db "SELECT COUNT(DISTINCT client) FROM queries;"');
-        const totalDomains = await execCommand('sudo sqlite3 /etc/pihole/gravity.db "SELECT COUNT(*) FROM gravity;"');
-
-        // Additional statistics
-        const cachedQueries = await execCommand('sudo sqlite3 /etc/pihole/pihole-FTL.db "SELECT COUNT(*) FROM queries WHERE status = 3;"');
-        const forwardedQueries = await execCommand('sudo sqlite3 /etc/pihole/pihole-FTL.db "SELECT COUNT(*) FROM queries WHERE status = 2;"');
-        const uniqueDomains = await execCommand('sudo sqlite3 /etc/pihole/pihole-FTL.db "SELECT COUNT(DISTINCT domain) FROM queries;"');
-
-        // Top 5 blocked domains
-        const topBlockedRaw = await execCommand('sudo sqlite3 /etc/pihole/pihole-FTL.db "SELECT domain, COUNT(*) as count FROM queries WHERE status IN (1, 4, 5, 6, 7, 8, 9, 10, 11, 15, 16) GROUP BY domain ORDER BY count DESC LIMIT 5;"');
-        const topBlocked = topBlockedRaw.split('\n').filter(line => line.trim()).map(line => {
-            const parts = line.split('|');
-            return { domain: parts[0], count: parseInt(parts[1]) || 0 };
-        });
-
-        const total = parseInt(totalQueries) || 0;
-        const blocked = parseInt(blockedQueries) || 0;
-        const percentBlocked = total > 0 ? ((blocked / total) * 100).toFixed(2) : '0.00';
-
+    if (!HAS_PIHOLE) {
         return {
-            status: 'active',
-            queries_today: total,
-            blocked_today: blocked,
-            percent_blocked: percentBlocked,
-            domains_blocked: parseInt(totalDomains) || 0,
-            clients: parseInt(uniqueClients) || 0,
-            cached_queries: parseInt(cachedQueries) || 0,
-            forwarded_queries: parseInt(forwardedQueries) || 0,
-            unique_domains: parseInt(uniqueDomains) || 0,
-            top_blocked: topBlocked
+            status: 'error',
+            error: 'Pi-hole not installed'
         };
+    }
+
+    try {
+        // Use sqlite3 library instead of shell commands for security
+        const sqlite3 = require('sqlite3').verbose();
+
+        return new Promise((resolve, reject) => {
+            const db = new sqlite3.Database('/etc/pihole/pihole-FTL.db', sqlite3.OPEN_READONLY, (err) => {
+                if (err) {
+                    resolve({
+                        status: 'error',
+                        error: 'Cannot open Pi-hole database: ' + err.message
+                    });
+                    return;
+                }
+
+                const stats = {};
+
+                // Get total queries
+                db.get('SELECT value FROM counters WHERE id=0', [], (err, row) => {
+                    if (err) {
+                        db.close();
+                        resolve({ status: 'error', error: err.message });
+                        return;
+                    }
+                    stats.queries_today = parseInt(row?.value) || 0;
+
+                    // Get blocked queries
+                    db.get('SELECT value FROM counters WHERE id=1', [], (err, row) => {
+                        if (err) {
+                            db.close();
+                            resolve({ status: 'error', error: err.message });
+                            return;
+                        }
+                        stats.blocked_today = parseInt(row?.value) || 0;
+
+                        // Get unique clients
+                        db.get('SELECT COUNT(DISTINCT client) as count FROM queries', [], (err, row) => {
+                            if (err) {
+                                db.close();
+                                resolve({ status: 'error', error: err.message });
+                                return;
+                            }
+                            stats.clients = parseInt(row?.count) || 0;
+
+                            // Get cached queries
+                            db.get('SELECT COUNT(*) as count FROM queries WHERE status = 3', [], (err, row) => {
+                                if (err) {
+                                    db.close();
+                                    resolve({ status: 'error', error: err.message });
+                                    return;
+                                }
+                                stats.cached_queries = parseInt(row?.count) || 0;
+
+                                // Get forwarded queries
+                                db.get('SELECT COUNT(*) as count FROM queries WHERE status = 2', [], (err, row) => {
+                                    if (err) {
+                                        db.close();
+                                        resolve({ status: 'error', error: err.message });
+                                        return;
+                                    }
+                                    stats.forwarded_queries = parseInt(row?.count) || 0;
+
+                                    // Get unique domains
+                                    db.get('SELECT COUNT(DISTINCT domain) as count FROM queries', [], (err, row) => {
+                                        if (err) {
+                                            db.close();
+                                            resolve({ status: 'error', error: err.message });
+                                            return;
+                                        }
+                                        stats.unique_domains = parseInt(row?.count) || 0;
+
+                                        // Get top 5 blocked domains
+                                        db.all('SELECT domain, COUNT(*) as count FROM queries WHERE status IN (1, 4, 5, 6, 7, 8, 9, 10, 11, 15, 16) GROUP BY domain ORDER BY count DESC LIMIT 5', [], (err, rows) => {
+                                            if (err) {
+                                                db.close();
+                                                resolve({ status: 'error', error: err.message });
+                                                return;
+                                            }
+                                            stats.top_blocked = rows.map(r => ({ domain: r.domain, count: r.count }));
+
+                                            // Get total domains from gravity database
+                                            const gravityDb = new sqlite3.Database('/etc/pihole/gravity.db', sqlite3.OPEN_READONLY, (err) => {
+                                                if (err) {
+                                                    db.close();
+                                                    stats.domains_blocked = 0;
+                                                    finishStats();
+                                                    return;
+                                                }
+
+                                                gravityDb.get('SELECT COUNT(*) as count FROM gravity', [], (err, row) => {
+                                                    gravityDb.close();
+                                                    db.close();
+
+                                                    if (err) {
+                                                        stats.domains_blocked = 0;
+                                                    } else {
+                                                        stats.domains_blocked = parseInt(row?.count) || 0;
+                                                    }
+
+                                                    finishStats();
+                                                });
+                                            });
+
+                                            function finishStats() {
+                                                const total = stats.queries_today;
+                                                const blocked = stats.blocked_today;
+                                                stats.percent_blocked = total > 0 ? ((blocked / total) * 100).toFixed(2) : '0.00';
+                                                stats.status = 'active';
+                                                resolve(stats);
+                                            }
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
     } catch (error) {
         console.error('Error getting Pi-hole stats:', error);
         return {
@@ -436,37 +561,86 @@ async function getPiholeStats() {
     }
 }
 
-// Get Network Statistics
-async function getNetworkStats() {
+// Auto-detect primary network interface
+async function detectNetworkInterface() {
+    if (NETWORK_INTERFACE !== 'auto') {
+        return NETWORK_INTERFACE;
+    }
+
     try {
-        // Get vnStat data in JSON format
-        const vnstatOutput = await execCommand('vnstat --json');
+        if (!HAS_VNSTAT) {
+            // Fallback to common interfaces
+            const commonInterfaces = ['wlan0', 'eth0', 'enp0s3', 'wlp2s0'];
+            for (const iface of commonInterfaces) {
+                try {
+                    await execCommand('IP_ADDR', { interface: iface });
+                    return iface;
+                } catch (e) {
+                    continue;
+                }
+            }
+            return 'wlan0'; // Last resort fallback
+        }
+
+        const vnstatOutput = await execCommand('VNSTAT_JSON');
         const vnstat = JSON.parse(vnstatOutput);
 
-        // Find wlan0 interface
-        const wlan0 = vnstat.interfaces.find(iface => iface.name === 'wlan0');
+        // Find interface with most traffic
+        let maxTraffic = 0;
+        let primaryInterface = 'wlan0';
 
-        if (!wlan0) {
+        for (const iface of vnstat.interfaces || []) {
+            const traffic = (iface.traffic?.total?.rx || 0) + (iface.traffic?.total?.tx || 0);
+            if (traffic > maxTraffic) {
+                maxTraffic = traffic;
+                primaryInterface = iface.name;
+            }
+        }
+
+        console.log('> Auto-detected network interface:', primaryInterface);
+        return primaryInterface;
+    } catch (error) {
+        console.error('Error detecting network interface:', error.message);
+        return 'wlan0'; // Fallback
+    }
+}
+
+// Get Network Statistics
+async function getNetworkStats() {
+    if (!HAS_VNSTAT) {
+        return {
+            status: 'error',
+            error: 'vnStat not installed'
+        };
+    }
+
+    try {
+        const interface = await detectNetworkInterface();
+        const vnstatOutput = await execCommand('VNSTAT_JSON');
+        const vnstat = JSON.parse(vnstatOutput);
+
+        // Find the detected interface
+        const ifaceData = vnstat.interfaces.find(iface => iface.name === interface);
+
+        if (!ifaceData) {
             return {
                 status: 'error',
-                error: 'wlan0 interface not found'
+                error: `Interface ${interface} not found in vnStat data`
             };
         }
 
         // Extract today's data
-        const today = wlan0.traffic.day[0] || { rx: 0, tx: 0 };
-        const month = wlan0.traffic.month[0] || { rx: 0, tx: 0 };
+        const today = ifaceData.traffic.day[0] || { rx: 0, tx: 0 };
+        const month = ifaceData.traffic.month[0] || { rx: 0, tx: 0 };
 
         // Get current connection status
-        const ipAddr = await execCommand('ip addr show wlan0 | grep "inet " | awk \'{print $2}\'');
-        const gateway = await execCommand('ip route | grep default | awk \'{print $3}\'');
-
-        // Get active connections summary
-        const connections = await execCommand('ss -s');
+        const ipAddr = await execCommand('IP_ADDR', { interface });
+        const gateway = await execCommand('GATEWAY');
+        const connections = await execCommand('SS_SUMMARY');
 
         return {
             status: 'online',
-            interface: 'wlan0',
+            interface: interface,
             ip_address: ipAddr || 'N/A',
             gateway: gateway || 'N/A',
             bandwidth: {
@@ -477,8 +651,8 @@ async function getNetworkStats() {
             },
             connections: connections,
             total_traffic: {
-                rx: wlan0.traffic.total.rx,
-                tx: wlan0.traffic.total.tx
+                rx: ifaceData.traffic.total.rx,
+                tx: ifaceData.traffic.total.tx
             }
         };
     } catch (error) {
@@ -490,48 +664,192 @@ async function getNetworkStats() {
     }
 }
 
-// Helper function to serve static files
+// API Proxy for Weather (backend calls API, frontend doesn't see key)
+async function proxyWeatherAPI(zipCode) {
+    const apiKey = ENV.OPENWEATHER_API_KEY;
+
+    if (!apiKey || apiKey === 'your_openweathermap_api_key') {
+        return { error: 'API key not configured' };
+    }
+
+    return new Promise((resolve) => {
+        const url = `https://api.openweathermap.org/data/2.5/weather?zip=${encodeURIComponent(zipCode)},us&units=imperial&appid=${apiKey}`;
+
+        https.get(url, (response) => {
+            let data = '';
+            response.on('data', (chunk) => { data += chunk; });
+            response.on('end', () => {
+                try {
+                    resolve(JSON.parse(data));
+                } catch (error) {
+                    resolve({ error: 'Failed to parse weather data' });
+                }
+            });
+        }).on('error', () => resolve({ error: 'Failed to fetch weather data' }));
+    });
+}
+
+// API Proxy for Weather Forecast
+async function proxyWeatherForecastAPI(zipCode) {
+    const apiKey = ENV.OPENWEATHER_API_KEY;
+
+    if (!apiKey || apiKey === 'your_openweathermap_api_key') {
+        return { error: 'API key not configured' };
+    }
+
+    return new Promise((resolve) => {
+        const url = `https://api.openweathermap.org/data/2.5/forecast?zip=${encodeURIComponent(zipCode)},us&units=imperial&appid=${apiKey}`;
+
+        https.get(url, (response) => {
+            let data = '';
+            response.on('data', (chunk) => { data += chunk; });
+            response.on('end', () => {
+                try {
+                    resolve(JSON.parse(data));
+                } catch (error) {
+                    resolve({ error: 'Failed to parse forecast data' });
+                }
+            });
+        }).on('error', () => resolve({ error: 'Failed to fetch forecast data' }));
+    });
+}
+
+// API Proxy for NY Times
+async function proxyNYTimesAPI() {
+    const apiKey = ENV.NYT_API_KEY;
+
+    if (!apiKey || apiKey === 'your_nytimes_api_key') {
+        return { error: 'API key not configured' };
+    }
+
+    return new Promise((resolve) => {
+        const url = `https://api.nytimes.com/svc/topstories/v2/technology.json?api-key=${apiKey}`;
+
+        https.get(url, (response) => {
+            let data = '';
+            response.on('data', (chunk) => { data += chunk; });
+            response.on('end', () => {
+                try {
+                    resolve(JSON.parse(data));
+                } catch (error) {
+                    resolve({ error: 'Failed to parse NYT data' });
+                }
+            });
+        }).on('error', () => resolve({ error: 'Failed to fetch NYT data' }));
+    });
+}
+
+// API Proxy for YouTube Search
+async function proxyYouTubeSearchAPI(query) {
+    const apiKey = ENV.YOUTUBE_API_KEY;
+
+    if (!apiKey || apiKey === 'your_youtube_api_key') {
+        return { error: 'API key not configured' };
+    }
+
+    return new Promise((resolve) => {
+        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=12&key=${apiKey}`;
+
+        https.get(url, (response) => {
+            let data = '';
+            response.on('data', (chunk) => { data += chunk; });
+            response.on('end', () => {
+                try {
+                    resolve(JSON.parse(data));
+                } catch (error) {
+                    resolve({ error: 'Failed to parse YouTube data' });
+                }
+            });
+        }).on('error', () => resolve({ error: 'Failed to fetch YouTube data' }));
+    });
+}
+
+// Helper function to serve static files with enhanced security
 function serveStaticFile(filePath, res) {
-    const extname = path.extname(filePath).toLowerCase();
-    const mimeTypes = {
-        '.html': 'text/html',
-        '.js': 'text/javascript',
-        '.css': 'text/css',
-        '.json': 'application/json',
-        '.png': 'image/png',
-        '.jpg': 'image/jpg',
-        '.jpeg': 'image/jpeg',
-        '.gif': 'image/gif',
-        '.svg': 'image/svg+xml',
-        '.ico': 'image/x-icon'
-    };
+    // Detect path traversal attempts in the original path
+    if (filePath.includes('..') || filePath.includes('%2e%2e') || filePath.includes('%2E%2E')) {
+        console.warn('> SECURITY: Path traversal attempt blocked:', filePath);
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('403 Forbidden');
+        return;
+    }
 
-    const contentType = mimeTypes[extname] || 'application/octet-stream';
+    // Strict path validation - prevent directory traversal
+    // Remove leading slash if present
+    const cleanPath = filePath.startsWith('/') ? filePath.substring(1) : filePath;
+    const normalizedPath = path.normalize(cleanPath);
+    const absolutePath = path.join(__dirname, normalizedPath);
 
-    fs.readFile(filePath, (error, content) => {
-        if (error) {
-            if (error.code === 'ENOENT') {
-                res.writeHead(404);
-                res.end('404 - File Not Found');
-            } else {
-                res.writeHead(500);
-                res.end('500 - Internal Server Error');
-            }
-        } else {
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(content, 'utf-8');
+    // Ensure the resolved path is within the project directory
+    if (!absolutePath.startsWith(__dirname + path.sep) && absolutePath !== __dirname) {
+        console.warn('> SECURITY: Path escape attempt blocked:', filePath);
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('403 Forbidden');
+        return;
+    }
+
+    // Check if path exists and is a file (not a directory)
+    fs.stat(absolutePath, (err, stats) => {
+        if (err || !stats.isFile()) {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end('404 - File Not Found');
+            return;
         }
+
+        const extname = path.extname(absolutePath).toLowerCase();
+        const mimeTypes = {
+            '.html': 'text/html',
+            '.js': 'text/javascript',
+            '.css': 'text/css',
+            '.json': 'application/json',
+            '.png': 'image/png',
+            '.jpg': 'image/jpg',
+            '.jpeg': 'image/jpeg',
+            '.gif': 'image/gif',
+            '.svg': 'image/svg+xml',
+            '.ico': 'image/x-icon'
+        };
+
+        const contentType = mimeTypes[extname] || 'application/octet-stream';
+
+        fs.readFile(absolutePath, (error, content) => {
+            if (error) {
+                res.writeHead(500, { 'Content-Type': 'text/plain' });
+                res.end('500 - Internal Server Error');
+            } else {
+                res.writeHead(200, { 'Content-Type': contentType });
+                res.end(content, 'utf-8');
+            }
+        });
     });
 }
 
 // HTTP Server
 const server = http.createServer(async (req, res) => {
-    // Enable CORS
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    // Secure CORS - only allow localhost
+    const origin = req.headers.origin;
+    const allowedOrigins = [
+        `http://localhost:${PORT}`,
+        `http://127.0.0.1:${PORT}`,
+        'http://localhost',
+        'http://127.0.0.1'
+    ];
+
+    if (origin && allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    } else {
+        res.setHeader('Access-Control-Allow-Origin', `http://localhost:${PORT}`);
+    }
+
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Parse URL
+    const parsedUrl = new URL(req.url, `http://localhost:${PORT}`);
+    const pathname = parsedUrl.pathname;
 
     // API endpoints
-    if (req.url === '/stats' && req.method === 'GET') {
+    if (pathname === '/stats' && req.method === 'GET') {
         res.setHeader('Content-Type', 'application/json');
         try {
             const stats = await getSystemStats();
@@ -541,7 +859,7 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(500);
             res.end(JSON.stringify({ error: 'Failed to get system stats' }));
         }
-    } else if (req.url === '/financial' && req.method === 'GET') {
+    } else if (pathname === '/financial' && req.method === 'GET') {
         res.setHeader('Content-Type', 'application/json');
         try {
             const financial = await getFinancialData();
@@ -552,7 +870,7 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(500);
             res.end(JSON.stringify({ error: 'Failed to get financial data' }));
         }
-    } else if (req.url === '/pihole' && req.method === 'GET') {
+    } else if (pathname === '/pihole' && req.method === 'GET') {
         res.setHeader('Content-Type', 'application/json');
         try {
             const piholeStats = await getPiholeStats();
@@ -563,7 +881,7 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(500);
             res.end(JSON.stringify({ error: 'Failed to get Pi-hole stats' }));
         }
-    } else if (req.url === '/network' && req.method === 'GET') {
+    } else if (pathname === '/network' && req.method === 'GET') {
         res.setHeader('Content-Type', 'application/json');
         try {
             const networkStats = await getNetworkStats();
@@ -574,42 +892,138 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(500);
             res.end(JSON.stringify({ error: 'Failed to get network stats' }));
         }
-    } else if (req.url === '/health' && req.method === 'GET') {
+    } else if (pathname === '/api/weather' && req.method === 'GET') {
+        // Weather API proxy
+        res.setHeader('Content-Type', 'application/json');
+        const zipCode = parsedUrl.searchParams.get('zip') || ENV.ZIP_CODE || '90210';
+        const weatherData = await proxyWeatherAPI(zipCode);
+        res.writeHead(200);
+        res.end(JSON.stringify(weatherData));
+    } else if (pathname === '/api/weather/forecast' && req.method === 'GET') {
+        // Weather Forecast API proxy
+        res.setHeader('Content-Type', 'application/json');
+        const zipCode = parsedUrl.searchParams.get('zip') || ENV.ZIP_CODE || '90210';
+        const forecastData = await proxyWeatherForecastAPI(zipCode);
+        res.writeHead(200);
+        res.end(JSON.stringify(forecastData));
+    } else if (pathname === '/api/nytimes' && req.method === 'GET') {
+        // NY Times API proxy
+        res.setHeader('Content-Type', 'application/json');
+        const nytData = await proxyNYTimesAPI();
+        res.writeHead(200);
+        res.end(JSON.stringify(nytData));
+    } else if (pathname === '/api/youtube/search' && req.method === 'GET') {
+        // YouTube Search API proxy
+        res.setHeader('Content-Type', 'application/json');
+        const query = parsedUrl.searchParams.get('q');
+        if (!query) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: 'Query parameter required' }));
+            return;
+        }
+        const youtubeData = await proxyYouTubeSearchAPI(query);
+        res.writeHead(200);
+        res.end(JSON.stringify(youtubeData));
+    } else if (pathname === '/health' && req.method === 'GET') {
         res.setHeader('Content-Type', 'application/json');
         res.writeHead(200);
         res.end(JSON.stringify({ status: 'ok' }));
-    } else if (req.url === '/config' && req.method === 'GET') {
+    } else if (pathname === '/config' && req.method === 'GET') {
+        // Send configuration WITHOUT API keys (security fix)
         res.setHeader('Content-Type', 'application/json');
         res.writeHead(200);
         res.end(JSON.stringify({
             zipCode: ENV.ZIP_CODE || '90210',
-            weatherApiKey: ENV.OPENWEATHER_API_KEY || '',
-            nytApiKey: ENV.NYT_API_KEY || '',
-            youtubeApiKey: ENV.YOUTUBE_API_KEY || '',
+            // API keys are NOT sent to frontend anymore
+            hasWeatherKey: !!(ENV.OPENWEATHER_API_KEY && ENV.OPENWEATHER_API_KEY !== 'your_openweathermap_api_key'),
+            hasNytKey: !!(ENV.NYT_API_KEY && ENV.NYT_API_KEY !== 'your_nytimes_api_key'),
+            hasYoutubeKey: !!(ENV.YOUTUBE_API_KEY && ENV.YOUTUBE_API_KEY !== 'your_youtube_api_key'),
             imageChangeInterval: 30000,
             weatherUpdateInterval: 600000,
             newsUpdateInterval: 300000,
             weatherCycleInterval: 300000,
-            systemMonitorUrl: 'http://localhost:3001/stats',
-            systemUpdateInterval: 30000
+            systemMonitorUrl: `http://localhost:${PORT}/stats`,
+            systemUpdateInterval: 30000,
+            epaperServerUrl: ENV.EPAPER_SERVER_URL || '',
+            screensaverTimeout: parseInt(ENV.SCREENSAVER_TIMEOUT) || 600000,
+            screensaverImageInterval: parseInt(ENV.SCREENSAVER_IMAGE_INTERVAL) || 600000,
+            port: PORT
         }));
-    } else {
-        // Serve static files
-        let filePath = '.' + req.url;
-        if (filePath === './') {
-            filePath = './index.html';
+    } else if (pathname === '/device-id' && req.method === 'GET') {
+        // Get stored device ID
+        res.setHeader('Content-Type', 'application/json');
+        const deviceIdFile = path.join(__dirname, 'device_id.txt');
+
+        try {
+            if (fs.existsSync(deviceIdFile)) {
+                const deviceId = fs.readFileSync(deviceIdFile, 'utf8').trim();
+                res.writeHead(200);
+                res.end(JSON.stringify({ device_id: deviceId }));
+            } else {
+                res.writeHead(404);
+                res.end(JSON.stringify({ error: 'Device ID not found' }));
+            }
+        } catch (error) {
+            console.error('Error reading device ID:', error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: 'Failed to read device ID' }));
         }
+    } else if (pathname === '/device-id' && req.method === 'POST') {
+        // Save device ID
+        res.setHeader('Content-Type', 'application/json');
+        let body = '';
 
-        // Prevent directory traversal
-        const safePath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
-        const fullPath = path.join(__dirname, safePath);
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
 
-        serveStaticFile(fullPath, res);
+        req.on('end', () => {
+            try {
+                const data = JSON.parse(body);
+                const deviceId = data.device_id;
+
+                if (!deviceId) {
+                    res.writeHead(400);
+                    res.end(JSON.stringify({ error: 'device_id is required' }));
+                    return;
+                }
+
+                const deviceIdFile = path.join(__dirname, 'device_id.txt');
+                fs.writeFileSync(deviceIdFile, deviceId, 'utf8');
+
+                console.log('> Device ID saved:', deviceId);
+                res.writeHead(200);
+                res.end(JSON.stringify({ success: true, device_id: deviceId }));
+            } catch (error) {
+                console.error('Error saving device ID:', error);
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: 'Failed to save device ID' }));
+            }
+        });
+    } else {
+        // Serve static files with enhanced security
+        let filePath = pathname === '/' ? '/index.html' : pathname;
+        serveStaticFile(filePath, res);
     }
 });
+
+// Validate screensaver server URL (enforce HTTPS in production)
+if (ENV.EPAPER_SERVER_URL) {
+    try {
+        const serverUrl = new URL(ENV.EPAPER_SERVER_URL);
+        if (serverUrl.protocol === 'http:' && !serverUrl.hostname.match(/^(localhost|127\.0\.0\.1|192\.168\.|10\.|172\.)/)) {
+            console.warn('> WARNING: Screensaver server URL uses HTTP instead of HTTPS');
+            console.warn('> This is insecure for external servers. Use HTTPS for production.');
+        }
+    } catch (error) {
+        console.error('> WARNING: Invalid EPAPER_SERVER_URL:', error.message);
+    }
+}
 
 server.listen(PORT, () => {
     console.log(`> SYSTEM MONITOR SERVER RUNNING ON PORT ${PORT}`);
     console.log(`> ENDPOINTS: /stats, /financial, /pihole, /network, /health`);
+    console.log(`> API PROXIES: /api/weather, /api/weather/forecast, /api/nytimes, /api/youtube/search`);
     console.log(`> WEB INTERFACE: http://localhost:${PORT}`);
+    console.log(`> SECURITY: CORS restricted to localhost, API keys protected`);
 });
