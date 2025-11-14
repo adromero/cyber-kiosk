@@ -1,0 +1,79 @@
+{
+  "layoutVersion": "1.0",
+  "screenSize": "medium",
+  "lastModified": "2025-11-14T00:00:00Z",
+  "activePanels": [
+    {
+      "id": "weather",
+      "position": 1,
+      "size": "medium",
+      "visible": true,
+      "gridArea": "panel1"
+    },
+    {
+      "id": "news",
+      "position": 2,
+      "size": "large",
+      "visible": true,
+      "gridArea": "panel2"
+    },
+    {
+      "id": "cyberspace",
+      "position": 3,
+      "size": "medium",
+      "visible": true,
+      "gridArea": "panel3"
+    },
+    {
+      "id": "video",
+      "position": 4,
+      "size": "medium",
+      "visible": true,
+      "gridArea": "panel4"
+    }
+  ],
+  "panelSettings": {
+    "weather": {
+      "source": "openweather",
+      "units": "imperial",
+      "refreshInterval": 600000
+    },
+    "news": {
+      "sources": ["hackernews"],
+      "maxItems": 20,
+      "refreshInterval": 300000
+    },
+    "video": {
+      "defaultVideo": "cyberpunk",
+      "autoplay": false
+    },
+    "cyberspace": {
+      "url": "https://cyberspace.online",
+      "refreshInterval": 0
+    },
+    "markets": {
+      "enabled": false,
+      "sources": [],
+      "refreshInterval": 60000
+    },
+    "timer": {
+      "defaultSound": "cyber-beep.mp3",
+      "volume": 0.7,
+      "enabled": false
+    },
+    "music": {
+      "spotifyConnected": false,
+      "autoPlay": false,
+      "enabled": false
+    },
+    "system": {
+      "showInHeader": true,
+      "enabled": true
+    }
+  },
+  "layout": {
+    "autoAdjust": true,
+    "preserveAspectRatio": true,
+    "compactMode": false
+  }
+}

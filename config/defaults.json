@@ -1,0 +1,143 @@
+{
+  "version": "1.0.0",
+  "description": "Default configuration for Cyber Kiosk responsive system",
+  "theme": {
+    "default": "cyberpunk",
+    "available": [
+      "cyberpunk",
+      "hiphop",
+      "california"
+    ],
+    "allowCustom": false
+  },
+  "layout": {
+    "autoAdjust": true,
+    "preserveAspectRatio": true,
+    "compactMode": false,
+    "defaultPanels": [
+      "weather",
+      "news",
+      "cyberspace",
+      "video"
+    ]
+  },
+  "panels": {
+    "weather": {
+      "enabled": true,
+      "source": "openweather",
+      "units": "imperial",
+      "refreshInterval": 600000,
+      "defaultSize": "medium",
+      "priority": 1
+    },
+    "news": {
+      "enabled": true,
+      "sources": ["hackernews"],
+      "maxItems": 20,
+      "refreshInterval": 300000,
+      "defaultSize": "large",
+      "priority": 2
+    },
+    "cyberspace": {
+      "enabled": true,
+      "url": "https://cyberspace.online",
+      "refreshInterval": 0,
+      "defaultSize": "medium",
+      "priority": 3
+    },
+    "video": {
+      "enabled": true,
+      "defaultVideo": "cyberpunk",
+      "autoplay": false,
+      "defaultSize": "medium",
+      "priority": 4
+    },
+    "markets": {
+      "enabled": false,
+      "sources": [],
+      "refreshInterval": 60000,
+      "defaultSize": "medium",
+      "priority": 5
+    },
+    "timer": {
+      "enabled": false,
+      "defaultSound": "cyber-beep.mp3",
+      "volume": 0.7,
+      "defaultSize": "small",
+      "priority": 6
+    },
+    "music": {
+      "enabled": false,
+      "spotifyConnected": false,
+      "autoPlay": false,
+      "defaultSize": "medium",
+      "priority": 7
+    },
+    "system": {
+      "enabled": true,
+      "showInHeader": true,
+      "refreshInterval": 5000,
+      "defaultSize": "medium",
+      "priority": 8
+    }
+  },
+  "display": {
+    "screenSizes": {
+      "xs": {
+        "name": "Extra Small (4-6\" phones)",
+        "maxWidth": 480,
+        "columns": 1,
+        "maxPanels": 3
+      },
+      "sm": {
+        "name": "Small (6-8\" tablets)",
+        "minWidth": 481,
+        "maxWidth": 768,
+        "columns": 1,
+        "maxPanels": 4
+      },
+      "md": {
+        "name": "Medium (7-10\" tablets, Pi 7\")",
+        "minWidth": 769,
+        "maxWidth": 1024,
+        "columns": 2,
+        "maxPanels": 4
+      },
+      "lg": {
+        "name": "Large (11-15\" laptops)",
+        "minWidth": 1025,
+        "maxWidth": 1440,
+        "columns": 3,
+        "maxPanels": 6
+      },
+      "xl": {
+        "name": "Extra Large (16\"+ desktops)",
+        "minWidth": 1441,
+        "columns": 3,
+        "maxPanels": 6
+      }
+    }
+  },
+  "features": {
+    "responsiveLayout": true,
+    "panelCustomization": true,
+    "themeSwitch ing": true,
+    "touchOptimization": true,
+    "burnInPrevention": true,
+    "screensaver": true,
+    "systemMonitoring": true
+  },
+  "performance": {
+    "enableAnimations": true,
+    "reducedMotion": false,
+    "lazyLoadPanels": false,
+    "cacheEnabled": true,
+    "prefersReducedData": false
+  },
+  "accessibility": {
+    "highContrast": false,
+    "largeText": false,
+    "screenReader": false,
+    "keyboardNavigation": true
+  }
+}

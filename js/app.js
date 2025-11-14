@@ -2077,10 +2077,28 @@ async function showSystemStatusModal() {
     }
 }
 
+// Initialize Layout Manager for responsive design
+let layoutManager;
+if (typeof LayoutManager !== 'undefined') {
+    layoutManager = new LayoutManager();
+    console.log('> LAYOUT MANAGER: INITIALIZED');
+    console.log(`> SCREEN: ${layoutManager.getScreenInfo().breakpointName.toUpperCase()} (${layoutManager.getScreenInfo().width}x${layoutManager.getScreenInfo().height})`);
+    console.log(`> COLUMNS: ${layoutManager.getCurrentLayoutTemplate().columns}`);
+
+    // Listen for layout changes
+    window.addEventListener('layoutchange', (e) => {
+        const { screenInfo } = e.detail;
+        console.log(`> LAYOUT CHANGED: ${screenInfo.breakpointName.toUpperCase()}`);
+    });
+} else {
+    console.warn('> LAYOUT MANAGER: NOT LOADED');
+}
+
 // Log system ready
 console.log('> CYBER TERMINAL SYSTEMS ONLINE');
 console.log('> BURN-IN PREVENTION: ACTIVE');
 console.log('> SYSTEM MONITOR: ACTIVE');
 console.log('> MODAL SYSTEM: ACTIVE');
 console.log('> NETWORK SHIELD: ACTIVE');
+console.log('> RESPONSIVE LAYOUT: ACTIVE');
 console.log('> AWAITING USER INPUT...');

@@ -1,0 +1,458 @@
+/* Responsive Multi-Theme Cyber Kiosk - Responsive Layout System */
+/* Mobile-first approach with fluid typography and flexible grids */
+
+/* ============================================================================
+   FLUID TYPOGRAPHY
+   Uses clamp() for responsive font sizes that scale smoothly
+   ============================================================================ */
+
+:root {
+    /* Fluid font sizes - scale from mobile to desktop */
+    --font-size-xs: clamp(0.75rem, 2vw, 0.9rem);
+    --font-size-sm: clamp(0.9rem, 2.5vw, 1.1rem);
+    --font-size-base: clamp(1rem, 3vw, 1.4rem);
+    --font-size-md: clamp(1.2rem, 3.5vw, 1.8rem);
+    --font-size-lg: clamp(1.5rem, 4vw, 2rem);
+    --font-size-xl: clamp(2rem, 5vw, 3rem);
+    --font-size-xxl: clamp(2.5rem, 6vw, 5rem);
+
+    /* Spacing scale */
+    --spacing-xs: clamp(5px, 1vw, 8px);
+    --spacing-sm: clamp(8px, 1.5vw, 12px);
+    --spacing-md: clamp(12px, 2vw, 20px);
+    --spacing-lg: clamp(20px, 3vw, 30px);
+    --spacing-xl: clamp(30px, 4vw, 50px);
+
+    /* Container padding based on screen size */
+    --container-padding: clamp(10px, 2vw, 20px);
+
+    /* Panel gaps */
+    --panel-gap: clamp(10px, 2vw, 20px);
+}
+
+/* ============================================================================
+   RESPONSIVE GRID SYSTEM
+   Dynamic CSS Grid that adapts from 1 column (mobile) to 3+ columns (desktop)
+   ============================================================================ */
+
+/* Base grid - mobile first (single column) */
+.main-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "panel1"
+        "panel2"
+        "panel3"
+        "panel4";
+    gap: var(--panel-gap);
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Grid item positioning */
+.grid-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.grid-panel-1 { grid-area: panel1; }
+.grid-panel-2 { grid-area: panel2; }
+.grid-panel-3 { grid-area: panel3; }
+.grid-panel-4 { grid-area: panel4; }
+.grid-panel-5 { grid-area: panel5; }
+.grid-panel-6 { grid-area: panel6; }
+
+/* ============================================================================
+   BREAKPOINT: EXTRA SMALL (4-6" phones)
+   480px and below - Single column, compact spacing
+   ============================================================================ */
+
+@media (max-width: 480px) {
+    .container {
+        padding: var(--spacing-sm);
+    }
+
+    .header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        text-align: center;
+        font-size: var(--font-size-md);
+    }
+
+    .header-right {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .widget-header {
+        padding: var(--spacing-sm);
+        flex-direction: column;
+        gap: var(--spacing-xs);
+        align-items: flex-start;
+    }
+
+    .widget-title {
+        font-size: var(--font-size-md);
+    }
+
+    .widget-status {
+        font-size: var(--font-size-sm);
+    }
+
+    .widget-content {
+        padding: var(--spacing-sm);
+    }
+
+    /* Compact weather display */
+    .weather-temp {
+        font-size: var(--font-size-xl) !important;
+    }
+
+    .weather-forecast {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    /* Stack financial items */
+    .financial-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Simplified footer */
+    .footer {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-sm);
+    }
+
+    .footer-text {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+}
+
+/* ============================================================================
+   BREAKPOINT: SMALL (6-8" tablets)
+   481px - 768px - Single column, more breathing room
+   ============================================================================ */
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .container {
+        padding: var(--spacing-md);
+    }
+
+    .main-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "panel1"
+            "panel2"
+            "panel3"
+            "panel4";
+    }
+
+    .header {
+        font-size: var(--font-size-lg);
+    }
+
+    .widget-title {
+        font-size: var(--font-size-md);
+    }
+
+    .weather-forecast {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .financial-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================================================
+   BREAKPOINT: MEDIUM (7-10" tablets, Raspberry Pi 7" screen)
+   769px - 1024px - 2 column grid (current default)
+   ============================================================================ */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding: var(--spacing-md);
+    }
+
+    .main-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            "panel1 panel2"
+            "panel3 panel4";
+    }
+
+    .header {
+        font-size: var(--font-size-lg);
+    }
+
+    .widget-title {
+        font-size: var(--font-size-md);
+    }
+
+    .weather-forecast {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .financial-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ============================================================================
+   BREAKPOINT: LARGE (11-15" laptops)
+   1025px - 1440px - 2-3 column grid with larger fonts
+   ============================================================================ */
+
+@media (min-width: 1025px) and (max-width: 1440px) {
+    .container {
+        padding: var(--spacing-lg);
+    }
+
+    /* 3 column grid for 4 panels */
+    .main-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-areas:
+            "panel1 panel2 panel3"
+            "panel4 panel4 panel4";
+    }
+
+    /* Alternative 6 panel layout */
+    .main-grid[data-panels="6"] {
+        grid-template-areas:
+            "panel1 panel2 panel3"
+            "panel4 panel5 panel6";
+    }
+
+    .header {
+        font-size: var(--font-size-xl);
+    }
+
+    .widget-title {
+        font-size: var(--font-size-lg);
+    }
+
+    .weather-temp {
+        font-size: var(--font-size-xxl) !important;
+    }
+
+    .financial-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ============================================================================
+   BREAKPOINT: EXTRA LARGE (16"+ desktops, 27" displays)
+   1441px and above - Maximum 3 column grid with spacious layout
+   ============================================================================ */
+
+@media (min-width: 1441px) {
+    .container {
+        padding: var(--spacing-xl);
+        max-width: 2560px;
+        margin: 0 auto;
+    }
+
+    /* 3 column grid optimized for large displays */
+    .main-grid {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-areas:
+            "panel1 panel2 panel3"
+            "panel4 panel5 panel6";
+    }
+
+    /* Alternative 4 panel layout for large screens */
+    .main-grid[data-panels="4"] {
+        grid-template-areas:
+            "panel1 panel2 panel3"
+            "panel4 panel4 panel4";
+    }
+
+    .header {
+        font-size: var(--font-size-xxl);
+    }
+
+    .widget-title {
+        font-size: var(--font-size-xl);
+    }
+
+    .widget-status {
+        font-size: var(--font-size-md);
+    }
+
+    .weather-temp {
+        font-size: 6rem !important;
+    }
+
+    .financial-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .weather-forecast {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ============================================================================
+   PANEL SIZE CLASSES
+   Allow individual panels to span multiple columns/rows
+   ============================================================================ */
+
+.panel-size-small {
+    grid-column: span 1;
+    grid-row: span 1;
+}
+
+.panel-size-medium {
+    grid-column: span 1;
+    grid-row: span 1;
+}
+
+.panel-size-large {
+    grid-column: span 2;
+    grid-row: span 1;
+}
+
+@media (min-width: 1025px) {
+    .panel-size-large {
+        grid-column: span 2;
+        grid-row: span 1;
+    }
+
+    .panel-size-xlarge {
+        grid-column: span 3;
+        grid-row: span 1;
+    }
+}
+
+/* ============================================================================
+   ORIENTATION SUPPORT
+   Adjust layout based on device orientation
+   ============================================================================ */
+
+@media (orientation: portrait) and (max-width: 768px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bottom-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (orientation: landscape) and (min-width: 481px) and (max-width: 1024px) {
+    .main-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ============================================================================
+   TOUCH-FRIENDLY ADJUSTMENTS
+   Larger hit targets and spacing for touchscreen devices
+   ============================================================================ */
+
+@media (hover: none) and (pointer: coarse) {
+    /* Increase touch targets */
+    .widget {
+        cursor: pointer;
+    }
+
+    .widget-header {
+        padding: var(--spacing-md);
+    }
+
+    .modal-close,
+    .modal-reload {
+        min-width: 50px;
+        min-height: 50px;
+    }
+
+    .exit-button,
+    .screensaver-button {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* Reduce hover effects on touch devices */
+    .widget:hover {
+        transform: none;
+    }
+}
+
+/* ============================================================================
+   ACCESSIBILITY - REDUCE MOTION
+   Respect user preference for reduced motion
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .container {
+        animation: none !important;
+    }
+
+    .widget {
+        animation: none !important;
+    }
+
+    .crt::after {
+        animation: none !important;
+    }
+}
+
+/* ============================================================================
+   HIGH CONTRAST MODE
+   Ensure readability in high contrast mode
+   ============================================================================ */
+
+@media (prefers-contrast: high) {
+    .widget {
+        border-width: 3px;
+    }
+
+    .separator {
+        height: 3px;
+    }
+
+    .widget-title,
+    .system-name,
+    .time-display {
+        font-weight: bold;
+    }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   Clean layout for printing (if ever needed)
+   ============================================================================ */
+
+@media print {
+    .crt,
+    .scanlines,
+    .exit-button,
+    .screensaver-button,
+    .modal-overlay {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+        color: black;
+    }
+
+    .widget {
+        border: 2px solid black;
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+}
