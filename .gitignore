@@ -1,6 +1,7 @@
 # Configuration with secrets
 config.json
 .env
+device_id.txt
 
 # Logs
 *.log
@@ -37,3 +38,6 @@ setup-financial-api.sh
 
 # Keep screenshots but ignore upload server
 screenshots/upload-server.py
+
+# Planning and implementation notes
+imageserver.md
