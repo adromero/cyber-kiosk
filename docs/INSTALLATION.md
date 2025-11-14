@@ -35,7 +35,7 @@ Complete step-by-step installation instructions for Raspberry Pi.
    The script will:
    - Check for Node.js and install if missing
    - Install npm dependencies
-   - Create config.json from template
+   - Create .env from template
    - Prompt for API keys
    - Test the system monitor
    - (Optional) Setup systemd service
@@ -77,19 +77,23 @@ npm install
 #### Step 4: Configure API Keys
 
 ```bash
-cp config.example.json config.json
-nano config.json
+cp .env.example .env
+nano .env
 ```
 
 Edit the file with your API keys and zip code:
 
-```json
-{
-  "zipCode": "90210",
-  "weatherApiKey": "YOUR_OPENWEATHERMAP_API_KEY",
-  "nytApiKey": "YOUR_NYT_API_KEY",
-  "youtubeApiKey": "YOUR_YOUTUBE_API_KEY"
-}
+```bash
+# API Keys
+OPENWEATHER_API_KEY=YOUR_OPENWEATHERMAP_API_KEY
+NYT_API_KEY=YOUR_NYT_API_KEY
+YOUTUBE_API_KEY=YOUR_YOUTUBE_API_KEY
+
+# Configuration
+ZIP_CODE=90210
+
+# Alpha Vantage API Key (for financial data)
+ALPHA_VANTAGE_API_KEY=your_alphavantage_api_key
 ```
 
 Save and exit (Ctrl+X, Y, Enter).
@@ -118,10 +122,9 @@ Save and exit (Ctrl+X, Y, Enter).
 **Alpha Vantage (Financial Data - Optional):**
 1. Visit https://www.alphavantage.co/support/#api-key
 2. Fill out form for free API key
-3. Set as environment variable:
+3. Add to .env file:
    ```bash
-   echo 'export ALPHA_VANTAGE_API_KEY=your_key_here' >> ~/.bashrc
-   source ~/.bashrc
+   ALPHA_VANTAGE_API_KEY=your_key_here
    ```
 
 #### Step 6: Install Chromium

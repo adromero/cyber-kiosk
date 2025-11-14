@@ -75,6 +75,13 @@ fi
 
 if [ ! -f ".env" ]; then
     echo -e "${YELLOW}Creating .env from template...${NC}"
+
+    if [ ! -f ".env.example" ]; then
+        echo -e "${RED}✗ .env.example not found!${NC}"
+        echo -e "${RED}Please ensure you cloned the complete repository.${NC}"
+        exit 1
+    fi
+
     cp .env.example .env
 
     echo ""

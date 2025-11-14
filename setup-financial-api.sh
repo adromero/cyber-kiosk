@@ -3,6 +3,10 @@
 # Setup script for Alpha Vantage API key
 # Get your free API key from: https://www.alphavantage.co/support/#api-key
 
+# Get script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 echo "=== Cyber Kiosk Financial API Setup ==="
 echo ""
 echo "This script will configure your Alpha Vantage API key for real-time financial data."
@@ -27,19 +31,23 @@ fi
 echo ""
 echo "Updating systemd service configuration..."
 
+# Detect node path
+NODE_PATH=$(which node)
+
 sudo tee /etc/systemd/system/cyber-kiosk-monitor.service > /dev/null << EOF
 [Unit]
-Description=Cyber Kiosk System Monitor Server
+Description=Cyber Kiosk System Monitor
 After=network.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/cyber-kiosk
+User=$USER
+WorkingDirectory=$SCRIPT_DIR
+Environment="NODE_ENV=production"
 Environment="ALPHA_VANTAGE_API_KEY=$api_key"
-ExecStart=/usr/bin/node /home/pi/cyber-kiosk/system-monitor.js
+ExecStart=$NODE_PATH $SCRIPT_DIR/system-monitor.js
 Restart=always
-RestartSec=5
+RestartSec=10
 StandardOutput=journal
 StandardError=journal
 
