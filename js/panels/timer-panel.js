@@ -116,12 +116,86 @@ class TimerPanel extends BasePanel {
     }
 
     /**
-     * Render the timer panel UI
+     * Render the timer panel UI (summary view)
      */
     render() {
         if (!this.elements.content) return;
 
-        const html = `
+        const html = this.renderSummaryView();
+        this.elements.content.innerHTML = html;
+
+        // Add click handlers for summary items
+        this.setupSummaryClickHandlers();
+    }
+
+    /**
+     * Render the summary view (shown in panel)
+     */
+    renderSummaryView() {
+        // Get current timer (first running or paused timer)
+        const currentTimer = this.timers[0];
+
+        // Get first enabled alarm
+        const firstAlarm = this.alarms.find(a => a.enabled);
+
+        // Format timer display
+        let timerValue = 'NO TIMER SET';
+        let timerSublabel = '';
+        if (currentTimer) {
+            const remaining = currentTimer.paused
+                ? currentTimer.remainingMs
+                : Math.max(0, currentTimer.endTime - Date.now());
+
+            const hours = Math.floor(remaining / 3600000);
+            const minutes = Math.floor((remaining % 3600000) / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+
+            timerValue = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            timerSublabel = currentTimer.paused ? 'PAUSED' : 'RUNNING';
+        }
+
+        // Format alarm display
+        let alarmValue = 'NO ALARM SET';
+        let alarmSublabel = '';
+        if (firstAlarm) {
+            alarmValue = firstAlarm.time;
+            alarmSublabel = firstAlarm.label || 'ALARM';
+        }
+
+        return `
+            <div class="timer-summary">
+                <div class="timer-summary-item" data-modal-section="timer">
+                    <div class="timer-summary-label">&gt; TIMER</div>
+                    <div class="timer-summary-value ${!currentTimer ? 'empty' : ''}">${timerValue}</div>
+                    ${timerSublabel ? `<div class="timer-summary-sublabel">${timerSublabel}</div>` : ''}
+                </div>
+                <div class="timer-summary-item has-alarm" data-modal-section="alarm">
+                    <div class="timer-summary-label">&gt; ALARM</div>
+                    <div class="timer-summary-value ${!firstAlarm ? 'empty' : ''}">${alarmValue}</div>
+                    ${alarmSublabel ? `<div class="timer-summary-sublabel">${alarmSublabel}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Set up click handlers for summary view
+     */
+    setupSummaryClickHandlers() {
+        const summaryItems = this.elements.content.querySelectorAll('.timer-summary-item');
+        summaryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const section = item.dataset.modalSection;
+                this.showModal(section);
+            });
+        });
+    }
+
+    /**
+     * Render the modal content (full timer/alarm interface)
+     */
+    renderModalContent() {
+        return `
             <div class="timer-panel-container">
                 <!-- Timer Controls -->
                 <div class="timer-controls">
@@ -197,8 +271,144 @@ class TimerPanel extends BasePanel {
                 </div>
             </div>
         `;
+    }
 
-        this.elements.content.innerHTML = html;
+    /**
+     * Create and attach the modal overlay to the document
+     */
+    createModal() {
+        // Create modal overlay
+        this.modalOverlay = document.createElement('div');
+        this.modalOverlay.className = 'timer-modal-overlay';
+        this.modalOverlay.id = `${this.id}-modal`;
+
+        // Create modal container
+        const modalContainer = document.createElement('div');
+        modalContainer.className = 'timer-modal-container';
+
+        // Modal structure
+        modalContainer.innerHTML = `
+            <div class="timer-modal-header">
+                <div class="timer-modal-title">&gt; TIMER_ALARM</div>
+                <button class="timer-modal-close" data-action="close-modal">X</button>
+            </div>
+            <div class="timer-modal-content" id="${this.id}-modal-content">
+                <!-- Content will be populated when modal opens -->
+            </div>
+        `;
+
+        this.modalOverlay.appendChild(modalContainer);
+        document.body.appendChild(this.modalOverlay);
+
+        // Close modal when clicking overlay (outside modal)
+        this.modalOverlay.addEventListener('click', (e) => {
+            if (e.target === this.modalOverlay) {
+                this.hideModal();
+            }
+        });
+
+        // Close modal with ESC key
+        this.escKeyHandler = (e) => {
+            if (e.key === 'Escape' && this.modalOverlay.classList.contains('active')) {
+                this.hideModal();
+            }
+        };
+        document.addEventListener('keydown', this.escKeyHandler);
+    }
+
+    /**
+     * Show the modal and populate with content
+     * @param {string} section - 'timer' or 'alarm' to scroll to that section
+     */
+    showModal(section = 'timer') {
+        if (!this.modalOverlay) {
+            this.createModal();
+        }
+
+        // Populate modal content
+        const modalContent = document.getElementById(`${this.id}-modal-content`);
+        if (modalContent) {
+            modalContent.innerHTML = this.renderModalContent();
+
+            // Set up event delegation for modal content
+            this.setupModalEventDelegation(modalContent);
+
+            // Scroll to section after a brief delay to allow rendering
+            setTimeout(() => {
+                const targetElement = section === 'alarm'
+                    ? modalContent.querySelector('.timer-section-divider')
+                    : modalContent.querySelector('.timer-controls');
+
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        }
+
+        // Show modal
+        this.modalOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    /**
+     * Hide the modal
+     */
+    hideModal() {
+        if (this.modalOverlay) {
+            this.modalOverlay.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scrolling
+
+            // Re-render summary view to reflect any changes made in modal
+            this.render();
+        }
+    }
+
+    /**
+     * Set up event delegation for modal content
+     * @param {HTMLElement} modalContent - Modal content element
+     */
+    setupModalEventDelegation(modalContent) {
+        // Handle all button clicks via delegation
+        modalContent.addEventListener('click', (e) => {
+            const button = e.target.closest('[data-action]');
+            if (!button) return;
+
+            const action = button.dataset.action;
+
+            switch (action) {
+                case 'close-modal':
+                    this.hideModal();
+                    break;
+                case 'start-custom':
+                    this.startCustomTimer();
+                    break;
+                case 'start-preset':
+                    this.startPresetTimer(parseInt(button.dataset.seconds));
+                    break;
+                case 'pause':
+                    this.pauseTimer(parseInt(button.dataset.timerId));
+                    break;
+                case 'resume':
+                    this.resumeTimer(parseInt(button.dataset.timerId));
+                    break;
+                case 'stop':
+                    this.stopTimer(parseInt(button.dataset.timerId));
+                    break;
+                case 'add-alarm':
+                    this.addAlarm();
+                    break;
+                case 'delete-alarm':
+                    this.deleteAlarm(parseInt(button.dataset.alarmId));
+                    break;
+            }
+        });
+
+        // Handle alarm toggle checkboxes
+        modalContent.addEventListener('change', (e) => {
+            if (e.target.classList.contains('alarm-toggle-checkbox')) {
+                this.toggleAlarm(parseInt(e.target.dataset.alarmId));
+            }
+        });
     }
 
     /**
@@ -600,38 +810,89 @@ class TimerPanel extends BasePanel {
     updateTimerDisplays() {
         const now = Date.now();
 
-        for (const timer of this.timers) {
-            const remaining = timer.paused
-                ? timer.remainingMs
-                : Math.max(0, timer.endTime - now);
+        // Check if modal is open
+        const isModalOpen = this.modalOverlay && this.modalOverlay.classList.contains('active');
 
-            const hours = Math.floor(remaining / 3600000);
-            const minutes = Math.floor((remaining % 3600000) / 60000);
-            const seconds = Math.floor((remaining % 60000) / 1000);
-            const milliseconds = Math.floor((remaining % 1000) / 10);
+        if (isModalOpen) {
+            // Update modal timer displays
+            for (const timer of this.timers) {
+                const remaining = timer.paused
+                    ? timer.remainingMs
+                    : Math.max(0, timer.endTime - now);
 
-            const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(2, '0')}`;
+                const hours = Math.floor(remaining / 3600000);
+                const minutes = Math.floor((remaining % 3600000) / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                const milliseconds = Math.floor((remaining % 1000) / 10);
 
-            const progress = timer.totalMs > 0
-                ? ((timer.totalMs - remaining) / timer.totalMs) * 100
-                : 0;
+                const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(2, '0')}`;
 
-            // Update only the display and progress elements
-            const timerElements = document.querySelectorAll(`[data-timer-id="${timer.id}"]`);
-            if (timerElements.length > 0) {
-                // Find the timer-item parent
-                const timerItem = timerElements[0].closest('.timer-item');
-                if (timerItem) {
-                    const displayElement = timerItem.querySelector('.timer-display');
-                    const progressFill = timerItem.querySelector('.timer-progress-fill');
+                const progress = timer.totalMs > 0
+                    ? ((timer.totalMs - remaining) / timer.totalMs) * 100
+                    : 0;
 
-                    if (displayElement) {
-                        displayElement.textContent = timeStr;
+                // Update only the display and progress elements in modal
+                const timerElements = document.querySelectorAll(`[data-timer-id="${timer.id}"]`);
+                if (timerElements.length > 0) {
+                    // Find the timer-item parent
+                    const timerItem = timerElements[0].closest('.timer-item');
+                    if (timerItem) {
+                        const displayElement = timerItem.querySelector('.timer-display');
+                        const progressFill = timerItem.querySelector('.timer-progress-fill');
+
+                        if (displayElement) {
+                            displayElement.textContent = timeStr;
+                        }
+
+                        if (progressFill) {
+                            progressFill.style.width = `${progress}%`;
+                        }
                     }
+                }
+            }
+        } else {
+            // Update summary view timer display
+            this.updateSummaryTimerDisplay();
+        }
+    }
 
-                    if (progressFill) {
-                        progressFill.style.width = `${progress}%`;
-                    }
+    /**
+     * Update just the timer display in the summary view
+     */
+    updateSummaryTimerDisplay() {
+        const currentTimer = this.timers[0];
+        const timerValueElement = this.elements.content.querySelector('[data-modal-section="timer"] .timer-summary-value');
+        const timerSublabelElement = this.elements.content.querySelector('[data-modal-section="timer"] .timer-summary-sublabel');
+
+        if (timerValueElement) {
+            if (currentTimer) {
+                const remaining = currentTimer.paused
+                    ? currentTimer.remainingMs
+                    : Math.max(0, currentTimer.endTime - Date.now());
+
+                const hours = Math.floor(remaining / 3600000);
+                const minutes = Math.floor((remaining % 3600000) / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+
+                const timerValue = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                timerValueElement.textContent = timerValue;
+                timerValueElement.classList.remove('empty');
+
+                // Update or create sublabel
+                const sublabel = currentTimer.paused ? 'PAUSED' : 'RUNNING';
+                if (timerSublabelElement) {
+                    timerSublabelElement.textContent = sublabel;
+                } else {
+                    const sublabelDiv = document.createElement('div');
+                    sublabelDiv.className = 'timer-summary-sublabel';
+                    sublabelDiv.textContent = sublabel;
+                    timerValueElement.parentElement.appendChild(sublabelDiv);
+                }
+            } else {
+                timerValueElement.textContent = 'NO TIMER SET';
+                timerValueElement.classList.add('empty');
+                if (timerSublabelElement) {
+                    timerSublabelElement.remove();
                 }
             }
         }
@@ -642,9 +903,17 @@ class TimerPanel extends BasePanel {
      * FULL re-render - use sparingly as it destroys and recreates DOM elements
      */
     updateTimersList() {
-        const listElement = document.getElementById(`${this.id}-timer-list`);
-        if (listElement) {
-            listElement.innerHTML = this.renderTimersList();
+        const isModalOpen = this.modalOverlay && this.modalOverlay.classList.contains('active');
+
+        if (isModalOpen) {
+            // Update modal timers list
+            const listElement = document.getElementById(`${this.id}-timer-list`);
+            if (listElement) {
+                listElement.innerHTML = this.renderTimersList();
+            }
+        } else {
+            // Re-render summary view
+            this.render();
         }
     }
 
@@ -652,9 +921,17 @@ class TimerPanel extends BasePanel {
      * Update only the alarms list portion of the UI
      */
     updateAlarmsList() {
-        const listElement = document.getElementById(`${this.id}-alarm-list`);
-        if (listElement) {
-            listElement.innerHTML = this.renderAlarmsList();
+        const isModalOpen = this.modalOverlay && this.modalOverlay.classList.contains('active');
+
+        if (isModalOpen) {
+            // Update modal alarms list
+            const listElement = document.getElementById(`${this.id}-alarm-list`);
+            if (listElement) {
+                listElement.innerHTML = this.renderAlarmsList();
+            }
+        } else {
+            // Re-render summary view
+            this.render();
         }
     }
 
@@ -684,6 +961,19 @@ class TimerPanel extends BasePanel {
      * Cleanup on destroy
      */
     onDestroy() {
+        // Remove ESC key handler
+        if (this.escKeyHandler) {
+            document.removeEventListener('keydown', this.escKeyHandler);
+        }
+
+        // Remove modal from DOM
+        if (this.modalOverlay && this.modalOverlay.parentNode) {
+            this.modalOverlay.parentNode.removeChild(this.modalOverlay);
+        }
+
+        // Restore body scroll
+        document.body.style.overflow = '';
+
         // Clean up global reference
         if (window[`timerPanel_${this.id}`]) {
             delete window[`timerPanel_${this.id}`];

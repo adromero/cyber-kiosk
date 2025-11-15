@@ -1638,3 +1638,202 @@ body {
         justify-content: space-between;
     }
 }
+
+/* Timer Panel Summary View */
+.timer-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.timer-summary-item {
+    background: rgba(0, 255, 255, 0.05);
+    border: 2px solid var(--neon-cyan);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.timer-summary-item:hover {
+    background: rgba(0, 255, 255, 0.15);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.timer-summary-item:active {
+    transform: translateY(0);
+}
+
+.timer-summary-item.has-alarm {
+    border-color: var(--neon-purple);
+    background: rgba(138, 43, 226, 0.05);
+}
+
+.timer-summary-item.has-alarm:hover {
+    background: rgba(138, 43, 226, 0.15);
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.4);
+}
+
+.timer-summary-label {
+    font-size: 1.2rem;
+    color: rgba(0, 255, 255, 0.7);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.timer-summary-item.has-alarm .timer-summary-label {
+    color: rgba(138, 43, 226, 0.7);
+}
+
+.timer-summary-value {
+    font-size: 2rem;
+    color: var(--neon-cyan);
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.timer-summary-item.has-alarm .timer-summary-value {
+    color: var(--neon-purple);
+    text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+.timer-summary-value.empty {
+    color: rgba(0, 255, 255, 0.3);
+    font-size: 1.4rem;
+}
+
+.timer-summary-item.has-alarm .timer-summary-value.empty {
+    color: rgba(138, 43, 226, 0.3);
+}
+
+.timer-summary-sublabel {
+    font-size: 1.1rem;
+    color: rgba(0, 255, 255, 0.5);
+    margin-top: 0.25rem;
+}
+
+.timer-summary-item.has-alarm .timer-summary-sublabel {
+    color: rgba(138, 43, 226, 0.5);
+}
+
+/* Timer Modal Overlay */
+.timer-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s;
+}
+
+.timer-modal-overlay.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.timer-modal-container {
+    background: var(--bg-primary);
+    border: 2px solid var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+    max-width: 800px;
+    width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideIn 0.3s;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.timer-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.05);
+}
+
+.timer-modal-title {
+    font-size: 2rem;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.timer-modal-close {
+    background: rgba(255, 0, 0, 0.1);
+    border: 2px solid #ff0055;
+    color: #ff0055;
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'VT323', monospace;
+    line-height: 1;
+}
+
+.timer-modal-close:hover {
+    background: rgba(255, 0, 0, 0.3);
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+    transform: scale(1.1);
+}
+
+.timer-modal-close:active {
+    transform: scale(0.95);
+}
+
+.timer-modal-content {
+    padding: 2rem;
+}
+
+/* Modal scrollbar styling */
+.timer-modal-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.timer-modal-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.timer-modal-container::-webkit-scrollbar-thumb {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.timer-modal-container::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+}
+}
