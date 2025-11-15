@@ -222,6 +222,11 @@ class BasePanel {
      * @param {Object} options - Event listener options
      */
     addEventListener(element, event, handler, options = {}) {
+        if (!element) {
+            console.error(`> ${this.id?.toUpperCase() || 'PANEL'}: Cannot addEventListener - element is null/undefined`);
+            return;
+        }
+        console.log(`> ${this.id?.toUpperCase() || 'PANEL'}: Adding ${event} listener to:`, element);
         element.addEventListener(event, handler, options);
         this.listeners.push({ element, event, handler, options });
     }
