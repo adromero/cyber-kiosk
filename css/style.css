@@ -1200,6 +1200,25 @@ body {
     overflow-y: auto;
 }
 
+/* Timer panel scrollbar styling */
+.timer-panel-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.timer-panel-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.timer-panel-container::-webkit-scrollbar-thumb {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.timer-panel-container::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+}
+
 /* Timer Controls */
 .timer-controls {
     display: flex;

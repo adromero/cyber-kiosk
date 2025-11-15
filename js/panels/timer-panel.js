@@ -68,6 +68,8 @@ class TimerPanel extends BasePanel {
 
             const action = button.dataset.action;
 
+            console.log('> TIMER: Button clicked -', action, 'timer:', button.dataset.timerId);
+
             switch (action) {
                 case 'start-custom':
                     this.startCustomTimer();
@@ -76,13 +78,19 @@ class TimerPanel extends BasePanel {
                     this.startPresetTimer(parseInt(button.dataset.seconds));
                     break;
                 case 'pause':
-                    this.pauseTimer(parseInt(button.dataset.timerId));
+                    const pauseId = parseInt(button.dataset.timerId);
+                    console.log('> TIMER: Pausing timer ID:', pauseId);
+                    this.pauseTimer(pauseId);
                     break;
                 case 'resume':
-                    this.resumeTimer(parseInt(button.dataset.timerId));
+                    const resumeId = parseInt(button.dataset.timerId);
+                    console.log('> TIMER: Resuming timer ID:', resumeId);
+                    this.resumeTimer(resumeId);
                     break;
                 case 'stop':
-                    this.stopTimer(parseInt(button.dataset.timerId));
+                    const stopId = parseInt(button.dataset.timerId);
+                    console.log('> TIMER: Stopping timer ID:', stopId);
+                    this.stopTimer(stopId);
                     break;
                 case 'add-alarm':
                     this.addAlarm();
