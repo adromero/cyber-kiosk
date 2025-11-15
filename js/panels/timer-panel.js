@@ -64,61 +64,12 @@ class TimerPanel extends BasePanel {
             return;
         }
 
-        console.log('> TIMER: Setting up event delegation on:', this.elements.content);
-        console.log('> TIMER: Content element ID:', this.elements.content.id);
-        console.log('> TIMER: Content element className:', this.elements.content.className);
-
         // Handle all button clicks via delegation
         this.addEventListener(this.elements.content, 'click', (e) => {
-            console.log('> TIMER: Click detected on:', e.target);
-            console.log('> TIMER: Target tagName:', e.target.tagName);
-            console.log('> TIMER: Target className:', e.target.className);
-            console.log('> TIMER: Target data-action:', e.target.dataset?.action);
-
-            // Log the parent chain
-            let current = e.target;
-            let depth = 0;
-            console.log('> TIMER: DOM chain from click target:');
-            while (current && depth < 10) {
-                const hasDataAction = current.hasAttribute && current.hasAttribute('data-action');
-                console.log(`  ${depth}: <${current.tagName}> class="${current.className}" data-action="${hasDataAction ? current.getAttribute('data-action') : 'none'}"`);
-                if (current === this.elements.content) {
-                    console.log('  ^^ Reached content element (listener attached here)');
-                    break;
-                }
-                current = current.parentElement;
-                depth++;
-            }
-
-            // Try to find button with data-action
             const button = e.target.closest('[data-action]');
-
-            console.log('> TIMER: closest("[data-action]") returned:', button);
-
-            if (!button) {
-                console.log('> TIMER: No button with data-action found');
-                console.log('> TIMER: closest() search failed - button is null');
-
-                // Double-check by manually searching
-                let manualCheck = e.target;
-                while (manualCheck && manualCheck !== this.elements.content) {
-                    if (manualCheck.hasAttribute && manualCheck.hasAttribute('data-action')) {
-                        console.log('> TIMER: FOUND via manual search!', manualCheck);
-                        console.log('> TIMER: This suggests closest() is failing unexpectedly');
-                        break;
-                    }
-                    manualCheck = manualCheck.parentElement;
-                }
-                if (!manualCheck || manualCheck === this.elements.content) {
-                    console.log('> TIMER: Manual search also found nothing');
-                }
-
-                return;
-            }
+            if (!button) return;
 
             const action = button.dataset.action;
-
-            console.log('> TIMER: Button clicked -', action, 'timer:', button.dataset.timerId);
 
             switch (action) {
                 case 'start-custom':
@@ -128,19 +79,13 @@ class TimerPanel extends BasePanel {
                     this.startPresetTimer(parseInt(button.dataset.seconds));
                     break;
                 case 'pause':
-                    const pauseId = parseInt(button.dataset.timerId);
-                    console.log('> TIMER: Pausing timer ID:', pauseId);
-                    this.pauseTimer(pauseId);
+                    this.pauseTimer(parseInt(button.dataset.timerId));
                     break;
                 case 'resume':
-                    const resumeId = parseInt(button.dataset.timerId);
-                    console.log('> TIMER: Resuming timer ID:', resumeId);
-                    this.resumeTimer(resumeId);
+                    this.resumeTimer(parseInt(button.dataset.timerId));
                     break;
                 case 'stop':
-                    const stopId = parseInt(button.dataset.timerId);
-                    console.log('> TIMER: Stopping timer ID:', stopId);
-                    this.stopTimer(stopId);
+                    this.stopTimer(parseInt(button.dataset.timerId));
                     break;
                 case 'add-alarm':
                     this.addAlarm();
@@ -264,8 +209,6 @@ class TimerPanel extends BasePanel {
             return '<div class="timer-empty">NO ACTIVE TIMERS</div>';
         }
 
-        console.log('> TIMER: Rendering timer list, count:', this.timers.length);
-
         return this.timers.map(timer => {
             const remaining = timer.paused
                 ? timer.remainingMs
@@ -282,12 +225,6 @@ class TimerPanel extends BasePanel {
                 ? ((timer.totalMs - remaining) / timer.totalMs) * 100
                 : 0;
 
-            const pauseResumeButton = timer.paused
-                ? `<button class="timer-action-button" data-action="resume" data-timer-id="${timer.id}">RESUME</button>`
-                : `<button class="timer-action-button" data-action="pause" data-timer-id="${timer.id}">PAUSE</button>`;
-
-            console.log(`> TIMER: Generating button HTML for timer ${timer.id}:`, pauseResumeButton);
-
             return `
                 <div class="timer-item ${timer.paused ? 'paused' : ''} ${remaining <= 0 ? 'completed' : ''}">
                     <div class="timer-display">${timeStr}</div>
@@ -295,7 +232,10 @@ class TimerPanel extends BasePanel {
                         <div class="timer-progress-fill" style="width: ${progress}%"></div>
                     </div>
                     <div class="timer-actions">
-                        ${pauseResumeButton}
+                        ${timer.paused
+                            ? `<button class="timer-action-button" data-action="resume" data-timer-id="${timer.id}">RESUME</button>`
+                            : `<button class="timer-action-button" data-action="pause" data-timer-id="${timer.id}">PAUSE</button>`
+                        }
                         <button class="timer-action-button" data-action="stop" data-timer-id="${timer.id}">STOP</button>
                     </div>
                 </div>
@@ -704,18 +644,7 @@ class TimerPanel extends BasePanel {
     updateTimersList() {
         const listElement = document.getElementById(`${this.id}-timer-list`);
         if (listElement) {
-            const newHtml = this.renderTimersList();
-            console.log('> TIMER: Setting timer list innerHTML, length:', newHtml.length);
-            listElement.innerHTML = newHtml;
-
-            // Verify the buttons were actually added to the DOM
-            const buttons = listElement.querySelectorAll('[data-action]');
-            console.log('> TIMER: Buttons with data-action in DOM after update:', buttons.length);
-            if (buttons.length > 0) {
-                console.log('> TIMER: First button:', buttons[0]);
-                console.log('> TIMER: First button data-action:', buttons[0].getAttribute('data-action'));
-                console.log('> TIMER: First button data-timer-id:', buttons[0].getAttribute('data-timer-id'));
-            }
+            listElement.innerHTML = this.renderTimersList();
         }
     }
 
