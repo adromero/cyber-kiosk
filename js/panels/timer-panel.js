@@ -59,12 +59,23 @@ class TimerPanel extends BasePanel {
      * Set up event delegation for all interactive elements
      */
     setupEventDelegation() {
-        if (!this.elements.content) return;
+        if (!this.elements.content) {
+            console.error('> TIMER: No content element for event delegation!');
+            return;
+        }
+
+        console.log('> TIMER: Setting up event delegation on:', this.elements.content);
 
         // Handle all button clicks via delegation
         this.addEventListener(this.elements.content, 'click', (e) => {
+            console.log('> TIMER: Click detected on:', e.target);
+
             const button = e.target.closest('[data-action]');
-            if (!button) return;
+
+            if (!button) {
+                console.log('> TIMER: No button with data-action found');
+                return;
+            }
 
             const action = button.dataset.action;
 
