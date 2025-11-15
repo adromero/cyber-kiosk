@@ -47,17 +47,18 @@ const ENV = loadEnvFile();
 const PORT = parseInt(ENV.PORT) || 3001;
 const NETWORK_INTERFACE = ENV.NETWORK_INTERFACE || 'auto';
 const ALPHA_VANTAGE_API_KEY = ENV.ALPHA_VANTAGE_API_KEY || 'demo';
+const PIHOLE_API_URL = ENV.PIHOLE_API_URL || '';
+const PIHOLE_PASSWORD = ENV.PIHOLE_PASSWORD || '';
 
 // Platform detection
 const IS_RASPBERRY_PI = fs.existsSync('/sys/firmware/devicetree/base/model');
 const HAS_VCGENCMD = fs.existsSync('/usr/bin/vcgencmd') || fs.existsSync('/opt/vc/bin/vcgencmd');
-const HAS_PIHOLE = fs.existsSync('/etc/pihole/pihole-FTL.db');
 const HAS_VNSTAT = fs.existsSync('/usr/bin/vnstat');
 
 console.log('> Platform Detection:');
 console.log('  - Raspberry Pi:', IS_RASPBERRY_PI);
 console.log('  - vcgencmd available:', HAS_VCGENCMD);
-console.log('  - Pi-hole installed:', HAS_PIHOLE);
+console.log('  - Pi-hole (remote):', PIHOLE_API_URL ? 'configured' : 'not configured');
 console.log('  - vnStat installed:', HAS_VNSTAT);
 
 // Command whitelist for security
@@ -425,138 +426,225 @@ function generateSimulatedData() {
     };
 }
 
-// Get Pi-hole statistics (using sqlite3 library for security)
+// Get Pi-hole statistics (from remote Pi-hole v6 API)
 async function getPiholeStats() {
-    if (!HAS_PIHOLE) {
+    if (!PIHOLE_API_URL) {
         return {
             status: 'error',
-            error: 'Pi-hole not installed'
+            error: 'Pi-hole API URL not configured',
+            fallback_iframe: 'http://100.90.104.35/admin'
         };
     }
 
     try {
-        // Use sqlite3 library instead of shell commands for security
-        const sqlite3 = require('sqlite3').verbose();
+        // First, get an API session token
+        const loginUrl = `${PIHOLE_API_URL}/api/auth`;
+        const loginData = JSON.stringify({ password: PIHOLE_PASSWORD });
 
-        return new Promise((resolve, reject) => {
-            const db = new sqlite3.Database('/etc/pihole/pihole-FTL.db', sqlite3.OPEN_READONLY, (err) => {
-                if (err) {
-                    resolve({
-                        status: 'error',
-                        error: 'Cannot open Pi-hole database: ' + err.message
-                    });
-                    return;
+        return new Promise((resolve) => {
+            const loginReq = http.request(loginUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(loginData),
+                    'Accept': 'application/json'
                 }
+            }, (loginResponse) => {
+                let loginDataStr = '';
+                loginResponse.on('data', (chunk) => { loginDataStr += chunk; });
+                loginResponse.on('end', () => {
+                    try {
 
-                const stats = {};
+                        const loginResult = JSON.parse(loginDataStr);
+                        const sessionId = loginResult.session?.sid;
+                        const csrfToken = loginResult.session?.csrf;
 
-                // Get total queries
-                db.get('SELECT value FROM counters WHERE id=0', [], (err, row) => {
-                    if (err) {
-                        db.close();
-                        resolve({ status: 'error', error: err.message });
-                        return;
-                    }
-                    stats.queries_today = parseInt(row?.value) || 0;
-
-                    // Get blocked queries
-                    db.get('SELECT value FROM counters WHERE id=1', [], (err, row) => {
-                        if (err) {
-                            db.close();
-                            resolve({ status: 'error', error: err.message });
+                        if (!sessionId) {
+                            console.error('> Pi-hole: Authentication failed - no session ID');
+                            resolve({
+                                status: 'error',
+                                error: 'Failed to authenticate with Pi-hole',
+                                fallback_iframe: 'http://100.90.104.35/admin'
+                            });
                             return;
                         }
-                        stats.blocked_today = parseInt(row?.value) || 0;
 
-                        // Get unique clients
-                        db.get('SELECT COUNT(DISTINCT client) as count FROM queries', [], (err, row) => {
-                            if (err) {
-                                db.close();
-                                resolve({ status: 'error', error: err.message });
-                                return;
-                            }
-                            stats.clients = parseInt(row?.count) || 0;
+                        // Extract cookie from Set-Cookie header
+                        const setCookieHeader = loginResponse.headers['set-cookie'];
+                        let cookieToUse = `sid=${sessionId}`;
 
-                            // Get cached queries
-                            db.get('SELECT COUNT(*) as count FROM queries WHERE status = 3', [], (err, row) => {
-                                if (err) {
-                                    db.close();
-                                    resolve({ status: 'error', error: err.message });
-                                    return;
-                                }
-                                stats.cached_queries = parseInt(row?.count) || 0;
+                        // If Set-Cookie header exists, use the full cookie value
+                        if (setCookieHeader && Array.isArray(setCookieHeader)) {
+                            cookieToUse = setCookieHeader[0].split(';')[0];
+                        }
 
-                                // Get forwarded queries
-                                db.get('SELECT COUNT(*) as count FROM queries WHERE status = 2', [], (err, row) => {
-                                    if (err) {
-                                        db.close();
-                                        resolve({ status: 'error', error: err.message });
+                        // Now fetch summary stats with the session token
+                        const summaryUrl = `${PIHOLE_API_URL}/api/stats/summary`;
+
+                        const requestHeaders = {
+                            'Cookie': cookieToUse,
+                            'Accept': 'application/json',
+                            'User-Agent': 'CyberKiosk/1.0'
+                        };
+
+                        // Add Pi-hole v6 authentication headers
+                        if (csrfToken) {
+                            requestHeaders['X-FTL-SID'] = sessionId;
+                            requestHeaders['X-FTL-CSRF'] = csrfToken;
+                        }
+
+                        const summaryReq = http.request(summaryUrl, {
+                            method: 'GET',
+                            headers: requestHeaders
+                        }, (response) => {
+                            let data = '';
+                            response.on('data', (chunk) => { data += chunk; });
+                            response.on('end', () => {
+                                try {
+                                    // Check if we got an authentication error
+                                    if (response.statusCode === 401 || response.statusCode === 403) {
+                                        console.error('> Pi-hole: Authentication rejected (HTTP ' + response.statusCode + ')');
+                                        resolve({
+                                            status: 'error',
+                                            error: 'Pi-hole API authentication rejected',
+                                            fallback_iframe: 'http://100.90.104.35/admin'
+                                        });
                                         return;
                                     }
-                                    stats.forwarded_queries = parseInt(row?.count) || 0;
 
-                                    // Get unique domains
-                                    db.get('SELECT COUNT(DISTINCT domain) as count FROM queries', [], (err, row) => {
-                                        if (err) {
-                                            db.close();
-                                            resolve({ status: 'error', error: err.message });
-                                            return;
-                                        }
-                                        stats.unique_domains = parseInt(row?.count) || 0;
+                                    const result = JSON.parse(data);
+                                    const queries = result.queries;
+                                    const clients = result.clients;
 
-                                        // Get top 5 blocked domains
-                                        db.all('SELECT domain, COUNT(*) as count FROM queries WHERE status IN (1, 4, 5, 6, 7, 8, 9, 10, 11, 15, 16) GROUP BY domain ORDER BY count DESC LIMIT 5', [], (err, rows) => {
-                                            if (err) {
-                                                db.close();
-                                                resolve({ status: 'error', error: err.message });
-                                                return;
-                                            }
-                                            stats.top_blocked = rows.map(r => ({ domain: r.domain, count: r.count }));
+                                    if (!queries) {
+                                        console.error('> Pi-hole: No queries data in response');
+                                        resolve({
+                                            status: 'error',
+                                            error: 'No queries data in response',
+                                            fallback_iframe: 'http://100.90.104.35/admin'
+                                        });
+                                        return;
+                                    }
 
-                                            // Get total domains from gravity database
-                                            const gravityDb = new sqlite3.Database('/etc/pihole/gravity.db', sqlite3.OPEN_READONLY, (err) => {
-                                                if (err) {
-                                                    db.close();
-                                                    stats.domains_blocked = 0;
-                                                    finishStats();
-                                                    return;
-                                                }
+                                    // Fetch top blocked domains
+                                    const topBlockedUrl = `${PIHOLE_API_URL}/api/stats/top_blocked`;
+                                    const topReq = http.request(topBlockedUrl, {
+                                        method: 'GET',
+                                        headers: requestHeaders
+                                    }, (topResponse) => {
+                                        let topData = '';
+                                        topResponse.on('data', (chunk) => { topData += chunk; });
+                                        topResponse.on('end', () => {
+                                            try {
+                                                const topResult = JSON.parse(topData);
+                                                // Pi-hole v6 returns top_blocked directly, not in stats
+                                                const topBlocked = topResult.top_blocked || [];
 
-                                                gravityDb.get('SELECT COUNT(*) as count FROM gravity', [], (err, row) => {
-                                                    gravityDb.close();
-                                                    db.close();
+                                                // Map Pi-hole v6 API response to expected format
+                                                const stats = {
+                                                    status: 'active',
+                                                    queries_today: parseInt(queries.total) || 0,
+                                                    blocked_today: parseInt(queries.blocked) || 0,
+                                                    percent_blocked: parseFloat(queries.percent_blocked) || 0,
+                                                    domains_blocked: parseInt(result.gravity?.domains_being_blocked) || 0,
+                                                    clients: parseInt(clients?.total_clients) || 0,
+                                                    cached_queries: parseInt(queries.cached) || 0,
+                                                    forwarded_queries: parseInt(queries.forwarded) || 0,
+                                                    unique_domains: parseInt(queries.unique_domains) || 0,
+                                                    top_blocked: topBlocked.slice(0, 5).map(item => ({
+                                                        domain: item.domain || '',
+                                                        count: parseInt(item.count) || 0
+                                                    }))
+                                                };
 
-                                                    if (err) {
-                                                        stats.domains_blocked = 0;
-                                                    } else {
-                                                        stats.domains_blocked = parseInt(row?.count) || 0;
-                                                    }
-
-                                                    finishStats();
-                                                });
-                                            });
-
-                                            function finishStats() {
-                                                const total = stats.queries_today;
-                                                const blocked = stats.blocked_today;
-                                                stats.percent_blocked = total > 0 ? ((blocked / total) * 100).toFixed(2) : '0.00';
-                                                stats.status = 'active';
                                                 resolve(stats);
+                                            } catch (error) {
+                                                console.error('Error parsing top blocked:', error);
+                                                // Return stats without top blocked
+                                                resolve({
+                                                    status: 'active',
+                                                    queries_today: parseInt(queries.total) || 0,
+                                                    blocked_today: parseInt(queries.blocked) || 0,
+                                                    percent_blocked: parseFloat(queries.percent_blocked) || 0,
+                                                    domains_blocked: parseInt(result.gravity?.domains_being_blocked) || 0,
+                                                    clients: parseInt(clients?.total_clients) || 0,
+                                                    cached_queries: parseInt(queries.cached) || 0,
+                                                    forwarded_queries: parseInt(queries.forwarded) || 0,
+                                                    unique_domains: parseInt(queries.unique_domains) || 0,
+                                                    top_blocked: []
+                                                });
                                             }
                                         });
                                     });
-                                });
+
+                                    topReq.on('error', (error) => {
+                                        console.error('Error fetching top blocked:', error);
+                                        // Return stats without top blocked
+                                        resolve({
+                                            status: 'active',
+                                            queries_today: parseInt(queries.total) || 0,
+                                            blocked_today: parseInt(queries.blocked) || 0,
+                                            percent_blocked: parseFloat(queries.percent_blocked) || 0,
+                                            domains_blocked: parseInt(result.gravity?.domains_being_blocked) || 0,
+                                            clients: parseInt(clients?.total_clients) || 0,
+                                            cached_queries: parseInt(queries.cached) || 0,
+                                            forwarded_queries: parseInt(queries.forwarded) || 0,
+                                            unique_domains: parseInt(queries.unique_domains) || 0,
+                                            top_blocked: []
+                                        });
+                                    });
+
+                                    topReq.end();
+                                } catch (error) {
+                                    console.error('Error parsing summary:', error);
+                                    resolve({
+                                        status: 'error',
+                                        error: 'Failed to parse summary: ' + error.message,
+                                        fallback_iframe: 'http://100.90.104.35/admin'
+                                    });
+                                }
                             });
                         });
-                    });
+
+                        summaryReq.on('error', (error) => {
+                            console.error('Error fetching summary:', error);
+                            resolve({
+                                status: 'error',
+                                error: 'Failed to fetch summary: ' + error.message,
+                                fallback_iframe: 'http://100.90.104.35/admin'
+                            });
+                        });
+
+                        summaryReq.end();
+                    } catch (error) {
+                        console.error('Error parsing login response:', error);
+                        resolve({
+                            status: 'error',
+                            error: 'Failed to parse login response: ' + error.message,
+                            fallback_iframe: 'http://100.90.104.35/admin'
+                        });
+                    }
                 });
             });
+
+            loginReq.on('error', (error) => {
+                console.error('Error authenticating with Pi-hole:', error);
+                resolve({
+                    status: 'error',
+                    error: 'Failed to authenticate: ' + error.message,
+                    fallback_iframe: 'http://100.90.104.35/admin'
+                });
+            });
+
+            loginReq.write(loginData);
+            loginReq.end();
         });
     } catch (error) {
         console.error('Error getting Pi-hole stats:', error);
         return {
             status: 'error',
-            error: error.message
+            error: error.message,
+            fallback_iframe: 'http://100.90.104.35/admin'
         };
     }
 }
