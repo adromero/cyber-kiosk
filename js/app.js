@@ -66,6 +66,39 @@ const YOUTUBE_VIDEOS = [
     { id: 'WLSNPkf8RCQ', title: 'Neon Tokyo Night Drive' }
 ];
 
+// Timer Panel - declare early to avoid hoisting issues
+let timerPanel;
+function initTimerPanel() {
+    const container = document.getElementById('timer-panel-container');
+
+    if (!container) {
+        console.error('> TIMER PANEL: Container not found');
+        return;
+    }
+
+    if (typeof TimerPanel === 'undefined') {
+        console.error('> TIMER PANEL: TimerPanel class not loaded');
+        return;
+    }
+
+    try {
+        timerPanel = new TimerPanel({
+            id: 'timer',
+            title: 'TIMER_ALARM',
+            container: container,
+            settings: {}
+        });
+
+        timerPanel.init();
+        console.log('> TIMER PANEL: INITIALIZED');
+
+        // Request notification permission for alarms/timers
+        timerPanel.requestNotificationPermission();
+    } catch (error) {
+        console.error('> ERROR INITIALIZING TIMER PANEL:', error);
+    }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('> CYBER TERMINAL INITIALIZING...');
@@ -1233,10 +1266,10 @@ document.querySelector('.cyberspace-widget').addEventListener('click', () => {
     showCyberspaceModal();
 });
 
-// VID panel click handler
-document.querySelector('.video-widget').addEventListener('click', () => {
-    showVideoModal();
-});
+// VID panel click handler - DISABLED (replaced with timer panel)
+// document.querySelector('.video-widget').addEventListener('click', () => {
+//     showVideoModal();
+// });
 
 // NEWS_FEED panel click handler
 document.querySelector('.news-widget').addEventListener('click', async () => {
@@ -2077,39 +2110,6 @@ async function showSystemStatusModal() {
     } catch (error) {
         console.error('> ERROR LOADING SYSTEM STATUS:', error);
         modalContent.innerHTML = '<div class="error-message">ERROR LOADING SYSTEM STATUS</div>';
-    }
-}
-
-// Initialize Timer Panel
-let timerPanel;
-function initTimerPanel() {
-    const container = document.getElementById('timer-panel-container');
-
-    if (!container) {
-        console.error('> TIMER PANEL: Container not found');
-        return;
-    }
-
-    if (typeof TimerPanel === 'undefined') {
-        console.error('> TIMER PANEL: TimerPanel class not loaded');
-        return;
-    }
-
-    try {
-        timerPanel = new TimerPanel({
-            id: 'timer',
-            title: 'TIMER_ALARM',
-            container: container,
-            settings: {}
-        });
-
-        timerPanel.init();
-        console.log('> TIMER PANEL: INITIALIZED');
-
-        // Request notification permission for alarms/timers
-        timerPanel.requestNotificationPermission();
-    } catch (error) {
-        console.error('> ERROR INITIALIZING TIMER PANEL:', error);
     }
 }
 
