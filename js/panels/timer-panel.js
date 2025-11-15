@@ -435,7 +435,7 @@ class TimerPanel extends BasePanel {
      * Update all running timers
      */
     updateTimers() {
-        let needsUpdate = false;
+        let needsFullRender = false;
         const now = Date.now();
 
         for (const timer of this.timers) {
@@ -447,16 +447,20 @@ class TimerPanel extends BasePanel {
             if (remaining <= 0 && timer.endTime > 0) {
                 this.onTimerComplete(timer);
                 timer.endTime = -1; // Mark as triggered
-                needsUpdate = true;
+                needsFullRender = true;
             }
         }
 
         // Check alarms
         this.checkAlarms();
 
-        // Update display if needed
-        if (needsUpdate || this.timers.some(t => !t.paused)) {
+        // Update display
+        if (needsFullRender) {
+            // Full re-render needed (timer completed, added, removed, etc.)
             this.updateTimersList();
+        } else if (this.timers.some(t => !t.paused)) {
+            // Just update the timer displays without destroying DOM
+            this.updateTimerDisplays();
         }
     }
 
@@ -650,7 +654,52 @@ class TimerPanel extends BasePanel {
     }
 
     /**
+     * Update only the timer displays (time and progress) without re-rendering buttons
+     * This prevents destroying DOM elements during rapid updates
+     */
+    updateTimerDisplays() {
+        const now = Date.now();
+
+        for (const timer of this.timers) {
+            const remaining = timer.paused
+                ? timer.remainingMs
+                : Math.max(0, timer.endTime - now);
+
+            const hours = Math.floor(remaining / 3600000);
+            const minutes = Math.floor((remaining % 3600000) / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            const milliseconds = Math.floor((remaining % 1000) / 10);
+
+            const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(2, '0')}`;
+
+            const progress = timer.totalMs > 0
+                ? ((timer.totalMs - remaining) / timer.totalMs) * 100
+                : 0;
+
+            // Update only the display and progress elements
+            const timerElements = document.querySelectorAll(`[data-timer-id="${timer.id}"]`);
+            if (timerElements.length > 0) {
+                // Find the timer-item parent
+                const timerItem = timerElements[0].closest('.timer-item');
+                if (timerItem) {
+                    const displayElement = timerItem.querySelector('.timer-display');
+                    const progressFill = timerItem.querySelector('.timer-progress-fill');
+
+                    if (displayElement) {
+                        displayElement.textContent = timeStr;
+                    }
+
+                    if (progressFill) {
+                        progressFill.style.width = `${progress}%`;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Update only the timers list portion of the UI
+     * FULL re-render - use sparingly as it destroys and recreates DOM elements
      */
     updateTimersList() {
         const listElement = document.getElementById(`${this.id}-timer-list`);
