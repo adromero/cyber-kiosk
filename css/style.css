@@ -1184,3 +1184,400 @@ body {
         font-size: 2rem;
     }
 }
+
+/* ============================================
+   TIMER PANEL STYLES
+   ============================================ */
+
+.timer-panel-container {
+    padding: 1rem;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Timer Controls */
+.timer-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.timer-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.timer-input {
+    width: 60px;
+    padding: 0.5rem;
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+    font-size: 1.8rem;
+    text-align: center;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.timer-input:focus {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.timer-input::placeholder {
+    color: rgba(0, 255, 255, 0.3);
+}
+
+.timer-separator {
+    font-size: 2rem;
+    color: var(--neon-cyan);
+    font-weight: bold;
+}
+
+/* Timer Buttons */
+.timer-button {
+    padding: 0.75rem 1.5rem;
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+}
+
+.timer-button:hover {
+    background: rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.timer-button:active {
+    transform: translateY(0);
+}
+
+.timer-button-primary {
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+}
+
+.timer-button-primary:hover {
+    background: rgba(0, 255, 0, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+/* Preset Buttons */
+.timer-presets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.timer-preset-button {
+    padding: 0.75rem;
+    background: rgba(255, 170, 0, 0.1);
+    border: 1px solid var(--neon-amber);
+    color: var(--neon-amber);
+    font-family: 'VT323', monospace;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.timer-preset-button:hover {
+    background: rgba(255, 170, 0, 0.3);
+    box-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+}
+
+/* Timer List */
+.timer-list,
+.timer-alarm-list {
+    margin-bottom: 1.5rem;
+}
+
+.timer-item {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid var(--neon-cyan);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s;
+}
+
+.timer-item.paused {
+    border-color: var(--neon-amber);
+    background: rgba(255, 170, 0, 0.05);
+}
+
+.timer-item.completed {
+    border-color: var(--neon-green);
+    background: rgba(0, 255, 0, 0.1);
+    animation: pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    }
+    to {
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+    }
+}
+
+.timer-display {
+    font-size: 2.5rem;
+    color: var(--neon-cyan);
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.timer-item.paused .timer-display {
+    color: var(--neon-amber);
+    text-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+}
+
+.timer-item.completed .timer-display {
+    color: var(--neon-green);
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+/* Progress Bar */
+.timer-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--neon-cyan);
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+}
+
+.timer-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
+    transition: width 0.1s linear;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+}
+
+.timer-item.completed .timer-progress-fill {
+    background: var(--neon-green);
+}
+
+/* Timer Actions */
+.timer-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.timer-action-button {
+    padding: 0.5rem 1rem;
+    background: rgba(138, 43, 226, 0.1);
+    border: 1px solid var(--neon-purple);
+    color: var(--neon-purple);
+    font-family: 'VT323', monospace;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    flex: 1;
+}
+
+.timer-action-button:hover {
+    background: rgba(138, 43, 226, 0.3);
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+/* Empty State */
+.timer-empty {
+    text-align: center;
+    color: rgba(0, 255, 255, 0.4);
+    font-size: 1.4rem;
+    padding: 2rem;
+    border: 1px dashed rgba(0, 255, 255, 0.2);
+    margin-bottom: 1rem;
+}
+
+/* Section Divider */
+.timer-section-divider {
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--neon-cyan),
+        transparent
+    );
+    margin: 2rem 0;
+}
+
+.timer-section-title {
+    font-size: 1.8rem;
+    color: var(--neon-cyan);
+    margin-bottom: 1.5rem;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* Alarm Inputs */
+.timer-alarm-input {
+    padding: 0.5rem;
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+    font-size: 1.6rem;
+    outline: none;
+    transition: all 0.3s;
+    width: 120px;
+}
+
+.timer-alarm-input:focus {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.timer-alarm-label-input {
+    padding: 0.5rem;
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+    font-size: 1.4rem;
+    outline: none;
+    transition: all 0.3s;
+    flex: 1;
+    min-width: 150px;
+}
+
+.timer-alarm-label-input:focus {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.timer-alarm-label-input::placeholder {
+    color: rgba(0, 255, 255, 0.3);
+}
+
+/* Alarm Items */
+.timer-alarm-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(138, 43, 226, 0.05);
+    border: 1px solid var(--neon-purple);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s;
+}
+
+.timer-alarm-item.disabled {
+    opacity: 0.5;
+    border-color: rgba(138, 43, 226, 0.3);
+}
+
+.timer-alarm-item.enabled {
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+}
+
+.timer-alarm-info {
+    flex: 1;
+}
+
+.timer-alarm-time {
+    font-size: 2rem;
+    color: var(--neon-purple);
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(138, 43, 226, 0.5);
+}
+
+.timer-alarm-label {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-top: 0.25rem;
+}
+
+.timer-alarm-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Toggle Switch */
+.timer-toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.timer-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.timer-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--neon-purple);
+    transition: 0.3s;
+}
+
+.timer-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--neon-purple);
+    transition: 0.3s;
+}
+
+.timer-toggle input:checked + .timer-toggle-slider {
+    background-color: rgba(138, 43, 226, 0.3);
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+.timer-toggle input:checked + .timer-toggle-slider:before {
+    transform: translateX(26px);
+    background-color: var(--neon-green);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+}
+
+/* Responsive adjustments for timer panel */
+@media screen and (max-width: 600px) {
+    .timer-input-group {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .timer-controls {
+        flex-direction: column;
+    }
+
+    .timer-display {
+        font-size: 2rem;
+    }
+
+    .timer-alarm-item {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .timer-alarm-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
