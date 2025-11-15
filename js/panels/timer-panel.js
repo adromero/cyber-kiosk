@@ -300,6 +300,9 @@ class TimerPanel extends BasePanel {
         this.modalOverlay.appendChild(modalContainer);
         document.body.appendChild(this.modalOverlay);
 
+        // Set up event delegation for entire modal container (one time only)
+        this.setupModalEventDelegation(modalContainer);
+
         // Close modal when clicking overlay (outside modal)
         this.modalOverlay.addEventListener('click', (e) => {
             if (e.target === this.modalOverlay) {
@@ -327,11 +330,9 @@ class TimerPanel extends BasePanel {
 
         // Populate modal content
         const modalContent = document.getElementById(`${this.id}-modal-content`);
+
         if (modalContent) {
             modalContent.innerHTML = this.renderModalContent();
-
-            // Set up event delegation for modal content
-            this.setupModalEventDelegation(modalContent);
 
             // Scroll to section after a brief delay to allow rendering
             setTimeout(() => {
