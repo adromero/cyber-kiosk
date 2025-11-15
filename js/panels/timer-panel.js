@@ -655,7 +655,18 @@ class TimerPanel extends BasePanel {
     updateTimersList() {
         const listElement = document.getElementById(`${this.id}-timer-list`);
         if (listElement) {
-            listElement.innerHTML = this.renderTimersList();
+            const newHtml = this.renderTimersList();
+            console.log('> TIMER: Setting timer list innerHTML, length:', newHtml.length);
+            listElement.innerHTML = newHtml;
+
+            // Verify the buttons were actually added to the DOM
+            const buttons = listElement.querySelectorAll('[data-action]');
+            console.log('> TIMER: Buttons with data-action in DOM after update:', buttons.length);
+            if (buttons.length > 0) {
+                console.log('> TIMER: First button:', buttons[0]);
+                console.log('> TIMER: First button data-action:', buttons[0].getAttribute('data-action'));
+                console.log('> TIMER: First button data-timer-id:', buttons[0].getAttribute('data-timer-id'));
+            }
         }
     }
 
