@@ -1216,21 +1216,24 @@ body {
 }
 
 .timer-input {
-    width: 60px;
-    padding: 0.5rem;
+    width: 70px;
+    min-height: 50px;
+    padding: 0.75rem;
     background: rgba(0, 255, 255, 0.1);
-    border: 1px solid var(--neon-cyan);
+    border: 2px solid var(--neon-cyan);
     color: var(--neon-cyan);
     font-family: 'VT323', monospace;
-    font-size: 1.8rem;
+    font-size: 2rem;
     text-align: center;
     outline: none;
     transition: all 0.3s;
+    touch-action: manipulation;
 }
 
 .timer-input:focus {
     background: rgba(0, 255, 255, 0.2);
     box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    border-color: var(--neon-green);
 }
 
 .timer-input::placeholder {
@@ -1243,17 +1246,19 @@ body {
     font-weight: bold;
 }
 
-/* Timer Buttons */
+/* Timer Buttons - Touch-friendly sizing */
 .timer-button {
-    padding: 0.75rem 1.5rem;
+    padding: 1rem 2rem;
+    min-height: 50px;
     background: rgba(0, 255, 255, 0.1);
-    border: 1px solid var(--neon-cyan);
+    border: 2px solid var(--neon-cyan);
     color: var(--neon-cyan);
     font-family: 'VT323', monospace;
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     cursor: pointer;
     transition: all 0.3s;
     text-transform: uppercase;
+    touch-action: manipulation; /* Prevent double-tap zoom */
 }
 
 .timer-button:hover {
@@ -1264,6 +1269,7 @@ body {
 
 .timer-button:active {
     transform: translateY(0);
+    background: rgba(0, 255, 255, 0.4);
 }
 
 .timer-button-primary {
@@ -1276,28 +1282,39 @@ body {
     box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
 }
 
-/* Preset Buttons */
+.timer-button-primary:active {
+    background: rgba(0, 255, 0, 0.4);
+}
+
+/* Preset Buttons - Touch-friendly */
 .timer-presets {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
     margin-bottom: 1.5rem;
 }
 
 .timer-preset-button {
-    padding: 0.75rem;
+    padding: 1rem;
+    min-height: 50px;
     background: rgba(255, 170, 0, 0.1);
-    border: 1px solid var(--neon-amber);
+    border: 2px solid var(--neon-amber);
     color: var(--neon-amber);
     font-family: 'VT323', monospace;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     cursor: pointer;
     transition: all 0.3s;
+    touch-action: manipulation;
 }
 
 .timer-preset-button:hover {
     background: rgba(255, 170, 0, 0.3);
     box-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+}
+
+.timer-preset-button:active {
+    background: rgba(255, 170, 0, 0.4);
+    transform: scale(0.98);
 }
 
 /* Timer List */
@@ -1382,20 +1399,27 @@ body {
 }
 
 .timer-action-button {
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1.25rem;
+    min-height: 44px;
     background: rgba(138, 43, 226, 0.1);
-    border: 1px solid var(--neon-purple);
+    border: 2px solid var(--neon-purple);
     color: var(--neon-purple);
     font-family: 'VT323', monospace;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     cursor: pointer;
     transition: all 0.3s;
     flex: 1;
+    touch-action: manipulation;
 }
 
 .timer-action-button:hover {
     background: rgba(138, 43, 226, 0.3);
     box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+.timer-action-button:active {
+    background: rgba(138, 43, 226, 0.4);
+    transform: scale(0.98);
 }
 
 /* Empty State */
@@ -1428,40 +1452,46 @@ body {
     text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
-/* Alarm Inputs */
+/* Alarm Inputs - Touch-friendly */
 .timer-alarm-input {
-    padding: 0.5rem;
+    padding: 0.75rem;
+    min-height: 50px;
     background: rgba(0, 255, 255, 0.1);
-    border: 1px solid var(--neon-cyan);
+    border: 2px solid var(--neon-cyan);
     color: var(--neon-cyan);
     font-family: 'VT323', monospace;
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     outline: none;
     transition: all 0.3s;
-    width: 120px;
+    width: 140px;
+    touch-action: manipulation;
 }
 
 .timer-alarm-input:focus {
     background: rgba(0, 255, 255, 0.2);
     box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    border-color: var(--neon-green);
 }
 
 .timer-alarm-label-input {
-    padding: 0.5rem;
+    padding: 0.75rem;
+    min-height: 50px;
     background: rgba(0, 255, 255, 0.1);
-    border: 1px solid var(--neon-cyan);
+    border: 2px solid var(--neon-cyan);
     color: var(--neon-cyan);
     font-family: 'VT323', monospace;
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     outline: none;
     transition: all 0.3s;
     flex: 1;
     min-width: 150px;
+    touch-action: manipulation;
 }
 
 .timer-alarm-label-input:focus {
     background: rgba(0, 255, 255, 0.2);
     box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    border-color: var(--neon-green);
 }
 
 .timer-alarm-label-input::placeholder {
@@ -1512,12 +1542,13 @@ body {
     align-items: center;
 }
 
-/* Toggle Switch */
+/* Toggle Switch - Touch-friendly larger size */
 .timer-toggle {
     position: relative;
     display: inline-block;
-    width: 50px;
-    height: 24px;
+    width: 60px;
+    height: 32px;
+    min-height: 32px;
 }
 
 .timer-toggle input {
@@ -1534,19 +1565,21 @@ body {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    border: 1px solid var(--neon-purple);
+    border: 2px solid var(--neon-purple);
     transition: 0.3s;
+    border-radius: 16px;
 }
 
 .timer-toggle-slider:before {
     position: absolute;
     content: "";
-    height: 16px;
-    width: 16px;
+    height: 22px;
+    width: 22px;
     left: 3px;
     bottom: 3px;
     background-color: var(--neon-purple);
     transition: 0.3s;
+    border-radius: 50%;
 }
 
 .timer-toggle input:checked + .timer-toggle-slider {
@@ -1555,7 +1588,7 @@ body {
 }
 
 .timer-toggle input:checked + .timer-toggle-slider:before {
-    transform: translateX(26px);
+    transform: translateX(28px);
     background-color: var(--neon-green);
     box-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
 }

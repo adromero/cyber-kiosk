@@ -46,10 +46,59 @@ class TimerPanel extends BasePanel {
         // Render initial UI
         this.render();
 
+        // Set up event delegation for all buttons
+        this.setupEventDelegation();
+
         // Start update loop for running timers
         this.setInterval('update', () => this.updateTimers(), 100);
 
         this.log('Timer panel initialized');
+    }
+
+    /**
+     * Set up event delegation for all interactive elements
+     */
+    setupEventDelegation() {
+        if (!this.elements.content) return;
+
+        // Handle all button clicks via delegation
+        this.addEventListener(this.elements.content, 'click', (e) => {
+            const button = e.target.closest('[data-action]');
+            if (!button) return;
+
+            const action = button.dataset.action;
+
+            switch (action) {
+                case 'start-custom':
+                    this.startCustomTimer();
+                    break;
+                case 'start-preset':
+                    this.startPresetTimer(parseInt(button.dataset.seconds));
+                    break;
+                case 'pause':
+                    this.pauseTimer(parseInt(button.dataset.timerId));
+                    break;
+                case 'resume':
+                    this.resumeTimer(parseInt(button.dataset.timerId));
+                    break;
+                case 'stop':
+                    this.stopTimer(parseInt(button.dataset.timerId));
+                    break;
+                case 'add-alarm':
+                    this.addAlarm();
+                    break;
+                case 'delete-alarm':
+                    this.deleteAlarm(parseInt(button.dataset.alarmId));
+                    break;
+            }
+        });
+
+        // Handle alarm toggle checkboxes
+        this.addEventListener(this.elements.content, 'change', (e) => {
+            if (e.target.classList.contains('alarm-toggle-checkbox')) {
+                this.toggleAlarm(parseInt(e.target.dataset.alarmId));
+            }
+        });
     }
 
     /**
@@ -99,7 +148,7 @@ class TimerPanel extends BasePanel {
                                value="0">
                     </div>
                     <button class="timer-button timer-button-primary"
-                            onclick="window.timerPanel_${this.id}.startCustomTimer()">
+                            data-action="start-custom">
                         START TIMER
                     </button>
                 </div>
@@ -108,7 +157,8 @@ class TimerPanel extends BasePanel {
                 <div class="timer-presets">
                     ${this.presets.map(preset => `
                         <button class="timer-preset-button"
-                                onclick="window.timerPanel_${this.id}.startPresetTimer(${preset.seconds})">
+                                data-action="start-preset"
+                                data-seconds="${preset.seconds}">
                             ${preset.label}
                         </button>
                     `).join('')}
@@ -133,7 +183,7 @@ class TimerPanel extends BasePanel {
                            class="timer-alarm-label-input"
                            placeholder="ALARM LABEL...">
                     <button class="timer-button timer-button-primary"
-                            onclick="window.timerPanel_${this.id}.addAlarm()">
+                            data-action="add-alarm">
                         ADD ALARM
                     </button>
                 </div>
@@ -146,9 +196,6 @@ class TimerPanel extends BasePanel {
         `;
 
         this.elements.content.innerHTML = html;
-
-        // Store reference to this panel instance globally for onclick handlers
-        window[`timerPanel_${this.id}`] = this;
     }
 
     /**
@@ -183,10 +230,10 @@ class TimerPanel extends BasePanel {
                     </div>
                     <div class="timer-actions">
                         ${timer.paused
-                            ? `<button class="timer-action-button" onclick="window.timerPanel_${this.id}.resumeTimer(${timer.id})">RESUME</button>`
-                            : `<button class="timer-action-button" onclick="window.timerPanel_${this.id}.pauseTimer(${timer.id})">PAUSE</button>`
+                            ? `<button class="timer-action-button" data-action="resume" data-timer-id="${timer.id}">RESUME</button>`
+                            : `<button class="timer-action-button" data-action="pause" data-timer-id="${timer.id}">PAUSE</button>`
                         }
-                        <button class="timer-action-button" onclick="window.timerPanel_${this.id}.stopTimer(${timer.id})">STOP</button>
+                        <button class="timer-action-button" data-action="stop" data-timer-id="${timer.id}">STOP</button>
                     </div>
                 </div>
             `;
@@ -211,12 +258,14 @@ class TimerPanel extends BasePanel {
                     <div class="timer-alarm-actions">
                         <label class="timer-toggle">
                             <input type="checkbox"
-                                   ${alarm.enabled ? 'checked' : ''}
-                                   onchange="window.timerPanel_${this.id}.toggleAlarm(${alarm.id})">
+                                   class="alarm-toggle-checkbox"
+                                   data-alarm-id="${alarm.id}"
+                                   ${alarm.enabled ? 'checked' : ''}>
                             <span class="timer-toggle-slider"></span>
                         </label>
                         <button class="timer-action-button"
-                                onclick="window.timerPanel_${this.id}.deleteAlarm(${alarm.id})">
+                                data-action="delete-alarm"
+                                data-alarm-id="${alarm.id}">
                             DELETE
                         </button>
                     </div>
