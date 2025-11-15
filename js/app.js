@@ -86,7 +86,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateSystemTemperature();
     setInterval(updateSystemTemperature, 15000); // Update every 15 seconds
 
-    loadVideos();
+    // Initialize Timer Panel (replacing video panel for testing)
+    initTimerPanel();
+
+    // loadVideos(); // Commented out - replaced with timer panel
     fetchWeatherOrFinancial();
     fetchNews();
     initCyberspace();
@@ -2077,6 +2080,39 @@ async function showSystemStatusModal() {
     }
 }
 
+// Initialize Timer Panel
+let timerPanel;
+function initTimerPanel() {
+    const container = document.getElementById('timer-panel-container');
+
+    if (!container) {
+        console.error('> TIMER PANEL: Container not found');
+        return;
+    }
+
+    if (typeof TimerPanel === 'undefined') {
+        console.error('> TIMER PANEL: TimerPanel class not loaded');
+        return;
+    }
+
+    try {
+        timerPanel = new TimerPanel({
+            id: 'timer',
+            title: 'TIMER_ALARM',
+            container: container,
+            settings: {}
+        });
+
+        timerPanel.init();
+        console.log('> TIMER PANEL: INITIALIZED');
+
+        // Request notification permission for alarms/timers
+        timerPanel.requestNotificationPermission();
+    } catch (error) {
+        console.error('> ERROR INITIALIZING TIMER PANEL:', error);
+    }
+}
+
 // Initialize Layout Manager for responsive design
 let layoutManager;
 if (typeof LayoutManager !== 'undefined') {
@@ -2101,4 +2137,5 @@ console.log('> SYSTEM MONITOR: ACTIVE');
 console.log('> MODAL SYSTEM: ACTIVE');
 console.log('> NETWORK SHIELD: ACTIVE');
 console.log('> RESPONSIVE LAYOUT: ACTIVE');
+console.log('> TIMER PANEL: ACTIVE');
 console.log('> AWAITING USER INPUT...');

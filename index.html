@@ -93,17 +93,9 @@
                 </div>
             </div>
 
-            <!-- Panel 4: Video -->
-            <div class="grid-panel grid-panel-4">
-                <div class="widget video-widget">
-                    <div class="widget-header">
-                        <span class="widget-title">&gt; VID</span>
-                        <span class="widget-status" id="video-status">ACTIVE</span>
-                    </div>
-                    <div class="widget-content video-content">
-                        <img id="video-thumbnail" src="" alt="YouTube Video">
-                    </div>
-                </div>
+            <!-- Panel 4: Timer (replacing Video for testing) -->
+            <div class="grid-panel grid-panel-4" id="timer-panel-container">
+                <!-- Timer panel will be initialized here by JavaScript -->
             </div>
         </div>
 
@@ -138,6 +130,8 @@
     <div id="screensaver-button" class="screensaver-button"></div>
 
     <script src="js/panels/panel-registry.js"></script>
+    <script src="js/panels/base-panel.js"></script>
+    <script src="js/panels/timer-panel.js"></script>
     <script src="js/layout-manager.js"></script>
     <script src="js/app.js"></script>
 </body>
