@@ -2,6 +2,7 @@
 config.json
 .env
 device_id.txt
+.spotify_tokens.json
 
 # Logs
 *.log

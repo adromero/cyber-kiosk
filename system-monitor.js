@@ -49,6 +49,13 @@ const NETWORK_INTERFACE = ENV.NETWORK_INTERFACE || 'auto';
 const ALPHA_VANTAGE_API_KEY = ENV.ALPHA_VANTAGE_API_KEY || 'demo';
 const PIHOLE_API_URL = ENV.PIHOLE_API_URL || '';
 const PIHOLE_PASSWORD = ENV.PIHOLE_PASSWORD || '';
+// Spotify Configuration - PKCE flow (no client secret needed!)
+const SPOTIFY_CLIENT_ID = ENV.SPOTIFY_CLIENT_ID || 'demo'; // Will prompt user to set up their own
+const SPOTIFY_REDIRECT_URI = ENV.SPOTIFY_REDIRECT_URI || `http://localhost:${PORT}/spotify/callback`;
+
+// PKCE state
+let pkceVerifier = null;
+let pkceChallenge = null;
 
 // Platform detection
 const IS_RASPBERRY_PI = fs.existsSync('/sys/firmware/devicetree/base/model');
@@ -912,6 +919,159 @@ function serveStaticFile(filePath, res) {
     });
 }
 
+// Spotify OAuth Token Management
+let spotifyTokens = {
+    access_token: null,
+    refresh_token: null,
+    expires_at: null
+};
+
+// Load saved Spotify tokens from file
+function loadSpotifyTokens() {
+    const tokenFile = path.join(__dirname, '.spotify_tokens.json');
+    try {
+        if (fs.existsSync(tokenFile)) {
+            const data = fs.readFileSync(tokenFile, 'utf8');
+            spotifyTokens = JSON.parse(data);
+            console.log('> Spotify tokens loaded from file');
+        }
+    } catch (error) {
+        console.error('> Error loading Spotify tokens:', error.message);
+    }
+}
+
+// Save Spotify tokens to file
+function saveSpotifyTokens() {
+    const tokenFile = path.join(__dirname, '.spotify_tokens.json');
+    try {
+        fs.writeFileSync(tokenFile, JSON.stringify(spotifyTokens, null, 2), 'utf8');
+        console.log('> Spotify tokens saved to file');
+    } catch (error) {
+        console.error('> Error saving Spotify tokens:', error.message);
+    }
+}
+
+// Refresh Spotify access token
+async function refreshSpotifyToken() {
+    if (!spotifyTokens.refresh_token) {
+        throw new Error('No refresh token available');
+    }
+
+    const tokenUrl = 'https://accounts.spotify.com/api/token';
+    const credentials = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
+
+    const postData = new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: spotifyTokens.refresh_token
+    }).toString();
+
+    return new Promise((resolve, reject) => {
+        const options = {
+            method: 'POST',
+            headers: {
+                'Authorization': `Basic ${credentials}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': postData.length
+            }
+        };
+
+        const req = https.request(tokenUrl, options, (res) => {
+            let data = '';
+            res.on('data', (chunk) => { data += chunk; });
+            res.on('end', () => {
+                try {
+                    const result = JSON.parse(data);
+                    if (result.access_token) {
+                        spotifyTokens.access_token = result.access_token;
+                        spotifyTokens.expires_at = Date.now() + (result.expires_in * 1000);
+                        saveSpotifyTokens();
+                        resolve(spotifyTokens.access_token);
+                    } else {
+                        reject(new Error('No access token in response'));
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        });
+
+        req.on('error', reject);
+        req.write(postData);
+        req.end();
+    });
+}
+
+// Get valid Spotify access token (refresh if needed)
+async function getSpotifyAccessToken() {
+    if (!spotifyTokens.access_token) {
+        return null;
+    }
+
+    // Check if token is expired or will expire in the next minute
+    if (spotifyTokens.expires_at && Date.now() >= (spotifyTokens.expires_at - 60000)) {
+        console.log('> Spotify token expired, refreshing...');
+        try {
+            await refreshSpotifyToken();
+        } catch (error) {
+            console.error('> Error refreshing Spotify token:', error.message);
+            return null;
+        }
+    }
+
+    return spotifyTokens.access_token;
+}
+
+// Make authenticated Spotify API request
+async function spotifyApiRequest(endpoint, method = 'GET', body = null) {
+    const accessToken = await getSpotifyAccessToken();
+
+    if (!accessToken) {
+        return { error: 'Not authenticated with Spotify' };
+    }
+
+    const url = `https://api.spotify.com/v1${endpoint}`;
+
+    return new Promise((resolve, reject) => {
+        const options = {
+            method: method,
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        };
+
+        const req = https.request(url, options, (res) => {
+            let data = '';
+            res.on('data', (chunk) => { data += chunk; });
+            res.on('end', () => {
+                try {
+                    if (res.statusCode === 204) {
+                        // No content response (e.g., pause/play commands)
+                        resolve({ success: true });
+                    } else if (res.statusCode >= 200 && res.statusCode < 300) {
+                        resolve(JSON.parse(data));
+                    } else {
+                        resolve({ error: `Spotify API error: ${res.statusCode}`, details: data });
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        });
+
+        req.on('error', reject);
+
+        if (body) {
+            req.write(JSON.stringify(body));
+        }
+
+        req.end();
+    });
+}
+
+// Load Spotify tokens on startup
+loadSpotifyTokens();
+
 // HTTP Server
 const server = http.createServer(async (req, res) => {
     // Secure CORS - only allow localhost
@@ -1088,6 +1248,191 @@ const server = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: 'Failed to save device ID' }));
             }
         });
+    } else if (pathname === '/spotify/login' && req.method === 'GET') {
+        // Spotify OAuth login - redirect to Spotify authorization
+        res.setHeader('Content-Type', 'application/json');
+
+        if (!SPOTIFY_CLIENT_ID || SPOTIFY_CLIENT_ID === 'demo') {
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: 'Spotify Client ID not configured. Add SPOTIFY_CLIENT_ID to .env file.' }));
+            return;
+        }
+
+        const scopes = [
+            'user-read-playback-state',
+            'user-modify-playback-state',
+            'user-read-currently-playing',
+            'playlist-read-private',
+            'playlist-read-collaborative',
+            'user-library-read',
+            'user-top-read',
+            'user-read-recently-played'
+        ];
+
+        const authUrl = 'https://accounts.spotify.com/authorize?' + new URLSearchParams({
+            response_type: 'code',
+            client_id: SPOTIFY_CLIENT_ID,
+            scope: scopes.join(' '),
+            redirect_uri: SPOTIFY_REDIRECT_URI,
+            show_dialog: 'true'
+        });
+
+        res.writeHead(200);
+        res.end(JSON.stringify({ auth_url: authUrl }));
+    } else if (pathname === '/spotify/callback' && req.method === 'GET') {
+        // Spotify OAuth callback - exchange code for tokens
+        const code = parsedUrl.searchParams.get('code');
+        const error = parsedUrl.searchParams.get('error');
+
+        if (error) {
+            console.error('> Spotify authorization denied by user');
+            res.writeHead(302, { 'Location': '/?spotify_error=denied' });
+            res.end();
+            return;
+        }
+
+        if (!code) {
+            res.writeHead(400, { 'Content-Type': 'text/html' });
+            res.end('<html><body><h1>Error: No authorization code</h1></body></html>');
+            return;
+        }
+
+        // Exchange code for tokens
+        const tokenUrl = 'https://accounts.spotify.com/api/token';
+        const credentials = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
+
+        const postData = new URLSearchParams({
+            grant_type: 'authorization_code',
+            code: code,
+            redirect_uri: SPOTIFY_REDIRECT_URI
+        }).toString();
+
+        const options = {
+            method: 'POST',
+            headers: {
+                'Authorization': `Basic ${credentials}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': postData.length
+            }
+        };
+
+        const tokenReq = https.request(tokenUrl, options, (tokenRes) => {
+            let data = '';
+            tokenRes.on('data', (chunk) => { data += chunk; });
+            tokenRes.on('end', () => {
+                try {
+                    const result = JSON.parse(data);
+                    if (result.access_token) {
+                        spotifyTokens.access_token = result.access_token;
+                        spotifyTokens.refresh_token = result.refresh_token;
+                        spotifyTokens.expires_at = Date.now() + (result.expires_in * 1000);
+                        saveSpotifyTokens();
+
+                        console.log('> Spotify authentication successful');
+                        res.writeHead(302, { 'Location': '/' });
+                        res.end();
+                    } else {
+                        console.error('> Spotify token exchange failed:', data);
+                        res.writeHead(500, { 'Content-Type': 'text/html' });
+                        res.end('<html><body><h1>Error: Could not get access token</h1></body></html>');
+                    }
+                } catch (error) {
+                    console.error('> Error parsing Spotify token response:', error);
+                    res.writeHead(500, { 'Content-Type': 'text/html' });
+                    res.end('<html><body><h1>Error: Could not parse token response</h1></body></html>');
+                }
+            });
+        });
+
+        tokenReq.on('error', (error) => {
+            console.error('> Error exchanging Spotify code:', error);
+            res.writeHead(500, { 'Content-Type': 'text/html' });
+            res.end('<html><body><h1>Error: Could not connect to Spotify</h1></body></html>');
+        });
+
+        tokenReq.write(postData);
+        tokenReq.end();
+    } else if (pathname === '/spotify/status' && req.method === 'GET') {
+        // Check Spotify authentication status
+        res.setHeader('Content-Type', 'application/json');
+        res.writeHead(200);
+        res.end(JSON.stringify({
+            authenticated: !!(spotifyTokens.access_token && spotifyTokens.refresh_token),
+            hasCredentials: SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_ID !== 'demo'
+        }));
+    } else if (pathname === '/spotify/logout' && req.method === 'POST') {
+        // Logout - clear tokens
+        res.setHeader('Content-Type', 'application/json');
+        spotifyTokens = {
+            access_token: null,
+            refresh_token: null,
+            expires_at: null
+        };
+        const tokenFile = path.join(__dirname, '.spotify_tokens.json');
+        try {
+            if (fs.existsSync(tokenFile)) {
+                fs.unlinkSync(tokenFile);
+            }
+        } catch (error) {
+            console.error('> Error deleting token file:', error);
+        }
+        console.log('> Spotify logged out');
+        res.writeHead(200);
+        res.end(JSON.stringify({ success: true }));
+    } else if (pathname === '/spotify/current' && req.method === 'GET') {
+        // Get currently playing track
+        res.setHeader('Content-Type', 'application/json');
+        const data = await spotifyApiRequest('/me/player/currently-playing');
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
+    } else if (pathname === '/spotify/player' && req.method === 'GET') {
+        // Get full player state
+        res.setHeader('Content-Type', 'application/json');
+        const data = await spotifyApiRequest('/me/player');
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
+    } else if (pathname === '/spotify/play' && req.method === 'POST') {
+        // Play/Resume playback
+        res.setHeader('Content-Type', 'application/json');
+        const data = await spotifyApiRequest('/me/player/play', 'PUT');
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
+    } else if (pathname === '/spotify/pause' && req.method === 'POST') {
+        // Pause playback
+        res.setHeader('Content-Type', 'application/json');
+        const data = await spotifyApiRequest('/me/player/pause', 'PUT');
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
+    } else if (pathname === '/spotify/next' && req.method === 'POST') {
+        // Skip to next track
+        res.setHeader('Content-Type', 'application/json');
+        const data = await spotifyApiRequest('/me/player/next', 'POST');
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
+    } else if (pathname === '/spotify/previous' && req.method === 'POST') {
+        // Skip to previous track
+        res.setHeader('Content-Type', 'application/json');
+        const data = await spotifyApiRequest('/me/player/previous', 'POST');
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
+    } else if (pathname === '/spotify/playlists' && req.method === 'GET') {
+        // Get user's playlists
+        res.setHeader('Content-Type', 'application/json');
+        const data = await spotifyApiRequest('/me/playlists?limit=50');
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
+    } else if (pathname === '/spotify/recent' && req.method === 'GET') {
+        // Get recently played tracks
+        res.setHeader('Content-Type', 'application/json');
+        const data = await spotifyApiRequest('/me/player/recently-played?limit=20');
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
+    } else if (pathname === '/spotify/devices' && req.method === 'GET') {
+        // Get available devices
+        res.setHeader('Content-Type', 'application/json');
+        const data = await spotifyApiRequest('/me/player/devices');
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
     } else {
         // Serve static files with enhanced security
         let filePath = pathname === '/' ? '/index.html' : pathname;
@@ -1112,6 +1457,9 @@ server.listen(PORT, () => {
     console.log(`> SYSTEM MONITOR SERVER RUNNING ON PORT ${PORT}`);
     console.log(`> ENDPOINTS: /stats, /financial, /pihole, /network, /health`);
     console.log(`> API PROXIES: /api/weather, /api/weather/forecast, /api/nytimes, /api/youtube/search`);
+    console.log(`> SPOTIFY: /spotify/login, /spotify/status, /spotify/current, /spotify/player, /spotify/playlists`);
     console.log(`> WEB INTERFACE: http://localhost:${PORT}`);
     console.log(`> SECURITY: CORS restricted to localhost, API keys protected`);
+    console.log(`> Spotify Client ID:`, SPOTIFY_CLIENT_ID !== 'demo' ? 'configured' : 'not configured');
+    console.log(`> Spotify authenticated:`, !!(spotifyTokens.access_token && spotifyTokens.refresh_token));
 });

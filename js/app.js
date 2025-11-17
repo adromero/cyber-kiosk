@@ -99,6 +99,36 @@ function initTimerPanel() {
     }
 }
 
+// Music Panel - Spotify integration
+let musicPanel;
+function initMusicPanel() {
+    const container = document.getElementById('music-panel-container');
+
+    if (!container) {
+        console.error('> MUSIC PANEL: Container not found');
+        return;
+    }
+
+    if (typeof MusicPanel === 'undefined') {
+        console.error('> MUSIC PANEL: MusicPanel class not loaded');
+        return;
+    }
+
+    try {
+        musicPanel = new MusicPanel({
+            id: 'music',
+            title: 'SPOTIFY',
+            container: container,
+            settings: {}
+        });
+
+        musicPanel.init();
+        console.log('> MUSIC PANEL: INITIALIZED');
+    } catch (error) {
+        console.error('> ERROR INITIALIZING MUSIC PANEL:', error);
+    }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('> CYBER TERMINAL INITIALIZING...');
@@ -121,6 +151,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize Timer Panel (replacing video panel for testing)
     initTimerPanel();
+
+    // Initialize Music Panel (Spotify integration)
+    initMusicPanel();
 
     // loadVideos(); // Commented out - replaced with timer panel
     fetchWeatherOrFinancial();

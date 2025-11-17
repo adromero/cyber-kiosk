@@ -171,19 +171,39 @@
 
 /* ============================================================================
    BREAKPOINT: MEDIUM (7-10" tablets, Raspberry Pi 7" screen)
-   769px - 1024px - 2 column grid (current default)
+   769px - 1024px - 2 column grid with scrolling for 5+ panels
    ============================================================================ */
 
 @media (min-width: 769px) and (max-width: 1024px) {
     .container {
         padding: var(--spacing-md);
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .main-grid {
         grid-template-columns: 1fr 1fr;
         grid-template-areas:
             "panel1 panel2"
-            "panel3 panel4";
+            "panel3 panel4"
+            "panel5 panel5";
+        grid-auto-flow: dense;
+    }
+
+    /* Support for 5 panels (music panel added) */
+    .main-grid[data-panels="5"] {
+        grid-template-areas:
+            "panel1 panel2"
+            "panel3 panel4"
+            "panel5 panel5";
+    }
+
+    /* Support for 6 panels */
+    .main-grid[data-panels="6"] {
+        grid-template-areas:
+            "panel1 panel2"
+            "panel3 panel4"
+            "panel5 panel6";
     }
 
     .header {

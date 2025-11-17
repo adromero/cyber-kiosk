@@ -90,11 +90,11 @@ const AVAILABLE_PANELS = {
         name: 'Music Player',
         icon: '🎵',
         component: 'MusicPanel',
-        minSize: 'medium',
+        minSize: 'small',
         defaultSize: 'medium',
         category: 'media',
         description: 'Spotify music player integration',
-        enabled: false, // To be implemented in Phase 2
+        enabled: true,
         priority: 7
     },
 
