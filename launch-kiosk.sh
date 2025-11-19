@@ -69,5 +69,5 @@ chromium-browser \
     --password-store=basic \
     --check-for-update-interval=31536000 \
     --enable-logging --v=1 \
-    --app="http://localhost:$PORT" \
+    --app="http://127.0.0.1:$PORT" \
     >> "$LOG_FILE" 2>&1

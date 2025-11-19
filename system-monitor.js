@@ -53,9 +53,22 @@ const PIHOLE_PASSWORD = ENV.PIHOLE_PASSWORD || '';
 const SPOTIFY_CLIENT_ID = ENV.SPOTIFY_CLIENT_ID || 'demo'; // Will prompt user to set up their own
 const SPOTIFY_REDIRECT_URI = ENV.SPOTIFY_REDIRECT_URI || `http://localhost:${PORT}/spotify/callback`;
 
-// PKCE state
+// PKCE state (stored per-session)
 let pkceVerifier = null;
 let pkceChallenge = null;
+
+// PKCE helper functions
+const crypto = require('crypto');
+
+function generateCodeVerifier() {
+    return crypto.randomBytes(32).toString('base64url');
+}
+
+function generateCodeChallenge(verifier) {
+    return crypto.createHash('sha256')
+        .update(verifier)
+        .digest('base64url');
+}
 
 // Platform detection
 const IS_RASPBERRY_PI = fs.existsSync('/sys/firmware/devicetree/base/model');
@@ -951,25 +964,24 @@ function saveSpotifyTokens() {
     }
 }
 
-// Refresh Spotify access token
+// Refresh Spotify access token (PKCE flow)
 async function refreshSpotifyToken() {
     if (!spotifyTokens.refresh_token) {
         throw new Error('No refresh token available');
     }
 
     const tokenUrl = 'https://accounts.spotify.com/api/token';
-    const credentials = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
 
     const postData = new URLSearchParams({
         grant_type: 'refresh_token',
-        refresh_token: spotifyTokens.refresh_token
+        refresh_token: spotifyTokens.refresh_token,
+        client_id: SPOTIFY_CLIENT_ID
     }).toString();
 
     return new Promise((resolve, reject) => {
         const options = {
             method: 'POST',
             headers: {
-                'Authorization': `Basic ${credentials}`,
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Content-Length': postData.length
             }
@@ -983,11 +995,16 @@ async function refreshSpotifyToken() {
                     const result = JSON.parse(data);
                     if (result.access_token) {
                         spotifyTokens.access_token = result.access_token;
+                        // Refresh token may also be refreshed
+                        if (result.refresh_token) {
+                            spotifyTokens.refresh_token = result.refresh_token;
+                        }
                         spotifyTokens.expires_at = Date.now() + (result.expires_in * 1000);
                         saveSpotifyTokens();
+                        console.log('> Spotify token refreshed successfully');
                         resolve(spotifyTokens.access_token);
                     } else {
-                        reject(new Error('No access token in response'));
+                        reject(new Error('No access token in refresh response'));
                     }
                 } catch (error) {
                     reject(error);
@@ -1249,7 +1266,7 @@ const server = http.createServer(async (req, res) => {
             }
         });
     } else if (pathname === '/spotify/login' && req.method === 'GET') {
-        // Spotify OAuth login - redirect to Spotify authorization
+        // Spotify OAuth login with PKCE - redirect to Spotify authorization
         res.setHeader('Content-Type', 'application/json');
 
         if (!SPOTIFY_CLIENT_ID || SPOTIFY_CLIENT_ID === 'demo') {
@@ -1257,6 +1274,12 @@ const server = http.createServer(async (req, res) => {
             res.end(JSON.stringify({ error: 'Spotify Client ID not configured. Add SPOTIFY_CLIENT_ID to .env file.' }));
             return;
         }
+
+        // Generate PKCE code verifier and challenge
+        pkceVerifier = generateCodeVerifier();
+        pkceChallenge = generateCodeChallenge(pkceVerifier);
+
+        console.log('> Generated PKCE challenge for Spotify OAuth');
 
         const scopes = [
             'user-read-playback-state',
@@ -1274,13 +1297,15 @@ const server = http.createServer(async (req, res) => {
             client_id: SPOTIFY_CLIENT_ID,
             scope: scopes.join(' '),
             redirect_uri: SPOTIFY_REDIRECT_URI,
+            code_challenge_method: 'S256',
+            code_challenge: pkceChallenge,
             show_dialog: 'true'
         });
 
         res.writeHead(200);
         res.end(JSON.stringify({ auth_url: authUrl }));
     } else if (pathname === '/spotify/callback' && req.method === 'GET') {
-        // Spotify OAuth callback - exchange code for tokens
+        // Spotify OAuth callback with PKCE - exchange code for tokens
         const code = parsedUrl.searchParams.get('code');
         const error = parsedUrl.searchParams.get('error');
 
@@ -1297,20 +1322,27 @@ const server = http.createServer(async (req, res) => {
             return;
         }
 
-        // Exchange code for tokens
+        if (!pkceVerifier) {
+            console.error('> No PKCE verifier found - session may have expired or server restarted');
+            res.writeHead(400, { 'Content-Type': 'text/html' });
+            res.end('<html><body style="font-family: monospace; padding: 20px;"><h1>Error: Session expired</h1><p>The OAuth session expired or the server was restarted during authentication.</p><p>This is normal if you waited too long or if the server restarted.</p><br><a href="/" style="background: #1DB954; color: white; padding: 10px 20px; text-decoration: none; border-radius: 20px;">Return to Kiosk and Try Again</a></body></html>');
+            return;
+        }
+
+        // Exchange code for tokens using PKCE
         const tokenUrl = 'https://accounts.spotify.com/api/token';
-        const credentials = Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64');
 
         const postData = new URLSearchParams({
             grant_type: 'authorization_code',
             code: code,
-            redirect_uri: SPOTIFY_REDIRECT_URI
+            redirect_uri: SPOTIFY_REDIRECT_URI,
+            client_id: SPOTIFY_CLIENT_ID,
+            code_verifier: pkceVerifier
         }).toString();
 
         const options = {
             method: 'POST',
             headers: {
-                'Authorization': `Basic ${credentials}`,
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Content-Length': postData.length
             }
@@ -1328,13 +1360,17 @@ const server = http.createServer(async (req, res) => {
                         spotifyTokens.expires_at = Date.now() + (result.expires_in * 1000);
                         saveSpotifyTokens();
 
-                        console.log('> Spotify authentication successful');
+                        // Clear PKCE state after successful authentication
+                        pkceVerifier = null;
+                        pkceChallenge = null;
+
+                        console.log('> Spotify PKCE authentication successful');
                         res.writeHead(302, { 'Location': '/' });
                         res.end();
                     } else {
                         console.error('> Spotify token exchange failed:', data);
                         res.writeHead(500, { 'Content-Type': 'text/html' });
-                        res.end('<html><body><h1>Error: Could not get access token</h1></body></html>');
+                        res.end('<html><body style="font-family: monospace; padding: 20px;"><h1>Error: Could not get access token</h1><pre>' + JSON.stringify(result, null, 2) + '</pre><br><a href="/">Return to Kiosk</a></body></html>');
                     }
                 } catch (error) {
                     console.error('> Error parsing Spotify token response:', error);
