@@ -59,6 +59,14 @@ class TimerPanel extends BasePanel {
      * Set up event delegation for all interactive elements
      */
     setupEventDelegation() {
+        // Handle header click to open modal (set up regardless of content)
+        if (this.elements.header) {
+            this.elements.header.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.showModal();
+            });
+        }
+
         if (!this.elements.content) {
             console.error('> TIMER: No content element for event delegation!');
             return;

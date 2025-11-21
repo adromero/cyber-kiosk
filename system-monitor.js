@@ -1282,6 +1282,7 @@ const server = http.createServer(async (req, res) => {
         console.log('> Generated PKCE challenge for Spotify OAuth');
 
         const scopes = [
+            'streaming',  // Web Playback SDK - enables browser-based playback
             'user-read-playback-state',
             'user-modify-playback-state',
             'user-read-currently-playing',
@@ -1428,11 +1429,38 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200);
         res.end(JSON.stringify(data));
     } else if (pathname === '/spotify/play' && req.method === 'POST') {
-        // Play/Resume playback
-        res.setHeader('Content-Type', 'application/json');
-        const data = await spotifyApiRequest('/me/player/play', 'PUT');
-        res.writeHead(200);
-        res.end(JSON.stringify(data));
+        // Play/Resume playback (optionally with context_uri and device_id)
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', async () => {
+            try {
+                res.setHeader('Content-Type', 'application/json');
+
+                let playbackOptions = {};
+                if (body) {
+                    try {
+                        playbackOptions = JSON.parse(body);
+                    } catch (e) {
+                        // If no JSON body, just resume playback
+                    }
+                }
+
+                // Build URL with device_id if provided
+                let url = '/me/player/play';
+                if (playbackOptions.device_id) {
+                    url += `?device_id=${playbackOptions.device_id}`;
+                    delete playbackOptions.device_id; // Remove from body
+                }
+
+                // Make API request
+                const data = await spotifyApiRequest(url, 'PUT', Object.keys(playbackOptions).length > 0 ? playbackOptions : null);
+                res.writeHead(200);
+                res.end(JSON.stringify(data));
+            } catch (error) {
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: error.message }));
+            }
+        });
     } else if (pathname === '/spotify/pause' && req.method === 'POST') {
         // Pause playback
         res.setHeader('Content-Type', 'application/json');
@@ -1467,6 +1495,55 @@ const server = http.createServer(async (req, res) => {
         // Get available devices
         res.setHeader('Content-Type', 'application/json');
         const data = await spotifyApiRequest('/me/player/devices');
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
+    } else if (pathname === '/spotify/token' && req.method === 'GET') {
+        // Get current access token (for Web Playback SDK)
+        res.setHeader('Content-Type', 'application/json');
+        const accessToken = await getSpotifyAccessToken();
+        if (!accessToken) {
+            res.writeHead(401);
+            res.end(JSON.stringify({ error: 'Not authenticated' }));
+        } else {
+            res.writeHead(200);
+            res.end(JSON.stringify({ access_token: accessToken }));
+        }
+    } else if (pathname === '/spotify/transfer-playback' && req.method === 'PUT') {
+        // Transfer playback to a device
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', async () => {
+            try {
+                const data = JSON.parse(body);
+                res.setHeader('Content-Type', 'application/json');
+                const result = await spotifyApiRequest('/me/player', 'PUT', data);
+                res.writeHead(200);
+                res.end(JSON.stringify(result));
+            } catch (error) {
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: error.message }));
+            }
+        });
+    } else if (pathname === '/spotify/search' && req.method === 'GET') {
+        // Search Spotify (tracks, artists, albums)
+        res.setHeader('Content-Type', 'application/json');
+        const query = parsedUrl.searchParams.get('q');
+        const type = parsedUrl.searchParams.get('type') || 'track';
+        const limit = parsedUrl.searchParams.get('limit') || '20';
+
+        if (!query) {
+            res.writeHead(400);
+            res.end(JSON.stringify({ error: 'Missing query parameter' }));
+            return;
+        }
+
+        const searchParams = new URLSearchParams({
+            q: query,
+            type: type,
+            limit: limit
+        });
+
+        const data = await spotifyApiRequest(`/search?${searchParams}`);
         res.writeHead(200);
         res.end(JSON.stringify(data));
     } else {

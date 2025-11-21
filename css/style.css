@@ -2447,3 +2447,347 @@ body {
     box-shadow: 0 0 8px var(--neon-green);
 }
 }
+
+/* ===========================
+   Spotify Device Switcher
+   =========================== */
+
+/* Devices Manager */
+.music-devices-manager {
+    padding: 1rem;
+}
+
+.music-devices-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--neon-cyan);
+}
+
+.devices-title {
+    font-size: 1.5rem;
+    color: var(--neon-cyan);
+}
+
+.devices-refresh-btn {
+    background: transparent;
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+    padding: 0.5rem 1rem;
+    font-family: 'VT323', monospace;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.devices-refresh-btn:hover {
+    background: var(--neon-cyan);
+    color: var(--dark-bg);
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* Device List */
+.music-devices-list {
+    margin-bottom: 1.5rem;
+}
+
+.music-device-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.music-device-item:hover {
+    background: rgba(0, 255, 255, 0.15);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    transform: translateX(3px);
+}
+
+.music-device-item.active {
+    border-color: var(--neon-green);
+    background: rgba(0, 255, 0, 0.1);
+}
+
+.music-device-item.active:hover {
+    background: rgba(0, 255, 0, 0.15);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+.music-device-item.sdk-device {
+    border-color: var(--neon-purple);
+    background: rgba(138, 43, 226, 0.05);
+}
+
+.music-device-item.sdk-device:hover {
+    background: rgba(138, 43, 226, 0.15);
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+}
+
+.music-device-item.sdk-device.active {
+    border-color: var(--neon-green);
+    background: linear-gradient(90deg, rgba(138, 43, 226, 0.1), rgba(0, 255, 0, 0.1));
+}
+
+.device-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.device-icon {
+    font-size: 2rem;
+}
+
+.device-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.device-name {
+    font-size: 1.3rem;
+    color: var(--neon-cyan);
+}
+
+.device-type {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    opacity: 0.7;
+}
+
+.device-status {
+    font-size: 1.1rem;
+}
+
+.status-badge {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.1);
+    font-size: 1rem;
+}
+
+.status-badge.active {
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+    background: rgba(0, 255, 0, 0.2);
+    animation: pulse 2s infinite;
+}
+
+/* Mode Info */
+.music-mode-info {
+    padding: 1rem;
+    border: 1px solid var(--neon-purple);
+    background: rgba(138, 43, 226, 0.05);
+    text-align: center;
+}
+
+.mode-info-label {
+    font-size: 1rem;
+    color: var(--neon-purple);
+    margin-bottom: 0.5rem;
+}
+
+.mode-info-value {
+    font-size: 1.4rem;
+    color: var(--text-primary);
+    font-weight: bold;
+}
+
+/* Pulse animation for active status */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Mode indicator (panel view) */
+.mode-indicator {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: bold;
+}
+
+.mode-indicator.sdk {
+    background: rgba(0, 255, 0, 0.2);
+    color: var(--neon-green);
+    border: 1px solid var(--neon-green);
+}
+
+.mode-indicator.api {
+    background: rgba(0, 255, 255, 0.2);
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+}
+
+.music-player-display {
+    position: relative;
+}
+
+
+/* ===========================
+   Spotify Search Tab
+   =========================== */
+
+.music-search {
+    padding: 1rem;
+}
+
+.music-search-input-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.music-search-input {
+    flex: 1;
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid var(--neon-cyan);
+    color: var(--text-primary);
+    padding: 0.8rem;
+    font-family: 'VT323', monospace;
+    font-size: 1.3rem;
+}
+
+.music-search-input:focus {
+    outline: none;
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.music-search-input::placeholder {
+    color: var(--text-primary);
+    opacity: 0.5;
+}
+
+.music-search-btn {
+    background: transparent;
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+    padding: 0.8rem 1.5rem;
+    font-family: 'VT323', monospace;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.music-search-btn:hover {
+    background: var(--neon-cyan);
+    color: var(--dark-bg);
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.music-search-empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    color: var(--text-primary);
+    opacity: 0.5;
+    font-size: 1.2rem;
+}
+
+.music-search-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.music-search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    border: 1px solid var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.music-search-result-item:hover {
+    background: rgba(0, 255, 255, 0.15);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    transform: translateX(3px);
+}
+
+.search-result-art {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+}
+
+.search-result-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.search-result-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.search-result-name {
+    font-size: 1.3rem;
+    color: var(--neon-cyan);
+}
+
+.search-result-artist {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.search-result-album {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    opacity: 0.7;
+}
+
+.search-result-play {
+    font-size: 2rem;
+    color: var(--neon-green);
+}
+
+
+/* ===========================
+   Panel Header Click/Hover
+   =========================== */
+
+/* Music and Timer panels should zoom on hover like other panels */
+.music-widget:hover,
+.timer-widget:hover {
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.5),
+                inset 0 0 25px rgba(0, 255, 255, 0.15);
+    transform: scale(1.02);
+}
+
+/* Make panel headers clickable with cursor pointer */
+.music-widget .widget-header,
+.timer-widget .widget-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Header hover effect */
+.music-widget .widget-header:hover,
+.timer-widget .widget-header:hover {
+    color: var(--neon-green);
+    text-shadow: 0 0 10px var(--neon-green);
+}
+

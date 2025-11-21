@@ -7,6 +7,11 @@ class MusicPanel extends BasePanel {
     constructor(config) {
         super(config);
 
+        // Player mode: 'sdk' (local playback) or 'api' (remote control)
+        this.playerMode = 'api';
+        this.sdkPlayer = null;
+        this.sdkDeviceId = null;
+
         // Music state
         this.currentTrack = null;
         this.isPlaying = false;
@@ -14,6 +19,8 @@ class MusicPanel extends BasePanel {
         this.playlists = [];
         this.recentTracks = [];
         this.devices = [];
+        this.searchResults = [];
+        this.searchQuery = '';
 
         // Update intervals
         this.updateInterval = 5000; // 5 seconds
@@ -21,7 +28,7 @@ class MusicPanel extends BasePanel {
 
         // Modal state
         this.isModalOpen = false;
-        this.currentModalTab = 'player'; // player, playlists, recent
+        this.currentModalTab = 'player'; // player, playlists, recent, devices, search
     }
 
     /**
@@ -39,6 +46,13 @@ class MusicPanel extends BasePanel {
             this.log('Spotify authorization was denied', 'warn');
             // Clear the URL parameter
             window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        // Initialize SDK player if authenticated
+        if (this.isAuthenticated) {
+            await this.initializeSDKPlayer();
+            await this.loadDevices();
+            this.chooseInitialMode();
         }
 
         // Render initial UI
@@ -80,9 +94,137 @@ class MusicPanel extends BasePanel {
     }
 
     /**
+     * Initialize Spotify Web Playback SDK
+     */
+    async initializeSDKPlayer() {
+        try {
+            this.log('Initializing Spotify SDK player...');
+
+            // Get access token
+            const response = await fetch('/spotify/token');
+            const data = await response.json();
+
+            if (!data.access_token) {
+                this.log('No access token available', 'warn');
+                return;
+            }
+
+            // Create SDK player instance
+            this.sdkPlayer = new SpotifyPlayerSDK();
+
+            // Listen to SDK events
+            this.sdkPlayer.addEventListener('ready', (e) => {
+                this.sdkDeviceId = e.detail.device_id;
+                this.log(`SDK player ready: ${this.sdkDeviceId}`);
+                this.setStatus('SDK_READY');
+            });
+
+            this.sdkPlayer.addEventListener('player_state_changed', (e) => {
+                if (this.playerMode === 'sdk') {
+                    this.handleSDKStateChange(e.detail);
+                }
+            });
+
+            this.sdkPlayer.addEventListener('authentication_error', async () => {
+                this.log('SDK auth error - refreshing token', 'warn');
+                await this.refreshSDKToken();
+            });
+
+            this.sdkPlayer.addEventListener('initialization_error', (e) => {
+                this.log(`SDK init error: ${e.detail.message}`, 'error');
+            });
+
+            // Initialize and connect
+            await this.sdkPlayer.init(data.access_token, 'Cyber Kiosk');
+            await this.sdkPlayer.connect();
+
+            this.log('SDK player connected');
+        } catch (error) {
+            this.log(`Failed to initialize SDK: ${error.message}`, 'error');
+            // Fallback to API mode
+            this.playerMode = 'api';
+        }
+    }
+
+    /**
+     * Handle SDK player state changes
+     */
+    handleSDKStateChange(state) {
+        if (!state) {
+            this.currentTrack = null;
+            this.isPlaying = false;
+            this.render();
+            return;
+        }
+
+        // Update track info from SDK state
+        this.currentTrack = state.track_window.current_track;
+        this.isPlaying = !state.paused;
+        this.currentTrack.progress_ms = state.position;
+        this.currentTrack.duration_ms = state.duration;
+
+        // Update UI
+        if (!this.isModalOpen) {
+            this.render();
+        }
+
+        this.setStatus(this.isPlaying ? 'PLAYING' : 'PAUSED');
+    }
+
+    /**
+     * Refresh SDK token
+     */
+    async refreshSDKToken() {
+        try {
+            const response = await fetch('/spotify/token');
+            const data = await response.json();
+
+            if (data.access_token && this.sdkPlayer) {
+                this.sdkPlayer.updateToken(data.access_token);
+                this.log('SDK token refreshed');
+            }
+        } catch (error) {
+            this.log(`Failed to refresh SDK token: ${error.message}`, 'error');
+        }
+    }
+
+    /**
+     * Choose initial player mode
+     */
+    chooseInitialMode() {
+        // If SDK is ready and no other devices are active, use SDK
+        if (this.sdkPlayer && this.sdkPlayer.isPlayerReady()) {
+            const hasActiveDevice = this.devices.some(d =>
+                d.is_active && d.id !== this.sdkDeviceId
+            );
+
+            if (!hasActiveDevice) {
+                this.playerMode = 'sdk';
+                this.log('Using SDK mode (local playback)');
+            } else {
+                this.playerMode = 'api';
+                this.log('Using API mode (remote control)');
+            }
+        } else {
+            this.playerMode = 'api';
+        }
+    }
+
+    /**
      * Set up event handlers
      */
     setupEventHandlers() {
+        // Handle header click to open modal (set up regardless of content)
+        if (this.elements.header) {
+            this.elements.header.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.log('Header clicked, authenticated: ' + this.isAuthenticated);
+                if (this.isAuthenticated) {
+                    this.showModal();
+                }
+            });
+        }
+
         if (!this.elements.content) return;
 
         // Handle all button clicks via delegation
@@ -188,13 +330,13 @@ class MusicPanel extends BasePanel {
                 </div>
                 <div class="music-controls">
                     <button class="music-control-btn" data-action="previous" title="Previous">
-                        <span class="control-icon">⏮</span>
+                        <span class="control-icon">◄◄</span>
                     </button>
                     <button class="music-control-btn music-control-play-pause" data-action="${this.isPlaying ? 'pause' : 'play'}" title="${this.isPlaying ? 'Pause' : 'Play'}">
-                        <span class="control-icon">${this.isPlaying ? '⏸' : '▶'}</span>
+                        <span class="control-icon">${this.isPlaying ? '❚❚' : '▶'}</span>
                     </button>
                     <button class="music-control-btn" data-action="next" title="Next">
-                        <span class="control-icon">⏭</span>
+                        <span class="control-icon">►►</span>
                     </button>
                 </div>
                 <div class="music-track-info">
@@ -285,6 +427,12 @@ class MusicPanel extends BasePanel {
                     <button class="music-tab-btn ${this.currentModalTab === 'player' ? 'active' : ''}" data-tab="player">
                         PLAYER
                     </button>
+                    <button class="music-tab-btn ${this.currentModalTab === 'search' ? 'active' : ''}" data-tab="search">
+                        SEARCH
+                    </button>
+                    <button class="music-tab-btn ${this.currentModalTab === 'devices' ? 'active' : ''}" data-tab="devices">
+                        DEVICES
+                    </button>
                     <button class="music-tab-btn ${this.currentModalTab === 'playlists' ? 'active' : ''}" data-tab="playlists">
                         PLAYLISTS
                     </button>
@@ -311,6 +459,10 @@ class MusicPanel extends BasePanel {
         switch (this.currentModalTab) {
             case 'player':
                 return this.renderPlayerTab();
+            case 'search':
+                return this.renderSearchTab();
+            case 'devices':
+                return this.renderDevicesTab();
             case 'playlists':
                 return this.renderPlaylistsTab();
             case 'recent':
@@ -364,13 +516,13 @@ class MusicPanel extends BasePanel {
 
                 <div class="music-player-controls-large">
                     <button class="music-control-btn-large" data-action="previous">
-                        <span class="control-icon">⏮</span>
+                        <span class="control-icon">◄◄</span>
                     </button>
                     <button class="music-control-btn-large music-control-play-pause-large" data-action="${this.isPlaying ? 'pause' : 'play'}">
-                        <span class="control-icon">${this.isPlaying ? '⏸' : '▶'}</span>
+                        <span class="control-icon">${this.isPlaying ? '❚❚' : '▶'}</span>
                     </button>
                     <button class="music-control-btn-large" data-action="next">
-                        <span class="control-icon">⏭</span>
+                        <span class="control-icon">►►</span>
                     </button>
                 </div>
 
@@ -415,7 +567,7 @@ class MusicPanel extends BasePanel {
             <div class="music-playlists">
                 <div class="music-playlists-grid">
                     ${this.playlists.map(playlist => `
-                        <div class="music-playlist-item" data-playlist-id="${playlist.id}">
+                        <div class="music-playlist-item" data-playlist-uri="${playlist.uri}" data-action="play-playlist">
                             <div class="music-playlist-art">
                                 ${playlist.images?.[0]?.url ?
                                     `<img src="${playlist.images[0].url}" alt="${playlist.name}">` :
@@ -467,6 +619,189 @@ class MusicPanel extends BasePanel {
     }
 
     /**
+     * Render search tab
+     */
+    renderSearchTab() {
+        return `
+            <div class="music-search">
+                <div class="music-search-input-container">
+                    <input
+                        type="text"
+                        class="music-search-input"
+                        placeholder="Search for tracks, artists, albums..."
+                        value="${this.searchQuery}"
+                        id="music-search-field"
+                    />
+                    <button class="music-search-btn" data-action="search">
+                        SEARCH
+                    </button>
+                </div>
+
+                <div class="music-search-results" id="music-search-results">
+                    ${this.renderSearchResults()}
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Render search results
+     */
+    renderSearchResults() {
+        if (this.searchResults.length === 0) {
+            return `
+                <div class="music-search-empty">
+                    ${this.searchQuery ?
+                        '<div class="search-empty-text">NO_RESULTS_FOUND</div>' :
+                        '<div class="search-empty-text">Enter a search query above</div>'
+                    }
+                </div>
+            `;
+        }
+
+        return `
+            <div class="music-search-results-list">
+                ${this.searchResults.map(track => `
+                    <div class="music-search-result-item" data-track-uri="${track.uri}" data-action="play-track">
+                        <div class="search-result-art">
+                            ${track.album?.images?.[0]?.url ?
+                                `<img src="${track.album.images[0].url}" alt="${track.name}">` :
+                                '<div class="music-no-art-small">♫</div>'}
+                        </div>
+                        <div class="search-result-info">
+                            <div class="search-result-name">${track.name}</div>
+                            <div class="search-result-artist">${track.artists?.map(a => a.name).join(', ')}</div>
+                            <div class="search-result-album">${track.album?.name || ''}</div>
+                        </div>
+                        <div class="search-result-play">
+                            <span class="control-icon">▶</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    /**
+     * Render devices tab
+     */
+    renderDevicesTab() {
+        const allDevices = [...this.devices];
+
+        // Add SDK device if initialized
+        if (this.sdkPlayer && this.sdkPlayer.isPlayerReady()) {
+            const sdkDevice = {
+                id: this.sdkDeviceId,
+                name: 'Cyber Kiosk (This Device)',
+                type: 'Computer',
+                is_active: this.playerMode === 'sdk' && this.isPlaying,
+                is_sdk: true
+            };
+            allDevices.unshift(sdkDevice);
+        }
+
+        return `
+            <div class="music-devices-manager">
+                <div class="music-devices-header">
+                    <div class="devices-title">&gt; PLAYBACK_DEVICES</div>
+                    <button class="devices-refresh-btn" data-action="refresh-devices">
+                        REFRESH
+                    </button>
+                </div>
+
+                <div class="music-devices-list">
+                    ${allDevices.map(device => this.renderDeviceItem(device)).join('')}
+                </div>
+
+                <div class="music-mode-info">
+                    <div class="mode-info-label">CURRENT MODE:</div>
+                    <div class="mode-info-value">
+                        ${this.playerMode === 'sdk' ? 'LOCAL PLAYBACK (SDK)' : 'REMOTE CONTROL (API)'}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Render a single device item
+     */
+    renderDeviceItem(device) {
+        const icon = this.getDeviceIcon(device.type);
+        const isActive = device.is_active || (device.id === this.sdkDeviceId && this.playerMode === 'sdk');
+
+        return `
+            <div class="music-device-item ${isActive ? 'active' : ''} ${device.is_sdk ? 'sdk-device' : ''}"
+                 data-device-id="${device.id}"
+                 data-action="switch-device">
+                <div class="device-info">
+                    <span class="device-icon">${icon}</span>
+                    <div class="device-details">
+                        <div class="device-name">${device.name}</div>
+                        <div class="device-type">${device.type.toUpperCase()}${device.is_sdk ? ' • SDK' : ''}</div>
+                    </div>
+                </div>
+                <div class="device-status">
+                    ${isActive ?
+                        '<span class="status-badge active">ACTIVE</span>' :
+                        '<span class="status-badge">AVAILABLE</span>'}
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Get device icon emoji
+     */
+    getDeviceIcon(type) {
+        const icons = {
+            'Computer': '💻',
+            'Smartphone': '📱',
+            'Speaker': '🔊',
+            'TV': '📺',
+            'Unknown': '🎵'
+        };
+        return icons[type] || icons['Unknown'];
+    }
+
+    /**
+     * Update modal devices tab (after device switch)
+     */
+    updateModalDevicesTab() {
+        const container = document.getElementById('music-modal-tab-content');
+        if (container) {
+            container.innerHTML = this.renderDevicesTab();
+            this.setupDevicesTabHandlers();
+        }
+    }
+
+    /**
+     * Setup event handlers for devices tab
+     */
+    setupDevicesTabHandlers() {
+        const modalContent = document.getElementById('music-modal-tab-content');
+        if (!modalContent) return;
+
+        // Refresh button
+        const refreshBtn = modalContent.querySelector('[data-action="refresh-devices"]');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', async () => {
+                await this.loadDevices();
+                this.updateModalDevicesTab();
+            });
+        }
+
+        // Device items
+        const deviceItems = modalContent.querySelectorAll('[data-action="switch-device"]');
+        deviceItems.forEach(item => {
+            item.addEventListener('click', async () => {
+                const deviceId = item.dataset.deviceId;
+                await this.switchToDevice(deviceId);
+            });
+        });
+    }
+
+    /**
      * Set up modal event handlers
      */
     setupModalEventHandlers() {
@@ -488,7 +823,9 @@ class MusicPanel extends BasePanel {
                 this.currentModalTab = tab;
 
                 // Load data for tab
-                if (tab === 'playlists' && this.playlists.length === 0) {
+                if (tab === 'devices') {
+                    await this.loadDevices();
+                } else if (tab === 'playlists' && this.playlists.length === 0) {
                     await this.loadPlaylists();
                 } else if (tab === 'recent' && this.recentTracks.length === 0) {
                     await this.loadRecentTracks();
@@ -498,6 +835,11 @@ class MusicPanel extends BasePanel {
                 const container = document.getElementById('music-modal-tab-content');
                 if (container) {
                     container.innerHTML = this.renderModalTab();
+                }
+
+                // Set up device tab handlers if needed
+                if (tab === 'devices') {
+                    this.setupDevicesTabHandlers();
                 }
 
                 // Update active tab button
@@ -526,8 +868,33 @@ class MusicPanel extends BasePanel {
                 case 'previous':
                     await this.previous();
                     break;
+                case 'play-playlist':
+                    const playlistUri = button.dataset.playlistUri;
+                    if (playlistUri) {
+                        await this.playPlaylist(playlistUri);
+                    }
+                    break;
+                case 'play-track':
+                    const trackUri = button.dataset.trackUri;
+                    if (trackUri) {
+                        await this.playTrack(trackUri);
+                    }
+                    break;
+                case 'search':
+                    await this.performSearch();
+                    break;
             }
         });
+
+        // Handle Enter key in search input
+        const searchInput = document.getElementById('music-search-field');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', async (e) => {
+                if (e.key === 'Enter') {
+                    await this.performSearch();
+                }
+            });
+        }
     }
 
     /**
@@ -675,52 +1042,255 @@ class MusicPanel extends BasePanel {
     }
 
     /**
-     * Play current track
+     * Play current track (hybrid mode)
      */
     async play() {
         try {
-            await fetch('/spotify/play', { method: 'POST' });
-            await this.updateCurrentTrack();
+            if (this.playerMode === 'sdk' && this.sdkPlayer) {
+                // SDK mode: Resume playback on local device
+                await this.sdkPlayer.resume();
+            } else {
+                // API mode: Control remote device
+                await fetch('/spotify/play', { method: 'POST' });
+                await this.updateCurrentTrack();
+            }
         } catch (error) {
             this.log('Error playing: ' + error.message, 'error');
         }
     }
 
     /**
-     * Pause current track
+     * Pause current track (hybrid mode)
      */
     async pause() {
         try {
-            await fetch('/spotify/pause', { method: 'POST' });
-            await this.updateCurrentTrack();
+            if (this.playerMode === 'sdk' && this.sdkPlayer) {
+                // SDK mode: Pause local playback
+                await this.sdkPlayer.pause();
+            } else {
+                // API mode: Control remote device
+                await fetch('/spotify/pause', { method: 'POST' });
+                await this.updateCurrentTrack();
+            }
         } catch (error) {
             this.log('Error pausing: ' + error.message, 'error');
         }
     }
 
     /**
-     * Skip to next track
+     * Skip to next track (hybrid mode)
      */
     async next() {
         try {
-            await fetch('/spotify/next', { method: 'POST' });
-            // Wait a bit for Spotify to update
-            setTimeout(() => this.updateCurrentTrack(), 500);
+            if (this.playerMode === 'sdk' && this.sdkPlayer) {
+                // SDK mode: Next track locally
+                await this.sdkPlayer.nextTrack();
+            } else {
+                // API mode: Control remote device
+                await fetch('/spotify/next', { method: 'POST' });
+                // Wait a bit for Spotify to update
+                setTimeout(() => this.updateCurrentTrack(), 500);
+            }
         } catch (error) {
             this.log('Error skipping to next: ' + error.message, 'error');
         }
     }
 
     /**
-     * Go to previous track
+     * Go to previous track (hybrid mode)
      */
     async previous() {
         try {
-            await fetch('/spotify/previous', { method: 'POST' });
-            // Wait a bit for Spotify to update
-            setTimeout(() => this.updateCurrentTrack(), 500);
+            if (this.playerMode === 'sdk' && this.sdkPlayer) {
+                // SDK mode: Previous track locally
+                await this.sdkPlayer.previousTrack();
+            } else {
+                // API mode: Control remote device
+                await fetch('/spotify/previous', { method: 'POST' });
+                // Wait a bit for Spotify to update
+                setTimeout(() => this.updateCurrentTrack(), 500);
+            }
         } catch (error) {
             this.log('Error going to previous: ' + error.message, 'error');
+        }
+    }
+
+    /**
+     * Play a specific playlist (hybrid mode)
+     */
+    async playPlaylist(playlistUri) {
+        try {
+            this.log(`Playing playlist: ${playlistUri}`);
+
+            if (this.playerMode === 'sdk' && this.sdkPlayer && this.sdkPlayer.isPlayerReady()) {
+                // SDK mode: Start playback on SDK device
+                const response = await fetch('/spotify/play', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        context_uri: playlistUri,
+                        device_id: this.sdkDeviceId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to start playlist playback');
+                }
+
+                this.log('Playlist started on SDK device');
+            } else {
+                // API mode: Play on current/any device
+                const response = await fetch('/spotify/play', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        context_uri: playlistUri
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to start playlist playback');
+                }
+
+                this.log('Playlist started via API');
+            }
+
+            // Update UI after playback starts
+            setTimeout(() => this.updateCurrentTrack(), 1000);
+
+        } catch (error) {
+            this.log(`Error playing playlist: ${error.message}`, 'error');
+        }
+    }
+
+    /**
+     * Play a specific track (hybrid mode)
+     */
+    async playTrack(trackUri) {
+        try {
+            this.log(`Playing track: ${trackUri}`);
+
+            if (this.playerMode === 'sdk' && this.sdkPlayer && this.sdkPlayer.isPlayerReady()) {
+                // SDK mode: Start playback on SDK device
+                const response = await fetch('/spotify/play', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        uris: [trackUri],
+                        device_id: this.sdkDeviceId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to start track playback');
+                }
+
+                this.log('Track started on SDK device');
+            } else {
+                // API mode: Play on current/any device
+                const response = await fetch('/spotify/play', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        uris: [trackUri]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to start track playback');
+                }
+
+                this.log('Track started via API');
+            }
+
+            // Update UI after playback starts
+            setTimeout(() => this.updateCurrentTrack(), 1000);
+
+        } catch (error) {
+            this.log(`Error playing track: ${error.message}`, 'error');
+        }
+    }
+
+    /**
+     * Perform Spotify search
+     */
+    async performSearch() {
+        const searchInput = document.getElementById('music-search-field');
+        if (!searchInput) return;
+
+        const query = searchInput.value.trim();
+        if (!query) return;
+
+        this.searchQuery = query;
+        this.log(`Searching for: ${query}`);
+
+        try {
+            const response = await fetch(`/spotify/search?q=${encodeURIComponent(query)}&type=track&limit=20`);
+            const data = await response.json();
+
+            if (data.tracks && data.tracks.items) {
+                this.searchResults = data.tracks.items;
+                this.log(`Found ${this.searchResults.length} results`);
+            } else {
+                this.searchResults = [];
+            }
+
+            // Update search results display
+            const resultsContainer = document.getElementById('music-search-results');
+            if (resultsContainer) {
+                resultsContainer.innerHTML = this.renderSearchResults();
+            }
+
+        } catch (error) {
+            this.log(`Error searching: ${error.message}`, 'error');
+            this.searchResults = [];
+        }
+    }
+
+    /**
+     * Switch to a specific device (hybrid mode)
+     */
+    async switchToDevice(deviceId) {
+        try {
+            const isSDKDevice = deviceId === this.sdkDeviceId;
+
+            if (isSDKDevice) {
+                // Switch to SDK mode (local playback)
+                this.playerMode = 'sdk';
+                this.log('Switched to SDK mode');
+
+                // Transfer playback to SDK device
+                await fetch('/spotify/transfer-playback', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        device_ids: [this.sdkDeviceId],
+                        play: true
+                    })
+                });
+            } else {
+                // Switch to API mode (remote control)
+                this.playerMode = 'api';
+                this.log(`Switched to API mode, device: ${deviceId}`);
+
+                // Transfer playback to target device
+                await fetch('/spotify/transfer-playback', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        device_ids: [deviceId],
+                        play: false
+                    })
+                });
+            }
+
+            // Reload devices and update UI
+            await this.loadDevices();
+            if (this.isModalOpen && this.currentModalTab === 'devices') {
+                this.updateModalDevicesTab();
+            }
+        } catch (error) {
+            this.log(`Error switching device: ${error.message}`, 'error');
         }
     }
 
