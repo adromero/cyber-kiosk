@@ -1,0 +1,1155 @@
+/* ============================================
+   CALIFORNIA THEME - Sunset & Beach Vibes
+   Warm colors, soft gradients, relaxed aesthetic
+   ============================================ */
+
+:root {
+    /* Primary Colors */
+    --sunset-orange: #FF6B35;
+    --pacific-blue: #004E89;
+    --golden-hour: #F7B801;
+    --teal: #00A896;
+    --coral: #FF8C69;
+
+    /* Background Colors - Light theme */
+    --sand: #FFF8F0;
+    --sunlight: #FFEAA7;
+    --dark-bg: #FFF8F0;
+    --darker-bg: #F5E6D3;
+    --bg-primary: #FFF8F0;
+    --bg-secondary: #FFEAA7;
+
+    /* Status Colors */
+    --success-green: #00A896;
+    --error-red: #E63946;
+
+    /* Text */
+    --text-primary: #1A1A1D;
+    --text-secondary: #4A4A4A;
+    --terminal-text: #1A1A1D;
+    --terminal-bg: #FFF8F0;
+
+    /* Theme-specific aliases */
+    --neon-cyan: var(--teal);
+    --neon-magenta: var(--sunset-orange);
+    --neon-amber: var(--golden-hour);
+    --neon-green: var(--success-green);
+    --neon-purple: var(--pacific-blue);
+    --terminal-green: var(--teal);
+}
+
+/* Typography - Clean & Relaxed */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Pacifico&display=swap');
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(180deg, var(--sand) 0%, var(--sunlight) 100%);
+    color: var(--text-primary);
+    background-attachment: fixed;
+}
+
+/* No CRT effects - clean modern look */
+.crt::before,
+.crt::after,
+.scanlines {
+    display: none;
+}
+
+/* Text Effects */
+.neon-glow {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Header - Sunset Gradient */
+.header {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.system-name {
+    color: var(--sunset-orange);
+    font-family: 'Pacifico', cursive;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.system-name:hover {
+    color: var(--teal);
+    transform: scale(1.05);
+}
+
+.temp-display {
+    color: var(--teal);
+}
+
+.temp-display:hover {
+    color: var(--pacific-blue);
+    transform: scale(1.05);
+}
+
+.time-display {
+    color: var(--pacific-blue);
+    font-weight: 600;
+}
+
+.date-display {
+    color: var(--sunset-orange);
+}
+
+/* Separator - Wave Style */
+.separator {
+    background: linear-gradient(90deg,
+        transparent,
+        var(--pacific-blue) 20%,
+        var(--teal) 50%,
+        var(--pacific-blue) 80%,
+        transparent
+    );
+    height: 3px;
+    border-radius: 2px;
+}
+
+/* Widgets - Soft Cards */
+.widget {
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+}
+
+.widget-header {
+    background: linear-gradient(135deg, var(--sunset-orange) 0%, var(--coral) 100%);
+    border-bottom: none;
+    border-radius: 16px 16px 0 0;
+}
+
+.widget-title {
+    color: white;
+    font-family: 'Pacifico', cursive;
+    font-size: 1.4rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.widget-status {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+
+/* Custom Scrollbar */
+.widget-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--sunset-orange), var(--coral));
+    border-radius: 4px;
+}
+
+/* Weather Widget */
+.weather-temp {
+    color: var(--sunset-orange);
+    font-weight: 700;
+    font-size: 3.5rem;
+}
+
+.weather-condition {
+    color: var(--pacific-blue);
+    font-weight: 600;
+}
+
+.label {
+    color: var(--sunset-orange);
+    font-weight: 600;
+}
+
+.forecast-item {
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 140, 105, 0.1) 100%);
+    border: none;
+    border-radius: 12px;
+}
+
+.forecast-day {
+    color: var(--sunset-orange);
+    font-weight: 600;
+}
+
+.forecast-temp {
+    color: var(--pacific-blue);
+    font-weight: 700;
+}
+
+.forecast-desc {
+    color: var(--text-secondary);
+}
+
+/* Video Widget */
+#video-thumbnail {
+    filter: saturate(1.1) brightness(1.05);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* News Widget */
+.news-item {
+    background: rgba(255, 255, 255, 0.7);
+    border-left: 4px solid var(--sunset-orange);
+    border-radius: 0 12px 12px 0;
+}
+
+.news-item:hover {
+    background: rgba(255, 107, 53, 0.1);
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+    transform: translateX(8px);
+}
+
+.news-rank {
+    color: var(--sunset-orange);
+    font-weight: 700;
+}
+
+.news-title {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.news-meta {
+    color: var(--teal);
+}
+
+.news-points {
+    color: var(--golden-hour);
+    font-weight: 600;
+}
+
+.news-abstract {
+    color: var(--text-secondary);
+}
+
+/* Footer */
+.footer {
+    color: var(--pacific-blue);
+    font-family: 'Pacifico', cursive;
+}
+
+/* Loading Animation - Smooth Wave */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.loading {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* No aggressive animations */
+.container {
+    animation: none;
+}
+
+.widget {
+    animation: none;
+}
+
+/* Financial Grid */
+.financial-grid {
+    animation: none;
+}
+
+.financial-item {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.financial-label {
+    color: var(--sunset-orange);
+    font-weight: 600;
+}
+
+.financial-value {
+    color: var(--pacific-blue);
+    font-weight: 700;
+}
+
+.financial-value.positive .financial-change,
+.financial-change.positive {
+    color: var(--teal);
+}
+
+.financial-value.negative .financial-change,
+.financial-change.negative {
+    color: var(--error-red);
+}
+
+.financial-time {
+    color: var(--golden-hour);
+}
+
+/* Error Message */
+.error-message {
+    color: var(--error-red);
+    font-weight: 600;
+}
+
+/* Widget Source Label */
+.widget-source {
+    color: var(--sunset-orange);
+}
+
+/* Modal Styles */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-overlay {
+    animation: fadeIn 0.3s ease-out;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-container {
+    background: var(--sand);
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    border-radius: 24px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--sunset-orange) 0%, var(--coral) 100%);
+    border-bottom: none;
+    border-radius: 24px 24px 0 0;
+}
+
+.modal-title {
+    color: white;
+    font-family: 'Pacifico', cursive;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close {
+    border: none;
+    color: white;
+    background: rgba(0, 0, 0, 0.2);
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 50%;
+}
+
+.modal-close:hover {
+    background: var(--error-red);
+    transform: scale(1.1);
+}
+
+.modal-reload {
+    border: none;
+    color: white;
+    background: rgba(0, 0, 0, 0.2);
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 8px;
+}
+
+.modal-reload:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.modal-content {
+    background: var(--sand);
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--sunset-orange), var(--coral));
+    border-radius: 4px;
+}
+
+/* Widget Hover Effects */
+.weather-widget:hover,
+.cyberspace-widget:hover,
+.video-widget:hover,
+.news-widget:hover,
+.music-widget:hover,
+.timer-widget:hover {
+    box-shadow: 0 8px 30px rgba(255, 107, 53, 0.2);
+    transform: translateY(-4px);
+}
+
+/* Modal Weather */
+.modal-weather-current {
+    border-bottom: 3px solid var(--sunset-orange);
+    border-radius: 0;
+}
+
+.modal-weather-temp {
+    color: var(--sunset-orange);
+    font-weight: 700;
+}
+
+.modal-weather-condition {
+    color: var(--pacific-blue);
+}
+
+.modal-forecast-title {
+    color: var(--sunset-orange);
+    font-family: 'Pacifico', cursive;
+}
+
+.modal-forecast-item {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.modal-forecast-day {
+    color: var(--sunset-orange);
+}
+
+.modal-forecast-temp {
+    color: var(--pacific-blue);
+    font-weight: 700;
+}
+
+.modal-forecast-desc {
+    color: var(--text-secondary);
+}
+
+/* Modal Financial */
+.modal-financial-item {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.modal-financial-label {
+    color: var(--sunset-orange);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+}
+
+.modal-financial-value {
+    color: var(--pacific-blue);
+    font-weight: 700;
+}
+
+/* Modal System Stats */
+.modal-system-section {
+    background: rgba(255, 255, 255, 0.8);
+    border-left: 4px solid var(--teal);
+    border-radius: 0 16px 16px 0;
+}
+
+.modal-system-label {
+    color: var(--sunset-orange);
+    font-weight: 600;
+}
+
+.modal-system-value {
+    color: var(--pacific-blue);
+    font-weight: 700;
+}
+
+/* Modal Video */
+.modal-video-player {
+    background: white;
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.modal-video-selector {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 16px;
+}
+
+.video-search-input {
+    background: white;
+    border: 2px solid var(--pacific-blue);
+    color: var(--text-primary);
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 8px;
+    text-transform: none;
+}
+
+.video-search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.video-search-input:focus {
+    box-shadow: 0 0 0 3px rgba(0, 78, 137, 0.2);
+    border-color: var(--teal);
+}
+
+.video-search-button {
+    background: linear-gradient(135deg, var(--sunset-orange), var(--coral));
+    border: none;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.video-search-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+}
+
+.modal-video-selector-title {
+    color: var(--sunset-orange);
+    font-family: 'Pacifico', cursive;
+}
+
+.video-selector-item {
+    background: white;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.video-selector-item:hover {
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.2);
+    transform: scale(1.05);
+}
+
+.video-selector-item.active {
+    box-shadow: 0 0 0 3px var(--teal);
+}
+
+.video-selector-item img {
+    border-radius: 8px;
+}
+
+.video-selector-item span {
+    color: var(--text-primary);
+}
+
+/* Modal News */
+.modal-news-source-title {
+    color: var(--sunset-orange);
+    font-family: 'Pacifico', cursive;
+    border-bottom: 3px solid var(--sunset-orange);
+}
+
+.modal-news-item {
+    background: rgba(255, 255, 255, 0.8);
+    border-left: 4px solid var(--sunset-orange);
+    border-radius: 0 12px 12px 0;
+}
+
+.modal-news-item:hover {
+    background: rgba(255, 107, 53, 0.1);
+    transform: translateX(10px);
+}
+
+.modal-news-title {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.modal-news-abstract {
+    color: var(--text-secondary);
+}
+
+.modal-news-meta {
+    color: var(--teal);
+}
+
+/* Hidden Buttons */
+.exit-button {
+    background: transparent;
+}
+
+.exit-button:hover {
+    background: rgba(230, 57, 70, 0.3);
+    border-radius: 12px 0 0 0;
+}
+
+.screensaver-button {
+    background: transparent;
+}
+
+.screensaver-button:hover {
+    background: rgba(255, 107, 53, 0.3);
+    border-radius: 0 12px 0 0;
+}
+
+/* Screensaver */
+#screensaver-info {
+    color: white;
+    font-family: 'Pacifico', cursive;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 12px;
+}
+
+/* ============================================
+   TIMER PANEL - California Theme
+   ============================================ */
+
+.timer-panel-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--sunset-orange), var(--coral));
+    border-radius: 4px;
+}
+
+.timer-input {
+    background: white;
+    border: 2px solid var(--pacific-blue);
+    color: var(--text-primary);
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 8px;
+}
+
+.timer-input:focus {
+    box-shadow: 0 0 0 3px rgba(0, 78, 137, 0.2);
+    border-color: var(--teal);
+}
+
+.timer-separator {
+    color: var(--pacific-blue);
+}
+
+.timer-button {
+    background: linear-gradient(135deg, var(--sunset-orange), var(--coral));
+    border: none;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.timer-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+}
+
+.timer-button:active {
+    transform: translateY(0);
+}
+
+.timer-button-primary {
+    background: linear-gradient(135deg, var(--teal), #00d4a8);
+}
+
+.timer-button-primary:hover {
+    box-shadow: 0 6px 20px rgba(0, 168, 150, 0.4);
+}
+
+.timer-preset-button {
+    background: white;
+    border: 2px solid var(--golden-hour);
+    color: var(--text-primary);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.timer-preset-button:hover {
+    background: var(--golden-hour);
+    color: white;
+}
+
+.timer-item {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.timer-item.paused {
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+}
+
+.timer-item.completed {
+    box-shadow: 0 4px 15px rgba(0, 168, 150, 0.3);
+    background: rgba(0, 168, 150, 0.1);
+}
+
+.timer-display {
+    color: var(--pacific-blue);
+    font-weight: 700;
+}
+
+.timer-item.paused .timer-display {
+    color: var(--sunset-orange);
+}
+
+.timer-item.completed .timer-display {
+    color: var(--teal);
+}
+
+.timer-progress-bar {
+    background: rgba(0, 78, 137, 0.1);
+    border: none;
+    border-radius: 4px;
+}
+
+.timer-progress-fill {
+    background: linear-gradient(90deg, var(--pacific-blue), var(--teal));
+    border-radius: 4px;
+}
+
+.timer-action-button {
+    background: white;
+    border: 2px solid var(--pacific-blue);
+    color: var(--pacific-blue);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.timer-action-button:hover {
+    background: var(--pacific-blue);
+    color: white;
+}
+
+.timer-empty {
+    color: var(--text-secondary);
+    border: 2px dashed rgba(0, 78, 137, 0.3);
+    border-radius: 12px;
+}
+
+.timer-section-divider {
+    background: linear-gradient(90deg, transparent, var(--sunset-orange), transparent);
+}
+
+.timer-section-title {
+    color: var(--sunset-orange);
+    font-family: 'Pacifico', cursive;
+}
+
+.timer-alarm-input {
+    background: white;
+    border: 2px solid var(--pacific-blue);
+    color: var(--text-primary);
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 8px;
+}
+
+.timer-alarm-label-input {
+    background: white;
+    border: 2px solid var(--pacific-blue);
+    color: var(--text-primary);
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 8px;
+}
+
+.timer-alarm-item {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.timer-alarm-time {
+    color: var(--pacific-blue);
+    font-weight: 700;
+}
+
+.timer-alarm-label {
+    color: var(--text-secondary);
+}
+
+.timer-toggle-slider {
+    background-color: rgba(0, 78, 137, 0.2);
+    border: none;
+}
+
+.timer-toggle-slider:before {
+    background-color: var(--pacific-blue);
+}
+
+.timer-toggle input:checked + .timer-toggle-slider {
+    background-color: rgba(0, 168, 150, 0.3);
+}
+
+.timer-toggle input:checked + .timer-toggle-slider:before {
+    background-color: var(--teal);
+}
+
+/* Timer Summary */
+.timer-summary-item {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.timer-summary-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.2);
+}
+
+.timer-summary-item.has-alarm {
+    box-shadow: 0 4px 15px rgba(0, 78, 137, 0.1);
+}
+
+.timer-summary-label {
+    color: var(--text-secondary);
+}
+
+.timer-summary-value {
+    color: var(--pacific-blue);
+    font-weight: 700;
+}
+
+.timer-summary-item.has-alarm .timer-summary-value {
+    color: var(--sunset-orange);
+}
+
+/* Timer Modal */
+.timer-modal-container {
+    background: var(--sand);
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    border-radius: 24px;
+}
+
+.timer-modal-header {
+    background: linear-gradient(135deg, var(--sunset-orange), var(--coral));
+    border-radius: 24px 24px 0 0;
+}
+
+.timer-modal-title {
+    color: white;
+    font-family: 'Pacifico', cursive;
+}
+
+.timer-modal-close {
+    background: rgba(0, 0, 0, 0.2);
+    border: none;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 50%;
+}
+
+.timer-modal-close:hover {
+    background: var(--error-red);
+}
+
+/* ============================================
+   MUSIC PANEL - California Theme
+   ============================================ */
+
+.music-connect-icon {
+    color: var(--sunset-orange);
+}
+
+.music-connect-text {
+    color: var(--text-secondary);
+    font-family: 'Montserrat', sans-serif;
+}
+
+.music-connect-btn {
+    background: linear-gradient(135deg, var(--sunset-orange), var(--coral));
+    border: none;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.music-connect-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+}
+
+.music-album-art {
+    background: white;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.music-no-art {
+    color: var(--sunset-orange);
+}
+
+.music-control-btn {
+    background: white;
+    border: 2px solid var(--pacific-blue);
+    color: var(--pacific-blue);
+}
+
+.music-control-btn:hover {
+    background: var(--pacific-blue);
+    color: white;
+}
+
+.music-control-play-pause {
+    border-color: var(--teal);
+    color: var(--teal);
+}
+
+.music-control-play-pause:hover {
+    background: var(--teal);
+    color: white;
+}
+
+.music-track-name {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.music-artist-name {
+    color: var(--sunset-orange);
+}
+
+/* Music Modal */
+.music-modal-tabs {
+    border-bottom: 3px solid var(--sunset-orange);
+}
+
+.music-tab-btn {
+    background: white;
+    border: 2px solid var(--pacific-blue);
+    color: var(--pacific-blue);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    border-radius: 8px 8px 0 0;
+}
+
+.music-tab-btn:hover {
+    background: rgba(0, 78, 137, 0.1);
+}
+
+.music-tab-btn.active {
+    background: linear-gradient(135deg, var(--sunset-orange), var(--coral));
+    border-color: var(--sunset-orange);
+    color: white;
+}
+
+.music-player-art-large {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.music-track-name-large {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.music-artist-name-large {
+    color: var(--sunset-orange);
+}
+
+.music-album-name-large {
+    color: var(--pacific-blue);
+}
+
+.music-progress-bar {
+    background: rgba(0, 78, 137, 0.1);
+    border: none;
+    border-radius: 4px;
+}
+
+.music-progress-fill {
+    background: linear-gradient(90deg, var(--sunset-orange), var(--coral));
+    border-radius: 4px;
+}
+
+.music-control-btn-large {
+    background: white;
+    border: 3px solid var(--pacific-blue);
+    color: var(--pacific-blue);
+}
+
+.music-control-btn-large:hover {
+    background: var(--pacific-blue);
+    color: white;
+}
+
+.music-control-play-pause-large {
+    border-color: var(--teal);
+    color: var(--teal);
+}
+
+.music-control-play-pause-large:hover {
+    background: var(--teal);
+    color: white;
+}
+
+.music-device-item {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.music-device-item:hover {
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.2);
+}
+
+.music-device-item.active {
+    box-shadow: 0 0 0 3px var(--teal);
+}
+
+.device-name {
+    color: var(--text-primary);
+}
+
+.device-badge {
+    background: var(--teal);
+    color: white;
+    border-radius: 6px;
+}
+
+.music-playlist-art {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.music-playlist-item:hover .music-playlist-art {
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+}
+
+.music-playlist-name {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.music-playlist-tracks {
+    color: var(--sunset-orange);
+}
+
+.music-recent-item {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.music-recent-item:hover {
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.2);
+    transform: translateX(5px);
+}
+
+.music-recent-art {
+    border: none;
+    border-radius: 8px;
+}
+
+.music-recent-name {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.music-recent-artist {
+    color: var(--sunset-orange);
+}
+
+.loading-text {
+    color: var(--sunset-orange);
+    font-family: 'Pacifico', cursive;
+}
+
+/* Devices Manager */
+.music-devices-header {
+    border-bottom: 2px solid var(--sunset-orange);
+}
+
+.devices-title {
+    color: var(--sunset-orange);
+    font-family: 'Pacifico', cursive;
+}
+
+.devices-refresh-btn {
+    background: linear-gradient(135deg, var(--sunset-orange), var(--coral));
+    color: white;
+    border: none;
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 8px;
+}
+
+.devices-refresh-btn:hover {
+    transform: scale(1.05);
+}
+
+.status-badge {
+    border-radius: 6px;
+}
+
+.status-badge.active {
+    background: var(--teal);
+    color: white;
+    border: none;
+}
+
+.music-mode-info {
+    border: none;
+    background: rgba(0, 78, 137, 0.05);
+    border-radius: 12px;
+}
+
+.mode-indicator.sdk {
+    background: var(--teal);
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+.mode-indicator.api {
+    background: var(--pacific-blue);
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+/* Search */
+.music-search-input {
+    background: white;
+    border: 2px solid var(--pacific-blue);
+    color: var(--text-primary);
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 8px;
+}
+
+.music-search-btn {
+    background: linear-gradient(135deg, var(--sunset-orange), var(--coral));
+    color: white;
+    border: none;
+    font-family: 'Montserrat', sans-serif;
+    border-radius: 8px;
+}
+
+.music-search-btn:hover {
+    transform: scale(1.05);
+}
+
+.music-search-result-item {
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.music-search-result-item:hover {
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.2);
+    transform: translateX(5px);
+}
+
+.search-result-name {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.search-result-play {
+    color: var(--teal);
+}
+
+/* Header hover effects */
+.music-widget .widget-header:hover,
+.timer-widget .widget-header:hover {
+    background: linear-gradient(135deg, var(--coral), var(--sunset-orange));
+}

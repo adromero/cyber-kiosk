@@ -1,0 +1,1150 @@
+/* ============================================
+   HIP-HOP THEME - Gold, Black, Bold
+   Boombox vibes, graffiti style, urban aesthetic
+   ============================================ */
+
+:root {
+    /* Primary Colors */
+    --gold: #FFD700;
+    --gold-dark: #B8860B;
+    --orange-red: #FF4500;
+    --turquoise: #00CED1;
+    --black: #000000;
+
+    /* Background Colors */
+    --dark-bg: #1A1A1A;
+    --darker-bg: #0D0D0D;
+    --bg-primary: #1A1A1A;
+    --bg-secondary: #2D2D2D;
+
+    /* Status Colors */
+    --success-green: #32CD32;
+    --error-red: #DC143C;
+
+    /* Text */
+    --text-primary: #FFFFFF;
+    --text-secondary: #CCCCCC;
+    --terminal-text: #FFFFFF;
+    --terminal-bg: #1A1A1A;
+
+    /* Theme-specific aliases */
+    --neon-cyan: var(--turquoise);
+    --neon-magenta: var(--orange-red);
+    --neon-amber: var(--gold);
+    --neon-green: var(--success-green);
+    --neon-purple: #9400D3;
+    --terminal-green: var(--success-green);
+}
+
+/* Typography - Bold Urban Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;700&display=swap');
+
+body {
+    font-family: 'Oswald', 'Impact', sans-serif;
+    background: var(--dark-bg);
+    color: var(--gold);
+    background-image:
+        repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 215, 0, 0.02) 10px, rgba(255, 215, 0, 0.02) 20px);
+}
+
+/* No CRT effects for hip-hop - clean modern look */
+.crt::before,
+.crt::after,
+.scanlines {
+    display: none;
+}
+
+/* Text Effects */
+.neon-glow {
+    text-shadow: 2px 2px 0 var(--black),
+                 -1px -1px 0 var(--gold-dark);
+}
+
+/* Header - Graffiti Style */
+.header {
+    text-shadow: 3px 3px 0 var(--black);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+}
+
+.system-name {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.system-name:hover {
+    color: var(--turquoise);
+    transform: scale(1.05);
+}
+
+.temp-display {
+    color: var(--success-green);
+    text-shadow: 2px 2px 0 var(--black);
+}
+
+.temp-display:hover {
+    color: #00FF00;
+    transform: scale(1.1);
+}
+
+.time-display {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.date-display {
+    color: var(--orange-red);
+}
+
+/* Separator - Chain Link Style */
+.separator {
+    background: linear-gradient(90deg,
+        transparent,
+        var(--gold) 10%,
+        var(--gold-dark) 20%,
+        var(--gold) 30%,
+        var(--gold-dark) 40%,
+        var(--gold) 50%,
+        var(--gold-dark) 60%,
+        var(--gold) 70%,
+        var(--gold-dark) 80%,
+        var(--gold) 90%,
+        transparent
+    );
+    height: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Widgets - Boombox Inspired */
+.widget {
+    border: 3px solid var(--gold);
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--dark-bg) 100%);
+    box-shadow: 4px 4px 0 var(--black),
+                inset 0 0 20px rgba(255, 215, 0, 0.05);
+    border-radius: 8px;
+}
+
+.widget-header {
+    background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dark) 100%);
+    border-bottom: 3px solid var(--black);
+    border-radius: 5px 5px 0 0;
+}
+
+.widget-title {
+    color: var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    text-transform: uppercase;
+    font-size: 1.8rem;
+    text-shadow: none;
+}
+
+.widget-status {
+    color: var(--dark-bg);
+    font-weight: bold;
+    text-shadow: none;
+}
+
+/* Custom Scrollbar */
+.widget-content::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 4px;
+}
+
+/* Weather Widget */
+.weather-temp {
+    color: var(--gold);
+    text-shadow: 3px 3px 0 var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+}
+
+.weather-condition {
+    color: var(--text-primary);
+    font-weight: bold;
+}
+
+.label {
+    color: var(--orange-red);
+    font-weight: bold;
+}
+
+.forecast-item {
+    background: rgba(255, 215, 0, 0.1);
+    border: 2px solid var(--gold-dark);
+    border-radius: 4px;
+}
+
+.forecast-day {
+    color: var(--orange-red);
+    font-weight: bold;
+}
+
+.forecast-temp {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.forecast-desc {
+    color: var(--text-secondary);
+}
+
+/* Video Widget */
+#video-thumbnail {
+    filter: contrast(1.2) saturate(1.1);
+    box-shadow: 4px 4px 0 var(--black);
+    border-radius: 4px;
+}
+
+/* News Widget */
+.news-item {
+    background: rgba(255, 215, 0, 0.05);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 4px 4px 0;
+}
+
+.news-item:hover {
+    background: rgba(255, 215, 0, 0.15);
+    box-shadow: 4px 4px 0 var(--gold-dark);
+    transform: translateX(8px);
+}
+
+.news-rank {
+    color: var(--orange-red);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+}
+
+.news-title {
+    color: var(--text-primary);
+    font-weight: bold;
+}
+
+.news-meta {
+    color: var(--success-green);
+}
+
+.news-points {
+    color: var(--gold);
+}
+
+.news-abstract {
+    color: var(--text-secondary);
+}
+
+/* Footer */
+.footer {
+    color: var(--gold);
+    text-shadow: 2px 2px 0 var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    text-transform: uppercase;
+}
+
+/* Loading Animation - Equalizer Style */
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scaleY(1); }
+    50% { opacity: 0.7; transform: scaleY(0.8); }
+}
+
+.loading {
+    animation: pulse 0.5s ease-in-out infinite;
+}
+
+/* No burn-in prevention animations - clean look */
+.container {
+    animation: none;
+}
+
+.widget {
+    animation: none;
+}
+
+/* Financial Grid */
+.financial-grid {
+    animation: none;
+}
+
+.financial-item {
+    background: rgba(255, 215, 0, 0.1);
+    border: 2px solid var(--gold-dark);
+    border-radius: 4px;
+}
+
+.financial-label {
+    color: var(--orange-red);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.financial-value {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    text-shadow: 2px 2px 0 var(--black);
+}
+
+.financial-value.positive .financial-change,
+.financial-change.positive {
+    color: var(--success-green);
+}
+
+.financial-value.negative .financial-change,
+.financial-change.negative {
+    color: var(--error-red);
+}
+
+.financial-time {
+    color: var(--gold);
+}
+
+/* Error Message */
+.error-message {
+    color: var(--error-red);
+    text-shadow: 2px 2px 0 var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+/* Widget Source Label */
+.widget-source {
+    color: var(--orange-red);
+}
+
+/* Modal Styles */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-overlay {
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-container {
+    background: var(--dark-bg);
+    border: 4px solid var(--gold);
+    box-shadow: 8px 8px 0 var(--black);
+    border-radius: 12px;
+    animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dark) 100%);
+    border-bottom: 4px solid var(--black);
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-title {
+    color: var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    text-shadow: none;
+    font-size: 2.5rem;
+}
+
+.modal-close {
+    border: 3px solid var(--error-red);
+    color: var(--error-red);
+    font-family: 'Bebas Neue', sans-serif;
+    background: var(--black);
+    border-radius: 4px;
+}
+
+.modal-close:hover {
+    background: var(--error-red);
+    color: var(--black);
+    transform: scale(1.1);
+}
+
+.modal-reload {
+    border: 3px solid var(--turquoise);
+    color: var(--turquoise);
+    font-family: 'Bebas Neue', sans-serif;
+    background: var(--black);
+    border-radius: 4px;
+}
+
+.modal-reload:hover {
+    background: var(--turquoise);
+    color: var(--black);
+}
+
+.modal-content {
+    background: var(--darker-bg);
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 4px;
+}
+
+/* Widget Hover Effects */
+.weather-widget:hover,
+.cyberspace-widget:hover,
+.video-widget:hover,
+.news-widget:hover,
+.music-widget:hover,
+.timer-widget:hover {
+    box-shadow: 6px 6px 0 var(--gold-dark);
+    transform: translate(-2px, -2px);
+}
+
+/* Modal Weather */
+.modal-weather-current {
+    border-bottom: 4px solid var(--gold);
+}
+
+.modal-weather-temp {
+    color: var(--gold);
+    text-shadow: 4px 4px 0 var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.modal-weather-condition {
+    color: var(--text-primary);
+}
+
+.modal-forecast-title {
+    color: var(--orange-red);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.modal-forecast-item {
+    background: rgba(255, 215, 0, 0.1);
+    border: 3px solid var(--gold-dark);
+    border-radius: 8px;
+}
+
+.modal-forecast-day {
+    color: var(--orange-red);
+}
+
+.modal-forecast-temp {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.modal-forecast-desc {
+    color: var(--text-secondary);
+}
+
+/* Modal Financial */
+.modal-financial-item {
+    background: rgba(255, 215, 0, 0.1);
+    border: 3px solid var(--gold-dark);
+    border-radius: 8px;
+}
+
+.modal-financial-label {
+    color: var(--orange-red);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.modal-financial-value {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+/* Modal System Stats */
+.modal-system-section {
+    background: rgba(255, 215, 0, 0.1);
+    border-left: 6px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+}
+
+.modal-system-label {
+    color: var(--orange-red);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.modal-system-value {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+/* Modal Video */
+.modal-video-player {
+    background: var(--black);
+    border: 3px solid var(--gold-dark);
+    border-radius: 8px;
+}
+
+.modal-video-selector {
+    background: rgba(255, 215, 0, 0.05);
+    border: 3px solid var(--gold-dark);
+    border-radius: 8px;
+}
+
+.video-search-input {
+    background: var(--black);
+    border: 2px solid var(--gold);
+    color: var(--text-primary);
+    font-family: 'Oswald', sans-serif;
+    border-radius: 4px;
+}
+
+.video-search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.video-search-input:focus {
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
+}
+
+.video-search-button {
+    background: var(--gold);
+    border: none;
+    color: var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    border-radius: 4px;
+}
+
+.video-search-button:hover {
+    background: var(--gold-dark);
+    transform: scale(1.05);
+}
+
+.modal-video-selector-title {
+    color: var(--orange-red);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.video-selector-item {
+    background: rgba(255, 215, 0, 0.05);
+    border: 2px solid var(--gold-dark);
+    border-radius: 8px;
+}
+
+.video-selector-item:hover {
+    background: rgba(255, 215, 0, 0.15);
+    transform: scale(1.05);
+}
+
+.video-selector-item.active {
+    border-color: var(--turquoise);
+    box-shadow: 0 0 0 3px rgba(0, 206, 209, 0.3);
+}
+
+.video-selector-item img {
+    border-radius: 4px;
+}
+
+.video-selector-item span {
+    color: var(--text-primary);
+}
+
+/* Modal News */
+.modal-news-source-title {
+    color: var(--orange-red);
+    font-family: 'Bebas Neue', sans-serif;
+    border-bottom: 4px solid var(--gold);
+}
+
+.modal-news-item {
+    background: rgba(255, 215, 0, 0.05);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+}
+
+.modal-news-item:hover {
+    background: rgba(255, 215, 0, 0.15);
+    transform: translateX(10px);
+}
+
+.modal-news-title {
+    color: var(--text-primary);
+}
+
+.modal-news-abstract {
+    color: var(--text-secondary);
+}
+
+.modal-news-meta {
+    color: var(--success-green);
+}
+
+/* Hidden Buttons */
+.exit-button {
+    background: transparent;
+}
+
+.exit-button:hover {
+    background: rgba(220, 20, 60, 0.3);
+    border-radius: 8px 0 0 0;
+}
+
+.screensaver-button {
+    background: transparent;
+}
+
+.screensaver-button:hover {
+    background: rgba(255, 215, 0, 0.3);
+    border-radius: 0 8px 0 0;
+}
+
+/* Screensaver */
+#screensaver-info {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--gold);
+    border-radius: 8px;
+}
+
+/* ============================================
+   TIMER PANEL - Hip-Hop Theme
+   ============================================ */
+
+.timer-panel-container::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 4px;
+}
+
+.timer-input {
+    background: var(--black);
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    border-radius: 4px;
+}
+
+.timer-input:focus {
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
+}
+
+.timer-separator {
+    color: var(--gold);
+}
+
+.timer-button {
+    background: var(--gold);
+    border: none;
+    color: var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    border-radius: 4px;
+}
+
+.timer-button:hover {
+    background: var(--gold-dark);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 0 var(--black);
+}
+
+.timer-button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.timer-button-primary {
+    background: var(--success-green);
+}
+
+.timer-button-primary:hover {
+    background: #28a745;
+}
+
+.timer-preset-button {
+    background: transparent;
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    border-radius: 4px;
+}
+
+.timer-preset-button:hover {
+    background: var(--gold);
+    color: var(--black);
+}
+
+.timer-item {
+    background: rgba(255, 215, 0, 0.05);
+    border: 2px solid var(--gold);
+    border-radius: 8px;
+}
+
+.timer-item.paused {
+    border-color: var(--orange-red);
+}
+
+.timer-item.completed {
+    border-color: var(--success-green);
+    background: rgba(50, 205, 50, 0.1);
+}
+
+.timer-display {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    text-shadow: 2px 2px 0 var(--black);
+}
+
+.timer-item.paused .timer-display {
+    color: var(--orange-red);
+}
+
+.timer-item.completed .timer-display {
+    color: var(--success-green);
+}
+
+.timer-progress-bar {
+    background: var(--black);
+    border: 2px solid var(--gold-dark);
+    border-radius: 4px;
+}
+
+.timer-progress-fill {
+    background: linear-gradient(90deg, var(--gold), var(--success-green));
+    border-radius: 2px;
+}
+
+.timer-action-button {
+    background: transparent;
+    border: 2px solid var(--turquoise);
+    color: var(--turquoise);
+    font-family: 'Bebas Neue', sans-serif;
+    border-radius: 4px;
+}
+
+.timer-action-button:hover {
+    background: var(--turquoise);
+    color: var(--black);
+}
+
+.timer-empty {
+    color: var(--text-secondary);
+    border: 2px dashed var(--gold-dark);
+    border-radius: 8px;
+}
+
+.timer-section-divider {
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.timer-section-title {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.timer-alarm-input {
+    background: var(--black);
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    border-radius: 4px;
+}
+
+.timer-alarm-label-input {
+    background: var(--black);
+    border: 2px solid var(--gold);
+    color: var(--text-primary);
+    font-family: 'Oswald', sans-serif;
+    border-radius: 4px;
+}
+
+.timer-alarm-item {
+    background: rgba(148, 0, 211, 0.05);
+    border: 2px solid var(--neon-purple);
+    border-radius: 8px;
+}
+
+.timer-alarm-time {
+    color: var(--neon-purple);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.timer-alarm-label {
+    color: var(--text-secondary);
+}
+
+.timer-toggle-slider {
+    background-color: var(--black);
+    border: 2px solid var(--neon-purple);
+}
+
+.timer-toggle-slider:before {
+    background-color: var(--neon-purple);
+}
+
+.timer-toggle input:checked + .timer-toggle-slider {
+    background-color: rgba(148, 0, 211, 0.3);
+}
+
+.timer-toggle input:checked + .timer-toggle-slider:before {
+    background-color: var(--success-green);
+}
+
+/* Timer Summary */
+.timer-summary-item {
+    background: rgba(255, 215, 0, 0.05);
+    border: 2px solid var(--gold);
+    border-radius: 8px;
+}
+
+.timer-summary-item:hover {
+    background: rgba(255, 215, 0, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 0 var(--gold-dark);
+}
+
+.timer-summary-item.has-alarm {
+    border-color: var(--neon-purple);
+}
+
+.timer-summary-label {
+    color: var(--text-secondary);
+}
+
+.timer-summary-value {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.timer-summary-item.has-alarm .timer-summary-value {
+    color: var(--neon-purple);
+}
+
+/* Timer Modal */
+.timer-modal-container {
+    background: var(--dark-bg);
+    border: 4px solid var(--gold);
+    box-shadow: 8px 8px 0 var(--black);
+    border-radius: 12px;
+}
+
+.timer-modal-header {
+    background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dark) 100%);
+    border-radius: 8px 8px 0 0;
+}
+
+.timer-modal-title {
+    color: var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.timer-modal-close {
+    background: var(--black);
+    border: 3px solid var(--error-red);
+    color: var(--error-red);
+    font-family: 'Bebas Neue', sans-serif;
+    border-radius: 4px;
+}
+
+.timer-modal-close:hover {
+    background: var(--error-red);
+    color: var(--black);
+}
+
+/* ============================================
+   MUSIC PANEL - Hip-Hop Theme
+   ============================================ */
+
+.music-connect-icon {
+    color: var(--gold);
+}
+
+.music-connect-text {
+    color: var(--text-secondary);
+    font-family: 'Oswald', sans-serif;
+}
+
+.music-connect-btn {
+    background: var(--gold);
+    border: none;
+    color: var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    border-radius: 4px;
+}
+
+.music-connect-btn:hover {
+    background: var(--gold-dark);
+    transform: scale(1.05);
+}
+
+.music-album-art {
+    background: var(--black);
+    border: 2px solid var(--gold);
+    border-radius: 8px;
+}
+
+.music-no-art {
+    color: var(--gold);
+}
+
+.music-control-btn {
+    background: transparent;
+    border: 2px solid var(--gold);
+    color: var(--gold);
+}
+
+.music-control-btn:hover {
+    background: var(--gold);
+    color: var(--black);
+}
+
+.music-control-play-pause {
+    border-color: var(--success-green);
+    color: var(--success-green);
+}
+
+.music-control-play-pause:hover {
+    background: var(--success-green);
+    color: var(--black);
+}
+
+.music-track-name {
+    color: var(--text-primary);
+    font-family: 'Oswald', sans-serif;
+}
+
+.music-artist-name {
+    color: var(--gold);
+}
+
+/* Music Modal */
+.music-modal-tabs {
+    border-bottom: 3px solid var(--gold);
+}
+
+.music-tab-btn {
+    background: transparent;
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    border-radius: 4px 4px 0 0;
+}
+
+.music-tab-btn:hover {
+    background: rgba(255, 215, 0, 0.2);
+}
+
+.music-tab-btn.active {
+    background: var(--gold);
+    color: var(--black);
+}
+
+.music-player-art-large {
+    border: 4px solid var(--gold);
+    border-radius: 8px;
+    box-shadow: 6px 6px 0 var(--black);
+}
+
+.music-track-name-large {
+    color: var(--text-primary);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.music-artist-name-large {
+    color: var(--gold);
+}
+
+.music-album-name-large {
+    color: var(--orange-red);
+}
+
+.music-progress-bar {
+    background: var(--black);
+    border: 2px solid var(--gold-dark);
+    border-radius: 4px;
+}
+
+.music-progress-fill {
+    background: var(--gold);
+    border-radius: 2px;
+}
+
+.music-control-btn-large {
+    background: transparent;
+    border: 3px solid var(--gold);
+    color: var(--gold);
+}
+
+.music-control-btn-large:hover {
+    background: var(--gold);
+    color: var(--black);
+}
+
+.music-control-play-pause-large {
+    border-color: var(--success-green);
+    color: var(--success-green);
+}
+
+.music-control-play-pause-large:hover {
+    background: var(--success-green);
+    color: var(--black);
+}
+
+.music-device-item {
+    background: rgba(255, 215, 0, 0.05);
+    border: 2px solid var(--gold-dark);
+    border-radius: 8px;
+}
+
+.music-device-item:hover {
+    background: rgba(255, 215, 0, 0.15);
+}
+
+.music-device-item.active {
+    border-color: var(--success-green);
+}
+
+.device-name {
+    color: var(--text-primary);
+}
+
+.device-badge {
+    background: var(--success-green);
+    color: var(--black);
+    border-radius: 4px;
+}
+
+.music-playlist-art {
+    border: 2px solid var(--gold);
+    border-radius: 8px;
+}
+
+.music-playlist-item:hover .music-playlist-art {
+    border-color: var(--turquoise);
+}
+
+.music-playlist-name {
+    color: var(--text-primary);
+}
+
+.music-playlist-tracks {
+    color: var(--gold);
+}
+
+.music-recent-item {
+    background: rgba(255, 215, 0, 0.05);
+    border: 2px solid var(--gold-dark);
+    border-radius: 8px;
+}
+
+.music-recent-item:hover {
+    background: rgba(255, 215, 0, 0.15);
+    transform: translateX(5px);
+}
+
+.music-recent-art {
+    border: 2px solid var(--gold);
+    border-radius: 4px;
+}
+
+.music-recent-name {
+    color: var(--text-primary);
+}
+
+.music-recent-artist {
+    color: var(--gold);
+}
+
+.loading-text {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+/* Devices Manager */
+.music-devices-header {
+    border-bottom: 2px solid var(--gold);
+}
+
+.devices-title {
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.devices-refresh-btn {
+    background: var(--gold);
+    color: var(--black);
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    border-radius: 4px;
+}
+
+.devices-refresh-btn:hover {
+    background: var(--gold-dark);
+}
+
+.status-badge {
+    border-radius: 4px;
+}
+
+.status-badge.active {
+    background: var(--success-green);
+    color: var(--black);
+    border: none;
+}
+
+.music-mode-info {
+    border: 2px solid var(--neon-purple);
+    background: rgba(148, 0, 211, 0.05);
+    border-radius: 8px;
+}
+
+.mode-indicator.sdk {
+    background: var(--success-green);
+    color: var(--black);
+    border: none;
+    border-radius: 4px;
+}
+
+.mode-indicator.api {
+    background: var(--turquoise);
+    color: var(--black);
+    border: none;
+    border-radius: 4px;
+}
+
+/* Search */
+.music-search-input {
+    background: var(--black);
+    border: 2px solid var(--gold);
+    color: var(--text-primary);
+    font-family: 'Oswald', sans-serif;
+    border-radius: 4px;
+}
+
+.music-search-btn {
+    background: var(--gold);
+    color: var(--black);
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    border-radius: 4px;
+}
+
+.music-search-btn:hover {
+    background: var(--gold-dark);
+}
+
+.music-search-result-item {
+    border: 2px solid var(--gold-dark);
+    background: rgba(255, 215, 0, 0.05);
+    border-radius: 8px;
+}
+
+.music-search-result-item:hover {
+    background: rgba(255, 215, 0, 0.15);
+    transform: translateX(5px);
+}
+
+.search-result-name {
+    color: var(--text-primary);
+}
+
+.search-result-play {
+    color: var(--success-green);
+}
+
+/* Header hover effects */
+.music-widget .widget-header:hover,
+.timer-widget .widget-header:hover {
+    background: var(--gold);
+}

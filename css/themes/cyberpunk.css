@@ -1,0 +1,1410 @@
+/* ============================================
+   CYBERPUNK THEME - Neuromancer Aesthetic
+   Neon colors, CRT effects, glitch animations
+   ============================================ */
+
+:root {
+    /* Primary Colors */
+    --neon-cyan: #00ffff;
+    --neon-magenta: #ff00ff;
+    --neon-amber: #ffaa00;
+    --neon-green: #00ff00;
+    --neon-purple: #8a2be2;
+
+    /* Background Colors */
+    --dark-bg: #0a0a0a;
+    --darker-bg: #050505;
+    --bg-primary: #0a0a0a;
+
+    /* Status Colors */
+    --terminal-green: #00ff41;
+    --error-red: #ff0040;
+
+    /* Text */
+    --text-primary: #e0e0e0;
+    --terminal-text: #e0e0e0;
+    --terminal-bg: #0a0a0a;
+}
+
+/* Typography */
+body {
+    font-family: 'VT323', monospace;
+    background: var(--dark-bg);
+    color: var(--neon-cyan);
+    background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.03) 2px, rgba(0, 255, 255, 0.03) 4px);
+}
+
+/* CRT Screen Effect */
+.crt::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.crt::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(18, 16, 16, 0.1);
+    opacity: 0;
+    z-index: 999;
+    pointer-events: none;
+    animation: flicker 0.15s infinite;
+}
+
+/* Scanlines */
+.scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    z-index: 998;
+}
+
+@keyframes flicker {
+    0% { opacity: 0.27861; }
+    5% { opacity: 0.34769; }
+    10% { opacity: 0.23604; }
+    15% { opacity: 0.90626; }
+    20% { opacity: 0.18128; }
+    25% { opacity: 0.83891; }
+    30% { opacity: 0.65583; }
+    35% { opacity: 0.67807; }
+    40% { opacity: 0.26559; }
+    45% { opacity: 0.84693; }
+    50% { opacity: 0.96019; }
+    55% { opacity: 0.08594; }
+    60% { opacity: 0.20313; }
+    65% { opacity: 0.71988; }
+    70% { opacity: 0.53455; }
+    75% { opacity: 0.37288; }
+    80% { opacity: 0.71428; }
+    85% { opacity: 0.70419; }
+    90% { opacity: 0.7003; }
+    95% { opacity: 0.36108; }
+    100% { opacity: 0.24387; }
+}
+
+/* Text Glow Effect */
+.neon-glow {
+    text-shadow: 0 0 5px var(--neon-cyan),
+                 0 0 10px var(--neon-cyan),
+                 0 0 20px var(--neon-cyan);
+}
+
+/* Header */
+.header {
+    text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.system-name {
+    color: var(--neon-cyan);
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.system-name:hover {
+    text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
+    transform: scale(1.02);
+}
+
+.temp-display {
+    color: var(--neon-green);
+    text-shadow: 0 0 5px var(--neon-green);
+}
+
+.temp-display:hover {
+    color: var(--terminal-green);
+    text-shadow: 0 0 10px var(--terminal-green),
+                 0 0 20px var(--terminal-green);
+    transform: scale(1.05);
+}
+
+.time-display {
+    color: var(--neon-amber);
+}
+
+.date-display {
+    color: var(--neon-magenta);
+}
+
+/* Separator */
+.separator {
+    background: linear-gradient(90deg,
+        transparent,
+        var(--neon-cyan) 20%,
+        var(--neon-cyan) 80%,
+        transparent
+    );
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* Widgets */
+.widget {
+    border: 2px solid var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.05);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3),
+                inset 0 0 15px rgba(0, 255, 255, 0.1);
+}
+
+.widget-header {
+    background: rgba(0, 255, 255, 0.1);
+    border-bottom: 1px solid var(--neon-cyan);
+}
+
+.widget-title {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.widget-status {
+    color: var(--terminal-green);
+    text-shadow: 0 0 5px var(--terminal-green);
+}
+
+/* Custom Scrollbar */
+.widget-content::-webkit-scrollbar-thumb {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 5px var(--neon-cyan);
+}
+
+/* Weather Widget */
+.weather-temp {
+    color: var(--neon-amber);
+    text-shadow: 0 0 20px var(--neon-amber);
+}
+
+.weather-condition {
+    color: var(--neon-cyan);
+}
+
+.label {
+    color: var(--neon-magenta);
+}
+
+.forecast-item {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.forecast-day {
+    color: var(--neon-magenta);
+}
+
+.forecast-temp {
+    color: var(--neon-amber);
+}
+
+.forecast-desc {
+    color: var(--neon-cyan);
+}
+
+/* Cyberspace Widget */
+.cyberspace-content iframe {
+    filter: brightness(0.8);
+}
+
+/* Video Widget */
+#video-thumbnail {
+    filter: contrast(1.1) brightness(0.9);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+/* News Widget */
+.news-item {
+    background: rgba(0, 255, 255, 0.05);
+    border-left: 3px solid var(--neon-cyan);
+}
+
+.news-item:hover {
+    background: rgba(0, 255, 255, 0.15);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    transform: translateX(5px);
+}
+
+.news-rank {
+    color: var(--neon-magenta);
+}
+
+.news-title {
+    color: var(--neon-cyan);
+}
+
+.news-meta {
+    color: var(--terminal-green);
+}
+
+.news-points {
+    color: var(--neon-amber);
+}
+
+.news-abstract {
+    color: rgba(0, 255, 255, 0.7);
+}
+
+/* Footer */
+.footer {
+    color: var(--terminal-green);
+    text-shadow: 0 0 5px var(--terminal-green);
+}
+
+/* Loading Animation */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Burn-in Prevention */
+@keyframes float {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(2px, -2px); }
+    50% { transform: translate(-2px, 2px); }
+    75% { transform: translate(2px, 2px); }
+}
+
+.container {
+    animation: float 120s ease-in-out infinite;
+}
+
+@keyframes breathe {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.95; }
+}
+
+.widget {
+    animation: breathe 90s ease-in-out infinite;
+}
+
+/* Financial Grid */
+.financial-grid {
+    animation: autoScroll 20s linear infinite;
+}
+
+@keyframes autoScroll {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-20%); }
+    100% { transform: translateY(0); }
+}
+
+.financial-item {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.financial-label {
+    color: var(--neon-magenta);
+}
+
+.financial-value {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.financial-value.positive .financial-change,
+.financial-change.positive {
+    color: var(--terminal-green);
+    text-shadow: 0 0 5px var(--terminal-green);
+}
+
+.financial-value.negative .financial-change,
+.financial-change.negative {
+    color: var(--error-red);
+    text-shadow: 0 0 5px var(--error-red);
+}
+
+.financial-time {
+    color: var(--neon-amber);
+}
+
+/* Error Message */
+.error-message {
+    color: var(--error-red);
+    text-shadow: 0 0 10px var(--error-red);
+}
+
+/* Widget Source Label */
+.widget-source {
+    color: var(--neon-magenta);
+    text-shadow: 0 0 5px var(--neon-magenta);
+}
+
+/* Modal Styles */
+.modal-overlay {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-container {
+    background: var(--dark-bg);
+    border: 3px solid var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5),
+                inset 0 0 30px rgba(0, 255, 255, 0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: rgba(0, 255, 255, 0.1);
+    border-bottom: 2px solid var(--neon-cyan);
+}
+
+.modal-title {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.modal-close {
+    border: 2px solid var(--error-red);
+    color: var(--error-red);
+    font-family: 'VT323', monospace;
+    text-shadow: 0 0 10px var(--error-red);
+}
+
+.modal-close:hover {
+    background: rgba(255, 0, 64, 0.2);
+    box-shadow: 0 0 20px var(--error-red);
+    transform: scale(1.1);
+}
+
+.modal-reload {
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+    text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.modal-reload:hover {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 20px var(--neon-cyan);
+    transform: scale(1.05);
+}
+
+.modal-content {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 5px var(--neon-cyan);
+}
+
+/* Widget Hover Effects */
+.weather-widget:hover,
+.cyberspace-widget:hover,
+.video-widget:hover,
+.news-widget:hover,
+.music-widget:hover,
+.timer-widget:hover {
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.5),
+                inset 0 0 25px rgba(0, 255, 255, 0.15);
+    transform: scale(1.02);
+}
+
+/* Modal Weather */
+.modal-weather-current {
+    border-bottom: 2px solid var(--neon-cyan);
+}
+
+.modal-weather-temp {
+    color: var(--neon-amber);
+    text-shadow: 0 0 30px var(--neon-amber);
+}
+
+.modal-weather-condition {
+    color: var(--neon-cyan);
+}
+
+.modal-forecast-title {
+    color: var(--neon-magenta);
+    text-shadow: 0 0 10px var(--neon-magenta);
+}
+
+.modal-forecast-item {
+    background: rgba(0, 255, 255, 0.05);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+}
+
+.modal-forecast-day {
+    color: var(--neon-magenta);
+}
+
+.modal-forecast-temp {
+    color: var(--neon-amber);
+}
+
+.modal-forecast-desc {
+    color: var(--neon-cyan);
+}
+
+/* Modal Financial */
+.modal-financial-item {
+    background: rgba(0, 255, 255, 0.05);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+}
+
+.modal-financial-label {
+    color: var(--neon-magenta);
+}
+
+.modal-financial-value {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* Modal System Stats */
+.modal-system-section {
+    background: rgba(0, 255, 255, 0.05);
+    border-left: 4px solid var(--neon-cyan);
+}
+
+.modal-system-label {
+    color: var(--neon-magenta);
+}
+
+.modal-system-value {
+    color: var(--neon-amber);
+    text-shadow: 0 0 10px var(--neon-amber);
+}
+
+/* Modal Video */
+.modal-video-player {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+}
+
+.modal-video-selector {
+    background: rgba(0, 255, 255, 0.05);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+}
+
+.video-search-input {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+}
+
+.video-search-input::placeholder {
+    color: rgba(0, 255, 255, 0.4);
+}
+
+.video-search-input:focus {
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    background: rgba(0, 255, 255, 0.05);
+}
+
+.video-search-button {
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+    text-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.video-search-button:hover {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.modal-video-selector-title {
+    color: var(--neon-magenta);
+    text-shadow: 0 0 5px var(--neon-magenta);
+}
+
+.video-selector-item {
+    background: rgba(0, 255, 255, 0.05);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+}
+
+.video-selector-item:hover {
+    background: rgba(0, 255, 255, 0.15);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.video-selector-item.active {
+    border-color: var(--neon-amber);
+    box-shadow: 0 0 20px rgba(255, 170, 0, 0.5);
+}
+
+.video-selector-item img {
+    border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.video-selector-item span {
+    color: var(--neon-cyan);
+}
+
+/* Modal News */
+.modal-news-source-title {
+    color: var(--neon-magenta);
+    text-shadow: 0 0 10px var(--neon-magenta);
+    border-bottom: 2px solid var(--neon-magenta);
+}
+
+.modal-news-item {
+    background: rgba(0, 255, 255, 0.05);
+    border-left: 3px solid var(--neon-cyan);
+}
+
+.modal-news-item:hover {
+    background: rgba(0, 255, 255, 0.15);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    transform: translateX(10px);
+}
+
+.modal-news-title {
+    color: var(--neon-cyan);
+}
+
+.modal-news-abstract {
+    color: rgba(0, 255, 255, 0.7);
+}
+
+.modal-news-meta {
+    color: var(--terminal-green);
+}
+
+/* Hidden Buttons */
+.exit-button {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.exit-button:hover {
+    background: rgba(255, 0, 64, 0.3);
+    box-shadow: 0 0 20px var(--error-red);
+    border-top-left-radius: 5px;
+}
+
+.exit-button:active {
+    background: rgba(255, 0, 64, 0.5);
+}
+
+.screensaver-button {
+    background: rgba(0, 255, 255, 0.05);
+}
+
+.screensaver-button:hover {
+    background: rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 20px var(--neon-cyan);
+    border-top-right-radius: 5px;
+}
+
+.screensaver-button:active {
+    background: rgba(0, 255, 255, 0.5);
+}
+
+.screensaver-button:focus {
+    background: rgba(0, 255, 255, 0.05);
+}
+
+/* Screensaver */
+#screensaver-info {
+    color: rgba(255, 255, 255, 0.7);
+    font-family: 'VT323', monospace;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================
+   TIMER PANEL - Cyberpunk Theme
+   ============================================ */
+
+.timer-panel-container::-webkit-scrollbar-thumb {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.timer-panel-container::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+}
+
+.timer-input {
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+}
+
+.timer-input:focus {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    border-color: var(--neon-green);
+}
+
+.timer-input::placeholder {
+    color: rgba(0, 255, 255, 0.3);
+}
+
+.timer-separator {
+    color: var(--neon-cyan);
+}
+
+.timer-button {
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+}
+
+.timer-button:hover {
+    background: rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.timer-button:active {
+    transform: translateY(0);
+    background: rgba(0, 255, 255, 0.4);
+}
+
+.timer-button-primary {
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+}
+
+.timer-button-primary:hover {
+    background: rgba(0, 255, 0, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+.timer-button-primary:active {
+    background: rgba(0, 255, 0, 0.4);
+}
+
+.timer-preset-button {
+    background: rgba(255, 170, 0, 0.1);
+    border: 2px solid var(--neon-amber);
+    color: var(--neon-amber);
+    font-family: 'VT323', monospace;
+}
+
+.timer-preset-button:hover {
+    background: rgba(255, 170, 0, 0.3);
+    box-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+}
+
+.timer-preset-button:active {
+    background: rgba(255, 170, 0, 0.4);
+    transform: scale(0.98);
+}
+
+.timer-item {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid var(--neon-cyan);
+}
+
+.timer-item.paused {
+    border-color: var(--neon-amber);
+    background: rgba(255, 170, 0, 0.05);
+}
+
+.timer-item.completed {
+    border-color: var(--neon-green);
+    background: rgba(0, 255, 0, 0.1);
+    animation: timerPulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes timerPulse {
+    from {
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    }
+    to {
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+    }
+}
+
+.timer-display {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.timer-item.paused .timer-display {
+    color: var(--neon-amber);
+    text-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+}
+
+.timer-item.completed .timer-display {
+    color: var(--neon-green);
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.timer-progress-bar {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--neon-cyan);
+}
+
+.timer-progress-fill {
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+}
+
+.timer-item.completed .timer-progress-fill {
+    background: var(--neon-green);
+}
+
+.timer-action-button {
+    background: rgba(138, 43, 226, 0.1);
+    border: 2px solid var(--neon-purple);
+    color: var(--neon-purple);
+    font-family: 'VT323', monospace;
+}
+
+.timer-action-button:hover {
+    background: rgba(138, 43, 226, 0.3);
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+.timer-action-button:active {
+    background: rgba(138, 43, 226, 0.4);
+    transform: scale(0.98);
+}
+
+.timer-empty {
+    color: rgba(0, 255, 255, 0.4);
+    border: 1px dashed rgba(0, 255, 255, 0.2);
+}
+
+.timer-section-divider {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--neon-cyan),
+        transparent
+    );
+}
+
+.timer-section-title {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.timer-alarm-input {
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+}
+
+.timer-alarm-input:focus {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    border-color: var(--neon-green);
+}
+
+.timer-alarm-label-input {
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+}
+
+.timer-alarm-label-input:focus {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    border-color: var(--neon-green);
+}
+
+.timer-alarm-label-input::placeholder {
+    color: rgba(0, 255, 255, 0.3);
+}
+
+.timer-alarm-item {
+    background: rgba(138, 43, 226, 0.05);
+    border: 1px solid var(--neon-purple);
+}
+
+.timer-alarm-item.disabled {
+    opacity: 0.5;
+    border-color: rgba(138, 43, 226, 0.3);
+}
+
+.timer-alarm-item.enabled {
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+}
+
+.timer-alarm-time {
+    color: var(--neon-purple);
+    text-shadow: 0 0 5px rgba(138, 43, 226, 0.5);
+}
+
+.timer-alarm-label {
+    color: var(--text-primary);
+}
+
+.timer-toggle-slider {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--neon-purple);
+}
+
+.timer-toggle-slider:before {
+    background-color: var(--neon-purple);
+}
+
+.timer-toggle input:checked + .timer-toggle-slider {
+    background-color: rgba(138, 43, 226, 0.3);
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+.timer-toggle input:checked + .timer-toggle-slider:before {
+    background-color: var(--neon-green);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+}
+
+/* Timer Summary */
+.timer-summary-item {
+    background: rgba(0, 255, 255, 0.05);
+    border: 2px solid var(--neon-cyan);
+}
+
+.timer-summary-item:hover {
+    background: rgba(0, 255, 255, 0.15);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.timer-summary-item.has-alarm {
+    border-color: var(--neon-purple);
+    background: rgba(138, 43, 226, 0.05);
+}
+
+.timer-summary-item.has-alarm:hover {
+    background: rgba(138, 43, 226, 0.15);
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.4);
+}
+
+.timer-summary-label {
+    color: rgba(0, 255, 255, 0.7);
+}
+
+.timer-summary-item.has-alarm .timer-summary-label {
+    color: rgba(138, 43, 226, 0.7);
+}
+
+.timer-summary-value {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.timer-summary-item.has-alarm .timer-summary-value {
+    color: var(--neon-purple);
+    text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+.timer-summary-value.empty {
+    color: rgba(0, 255, 255, 0.3);
+}
+
+.timer-summary-item.has-alarm .timer-summary-value.empty {
+    color: rgba(138, 43, 226, 0.3);
+}
+
+.timer-summary-sublabel {
+    color: rgba(0, 255, 255, 0.5);
+}
+
+.timer-summary-item.has-alarm .timer-summary-sublabel {
+    color: rgba(138, 43, 226, 0.5);
+}
+
+/* Timer Modal */
+.timer-modal-container {
+    background: var(--bg-primary);
+    border: 2px solid var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+}
+
+.timer-modal-header {
+    border-bottom: 1px solid var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.05);
+}
+
+.timer-modal-title {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.timer-modal-close {
+    background: rgba(255, 0, 0, 0.1);
+    border: 2px solid #ff0055;
+    color: #ff0055;
+    font-family: 'VT323', monospace;
+}
+
+.timer-modal-close:hover {
+    background: rgba(255, 0, 0, 0.3);
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+    transform: scale(1.1);
+}
+
+.timer-modal-container::-webkit-scrollbar-thumb {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.timer-modal-container::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+}
+
+/* ============================================
+   MUSIC PANEL - Cyberpunk Theme
+   ============================================ */
+
+.music-connect-icon {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.music-connect-text {
+    color: var(--neon-amber);
+    font-family: 'VT323', monospace;
+}
+
+.music-config-hint {
+    color: var(--terminal-text);
+    font-family: 'VT323', monospace;
+}
+
+.music-setup-link {
+    color: var(--neon-cyan);
+}
+
+.music-setup-link:hover {
+    color: var(--neon-green);
+    text-shadow: 0 0 10px var(--neon-green);
+}
+
+.music-connect-btn {
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.music-connect-btn:hover {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+    transform: scale(1.05);
+}
+
+.music-album-art {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--neon-cyan);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+.music-no-art {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.music-control-btn {
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+.music-control-btn:hover {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.music-control-play-pause {
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+    background: rgba(0, 255, 0, 0.1);
+}
+
+.music-control-play-pause:hover {
+    background: rgba(0, 255, 0, 0.2);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+}
+
+.music-track-name {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.music-artist-name {
+    color: var(--neon-amber);
+}
+
+/* Music Modal */
+.music-modal-tabs {
+    border-bottom: 2px solid var(--neon-cyan);
+}
+
+.music-tab-btn {
+    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+}
+
+.music-tab-btn:hover {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.music-tab-btn.active {
+    background: rgba(0, 255, 255, 0.3);
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+.music-player-art-large {
+    border: 3px solid var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.music-no-art-large {
+    color: var(--neon-cyan);
+}
+
+.music-track-name-large {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.music-artist-name-large {
+    color: var(--neon-green);
+}
+
+.music-album-name-large {
+    color: var(--neon-amber);
+}
+
+.music-progress-time {
+    color: var(--neon-cyan);
+}
+
+.music-progress-bar {
+    background: rgba(0, 255, 255, 0.2);
+    border: 1px solid var(--neon-cyan);
+}
+
+.music-progress-fill {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.music-control-btn-large {
+    background: rgba(0, 255, 255, 0.1);
+    border: 3px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+.music-control-btn-large:hover {
+    background: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+    transform: scale(1.1);
+}
+
+.music-control-play-pause-large {
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+    background: rgba(0, 255, 0, 0.1);
+}
+
+.music-control-play-pause-large:hover {
+    background: rgba(0, 255, 0, 0.2);
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.8);
+}
+
+.music-no-playback-icon {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 20px var(--neon-cyan);
+}
+
+.music-no-playback-text {
+    color: var(--neon-amber);
+}
+
+.music-no-playback-hint {
+    color: var(--terminal-text);
+}
+
+.music-devices-title {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.music-device-item {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid var(--neon-cyan);
+}
+
+.music-device-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.music-device-item.active {
+    border-color: var(--neon-green);
+    background: rgba(0, 255, 0, 0.1);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+}
+
+.device-name {
+    color: var(--neon-cyan);
+}
+
+.device-badge {
+    background: var(--neon-green);
+    color: var(--terminal-bg);
+}
+
+.music-playlist-art {
+    border: 2px solid var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.music-playlist-item:hover .music-playlist-art {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+}
+
+.music-playlist-name {
+    color: var(--neon-cyan);
+}
+
+.music-playlist-tracks {
+    color: var(--neon-amber);
+}
+
+.music-recent-item {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid var(--neon-cyan);
+}
+
+.music-recent-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    transform: translateX(5px);
+}
+
+.music-recent-art {
+    border: 1px solid var(--neon-cyan);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.music-no-art-small {
+    color: var(--neon-cyan);
+}
+
+.music-recent-name {
+    color: var(--neon-cyan);
+}
+
+.music-recent-artist {
+    color: var(--neon-amber);
+}
+
+.loading-text {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.music-modal-content::-webkit-scrollbar-thumb {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.music-modal-content::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+}
+
+/* Devices Manager */
+.music-devices-header {
+    border-bottom: 1px solid var(--neon-cyan);
+}
+
+.devices-title {
+    color: var(--neon-cyan);
+}
+
+.devices-refresh-btn {
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+    font-family: 'VT323', monospace;
+}
+
+.devices-refresh-btn:hover {
+    background: var(--neon-cyan);
+    color: var(--dark-bg);
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.music-device-item.sdk-device {
+    border-color: var(--neon-purple);
+    background: rgba(138, 43, 226, 0.05);
+}
+
+.music-device-item.sdk-device:hover {
+    background: rgba(138, 43, 226, 0.15);
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+}
+
+.music-device-item.sdk-device.active {
+    border-color: var(--neon-green);
+    background: linear-gradient(90deg, rgba(138, 43, 226, 0.1), rgba(0, 255, 0, 0.1));
+}
+
+.device-type {
+    color: var(--text-primary);
+}
+
+.status-badge {
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.1);
+}
+
+.status-badge.active {
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+    background: rgba(0, 255, 0, 0.2);
+}
+
+.music-mode-info {
+    border: 1px solid var(--neon-purple);
+    background: rgba(138, 43, 226, 0.05);
+}
+
+.mode-info-label {
+    color: var(--neon-purple);
+}
+
+.mode-info-value {
+    color: var(--text-primary);
+}
+
+.mode-indicator.sdk {
+    background: rgba(0, 255, 0, 0.2);
+    color: var(--neon-green);
+    border: 1px solid var(--neon-green);
+}
+
+.mode-indicator.api {
+    background: rgba(0, 255, 255, 0.2);
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+}
+
+/* Search */
+.music-search-input {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid var(--neon-cyan);
+    color: var(--text-primary);
+    font-family: 'VT323', monospace;
+}
+
+.music-search-input:focus {
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.music-search-input::placeholder {
+    color: var(--text-primary);
+}
+
+.music-search-btn {
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+    font-family: 'VT323', monospace;
+}
+
+.music-search-btn:hover {
+    background: var(--neon-cyan);
+    color: var(--dark-bg);
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.music-search-empty {
+    color: var(--text-primary);
+}
+
+.music-search-result-item {
+    border: 1px solid var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.05);
+}
+
+.music-search-result-item:hover {
+    background: rgba(0, 255, 255, 0.15);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    transform: translateX(3px);
+}
+
+.search-result-name {
+    color: var(--neon-cyan);
+}
+
+.search-result-artist {
+    color: var(--text-primary);
+}
+
+.search-result-album {
+    color: var(--text-primary);
+}
+
+.search-result-play {
+    color: var(--neon-green);
+}
+
+/* Header hover effects */
+.music-widget .widget-header:hover,
+.timer-widget .widget-header:hover {
+    color: var(--neon-green);
+    text-shadow: 0 0 10px var(--neon-green);
+}

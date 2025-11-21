@@ -1324,6 +1324,80 @@ document.querySelector('#system-temp').addEventListener('click', async () => {
     await showSystemStatusModal();
 });
 
+// System name click handler - Theme Selector
+document.querySelector('.system-name').addEventListener('click', () => {
+    showThemeSelector();
+});
+
+// Show Theme Selector Modal
+function showThemeSelector() {
+    if (typeof themeManager === 'undefined') {
+        console.error('ThemeManager not loaded');
+        return;
+    }
+
+    const themes = themeManager.getAvailableThemes();
+    const currentTheme = themeManager.getCurrentTheme();
+
+    const themeCards = themes.map(theme => `
+        <div class="theme-card ${theme.active ? 'active' : ''}" data-theme="${theme.id}" onclick="selectTheme('${theme.id}')">
+            <div class="theme-preview" style="background: ${theme.preview}; width: 100%; height: 80px; border-radius: 8px 8px 0 0;"></div>
+            <div class="theme-info" style="padding: 15px;">
+                <div class="theme-name" style="font-size: 1.8rem; color: var(--neon-cyan); margin-bottom: 5px;">${theme.name}</div>
+                <div class="theme-desc" style="font-size: 1.1rem; opacity: 0.7;">${theme.description}</div>
+                ${theme.active ? '<div class="theme-active-badge" style="margin-top: 10px; color: var(--neon-green); font-size: 1.2rem;">✓ ACTIVE</div>' : ''}
+            </div>
+        </div>
+    `).join('');
+
+    const content = `
+        <div class="theme-selector-container" style="padding: 20px;">
+            <div class="theme-selector-header" style="text-align: center; margin-bottom: 30px;">
+                <div style="font-size: 1.4rem; opacity: 0.7; margin-bottom: 10px;">SELECT YOUR VISUAL STYLE</div>
+                <div style="font-size: 1.2rem; opacity: 0.5;">Current: ${themes.find(t => t.active)?.name || 'Unknown'}</div>
+            </div>
+            <div class="theme-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                ${themeCards}
+            </div>
+        </div>
+        <style>
+            .theme-card {
+                border: 2px solid var(--neon-cyan);
+                background: rgba(0, 255, 255, 0.05);
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                overflow: hidden;
+            }
+            .theme-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+            }
+            .theme-card.active {
+                border-color: var(--neon-green);
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            }
+        </style>
+    `;
+
+    openModal('&gt; THEME_SELECTOR', content);
+}
+
+// Global function to select theme (called from onclick)
+window.selectTheme = function(themeName) {
+    if (typeof themeManager === 'undefined') return;
+
+    themeManager.switchTheme(themeName);
+
+    // Close modal and reload to apply theme fully
+    closeModal();
+
+    // Small delay then reload to ensure theme CSS is fully applied
+    setTimeout(() => {
+        location.reload();
+    }, 300);
+};
+
 // Show Weather Modal with 5-day forecast
 async function showWeatherModal() {
     try {

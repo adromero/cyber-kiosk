@@ -1,0 +1,1733 @@
+/* ============================================
+   BASE THEME - Shared structural styles
+   Theme-agnostic layout and functionality
+   ============================================ */
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    overflow: hidden;
+    height: 100vh;
+    position: relative;
+}
+
+/* Container */
+.container {
+    position: relative;
+    z-index: 10;
+    padding: 20px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.header-right {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.temp-display {
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.time-display {
+    font-size: 2rem;
+}
+
+/* Separator */
+.separator {
+    height: 2px;
+    margin: 10px 0;
+}
+
+/* Main Grid */
+.main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.left-column, .right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow: hidden;
+}
+
+/* Widgets */
+.widget {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.weather-widget,
+.video-widget,
+.news-widget,
+.timer-widget,
+.music-widget,
+.cyberspace-widget {
+    flex: 1;
+    min-height: 0;
+}
+
+.widget-header {
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.widget-title {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+}
+
+.widget-status {
+    font-size: 1.2rem;
+}
+
+.widget-content {
+    padding: 15px;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* Custom Scrollbar Base */
+.widget-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.widget-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Weather Widget */
+.weather-current {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.weather-temp {
+    font-size: 3rem;
+    margin-bottom: 5px;
+}
+
+.weather-condition {
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+.weather-details {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+}
+
+.weather-detail {
+    font-size: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.label {
+    font-size: 0.9rem;
+}
+
+.weather-forecast {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.forecast-item {
+    padding: 8px;
+    text-align: center;
+}
+
+.forecast-day {
+    font-size: 1rem;
+    margin-bottom: 3px;
+}
+
+.forecast-temp {
+    font-size: 1.3rem;
+}
+
+.forecast-desc {
+    font-size: 0.9rem;
+    margin-top: 3px;
+}
+
+/* Bottom Row */
+.bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Cyberspace Widget */
+.cyberspace-content {
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.cyberspace-content iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    zoom: 0.6;
+}
+
+/* Video Widget */
+.video-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0;
+}
+
+#video-thumbnail {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* News Widget */
+.news-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.news-item {
+    padding: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.news-rank {
+    font-size: 1.2rem;
+    margin-right: 10px;
+}
+
+.news-title {
+    font-size: 1.4rem;
+    line-height: 1.4;
+    margin-bottom: 5px;
+}
+
+.news-meta {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.news-abstract {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding-left: 20px;
+}
+
+/* Footer */
+.footer {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+}
+
+/* Financial Grid */
+.financial-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.financial-item {
+    padding: 10px;
+    text-align: center;
+}
+
+.financial-label {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+.financial-value {
+    font-size: 1.4rem;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.financial-change {
+    font-size: 1rem;
+    margin-top: 3px;
+}
+
+.financial-time {
+    font-size: 1.4rem;
+}
+
+/* Error Message */
+.error-message {
+    font-size: 1.5rem;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Widget Source Label */
+.widget-source {
+    font-size: 1rem;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+}
+
+.modal-overlay.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-container {
+    width: 90%;
+    max-width: 1200px;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.modal-header {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 2rem;
+    letter-spacing: 3px;
+}
+
+.modal-close {
+    background: transparent;
+    font-size: 2.5rem;
+    width: 50px;
+    height: 50px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+.modal-reload {
+    background: transparent;
+    font-size: 1.4rem;
+    height: 50px;
+    padding: 0 20px;
+    margin-right: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+}
+
+.modal-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+}
+
+/* Modal Content Scrollbar Base */
+.modal-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Widget Click Cursor */
+.weather-widget,
+.cyberspace-widget,
+.video-widget,
+.news-widget,
+.music-widget,
+.timer-widget {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Modal Weather */
+.modal-weather-expanded {
+    text-align: center;
+}
+
+.modal-weather-current {
+    margin-bottom: 30px;
+    padding-bottom: 30px;
+}
+
+.modal-weather-temp {
+    font-size: 5rem;
+    margin-bottom: 10px;
+}
+
+.modal-weather-condition {
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+}
+
+.modal-weather-details {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.modal-weather-detail {
+    font-size: 1.8rem;
+}
+
+.modal-forecast {
+    margin-top: 30px;
+}
+
+.modal-forecast-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+.modal-forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.modal-forecast-item {
+    padding: 20px;
+    text-align: center;
+}
+
+.modal-forecast-day {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.modal-forecast-temp {
+    font-size: 2rem;
+    margin: 10px 0;
+}
+
+.modal-forecast-desc {
+    font-size: 1.2rem;
+}
+
+/* Modal Financial Grid */
+.modal-financial-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.modal-financial-item {
+    padding: 25px;
+    text-align: center;
+}
+
+.modal-financial-label {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+}
+
+.modal-financial-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.modal-financial-change {
+    font-size: 1.5rem;
+    margin-top: 10px;
+    display: block;
+}
+
+/* Modal System Stats */
+.modal-system-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.modal-system-section {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-system-label {
+    font-size: 2rem;
+    letter-spacing: 2px;
+}
+
+.modal-system-value {
+    font-size: 2.2rem;
+    font-weight: bold;
+}
+
+/* Modal Video Display */
+.modal-video-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modal-video-player {
+    width: 100%;
+    height: 400px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.modal-video-player iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.modal-video-selector {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-video-search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.video-search-input {
+    flex: 1;
+    font-size: 1.4rem;
+    padding: 10px 15px;
+    outline: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.video-search-button {
+    font-size: 1.4rem;
+    padding: 10px 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 2px;
+}
+
+.modal-video-selector-title {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+}
+
+.modal-video-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.video-selector-item {
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.video-selector-item img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.video-selector-item span {
+    font-size: 1.1rem;
+    text-align: center;
+    line-height: 1.3;
+}
+
+/* Modal News Feed */
+.modal-news-section {
+    margin-bottom: 40px;
+}
+
+.modal-news-source-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    padding-bottom: 10px;
+}
+
+.modal-news-item {
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.modal-news-title {
+    font-size: 1.6rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.modal-news-abstract {
+    font-size: 1.3rem;
+    line-height: 1.4;
+    margin: 10px 0;
+}
+
+.modal-news-meta {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+/* Hidden Exit Button */
+.exit-button {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    z-index: 3000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Screensaver Trigger Button */
+.screensaver-button {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    z-index: 3000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    border: none;
+}
+
+/* Screensaver Overlay */
+#screensaver-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#screensaver-image {
+    max-width: 100vw;
+    max-height: 100vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    transition: opacity 0.5s ease-in-out;
+    opacity: 1;
+}
+
+#screensaver-info {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    padding: 10px 20px;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+
+/* Responsive adjustments for 7-inch display */
+@media screen and (max-width: 800px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bottom-row {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        font-size: 1.4rem;
+    }
+
+    .time-display {
+        font-size: 1.6rem;
+    }
+
+    .system-label {
+        font-size: 1.1rem;
+    }
+
+    .system-value {
+        font-size: 1.3rem;
+    }
+
+    .financial-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-container {
+        width: 95%;
+        height: 90vh;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+    }
+
+    .modal-close {
+        width: 40px;
+        height: 40px;
+        font-size: 2rem;
+    }
+}
+
+/* ============================================
+   TIMER PANEL BASE STYLES
+   ============================================ */
+
+.timer-panel-container {
+    padding: 1rem;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.timer-panel-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.timer-panel-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Timer Controls */
+.timer-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.timer-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.timer-input {
+    width: 70px;
+    min-height: 50px;
+    padding: 0.75rem;
+    font-size: 2rem;
+    text-align: center;
+    outline: none;
+    transition: all 0.3s;
+    touch-action: manipulation;
+}
+
+.timer-separator {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+/* Timer Buttons */
+.timer-button {
+    padding: 1rem 2rem;
+    min-height: 50px;
+    font-size: 1.6rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    touch-action: manipulation;
+}
+
+/* Preset Buttons */
+.timer-presets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.timer-preset-button {
+    padding: 1rem;
+    min-height: 50px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    touch-action: manipulation;
+}
+
+/* Timer List */
+.timer-list,
+.timer-alarm-list {
+    margin-bottom: 1.5rem;
+}
+
+.timer-item {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s;
+}
+
+.timer-display {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+/* Progress Bar */
+.timer-progress-bar {
+    width: 100%;
+    height: 8px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+}
+
+.timer-progress-fill {
+    height: 100%;
+    transition: width 0.1s linear;
+}
+
+/* Timer Actions */
+.timer-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.timer-action-button {
+    padding: 0.75rem 1.25rem;
+    min-height: 44px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    flex: 1;
+    touch-action: manipulation;
+}
+
+/* Empty State */
+.timer-empty {
+    text-align: center;
+    font-size: 1.4rem;
+    padding: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Section Divider */
+.timer-section-divider {
+    height: 1px;
+    margin: 2rem 0;
+}
+
+.timer-section-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Alarm Inputs */
+.timer-alarm-input {
+    padding: 0.75rem;
+    min-height: 50px;
+    font-size: 1.8rem;
+    outline: none;
+    transition: all 0.3s;
+    width: 140px;
+    touch-action: manipulation;
+}
+
+.timer-alarm-label-input {
+    padding: 0.75rem;
+    min-height: 50px;
+    font-size: 1.6rem;
+    outline: none;
+    transition: all 0.3s;
+    flex: 1;
+    min-width: 150px;
+    touch-action: manipulation;
+}
+
+/* Alarm Items */
+.timer-alarm-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s;
+}
+
+.timer-alarm-info {
+    flex: 1;
+}
+
+.timer-alarm-time {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.timer-alarm-label {
+    font-size: 1.3rem;
+    margin-top: 0.25rem;
+}
+
+.timer-alarm-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Toggle Switch */
+.timer-toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 32px;
+    min-height: 32px;
+}
+
+.timer-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.timer-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: 0.3s;
+    border-radius: 16px;
+}
+
+.timer-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+.timer-toggle input:checked + .timer-toggle-slider:before {
+    transform: translateX(28px);
+}
+
+/* Responsive adjustments for timer panel */
+@media screen and (max-width: 600px) {
+    .timer-input-group {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .timer-controls {
+        flex-direction: column;
+    }
+
+    .timer-display {
+        font-size: 2rem;
+    }
+
+    .timer-alarm-item {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .timer-alarm-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* Timer Panel Summary View */
+.timer-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.timer-summary-item {
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.timer-summary-label {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.timer-summary-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.timer-summary-sublabel {
+    font-size: 1.1rem;
+    margin-top: 0.25rem;
+}
+
+/* Timer Modal Overlay */
+.timer-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-modal-overlay.active {
+    display: flex;
+}
+
+.timer-modal-container {
+    max-width: 800px;
+    width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.timer-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+}
+
+.timer-modal-title {
+    font-size: 2rem;
+}
+
+.timer-modal-close {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.timer-modal-content {
+    padding: 2rem;
+}
+
+/* ============================================
+   MUSIC PANEL BASE STYLES
+   ============================================ */
+
+.music-widget {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.music-not-connected {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 1rem;
+}
+
+.music-connect-prompt {
+    text-align: center;
+}
+
+.music-connect-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.music-connect-text {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.music-config-hint {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    line-height: 1.6;
+    text-align: left;
+}
+
+.music-setup-link {
+    text-decoration: underline;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.music-connect-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.music-player-display {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0.5rem;
+    position: relative;
+}
+
+.music-album-art {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+}
+
+.music-album-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.music-no-art {
+    font-size: 4rem;
+    opacity: 0.3;
+}
+
+.music-controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.music-control-btn {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.music-control-play-pause {
+    width: 4rem;
+    height: 4rem;
+}
+
+.music-track-info {
+    text-align: center;
+    overflow: hidden;
+}
+
+.music-track-name {
+    font-size: 1rem;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.music-artist-name {
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 0.25rem;
+}
+
+/* Music Modal Styles */
+.music-modal-container {
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+    max-height: 800px;
+}
+
+.music-modal-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+}
+
+.music-tab-btn {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.music-modal-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Player Tab - Full View */
+.music-player-full {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+}
+
+.music-player-art-large {
+    width: 300px;
+    height: 300px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.music-player-art-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.music-no-art-large {
+    font-size: 8rem;
+    opacity: 0.3;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.music-player-info {
+    text-align: center;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 500px;
+}
+
+.music-track-name-large {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.music-artist-name-large {
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
+}
+
+.music-album-name-large {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.music-player-progress {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 2rem;
+}
+
+.music-progress-time {
+    font-size: 0.9rem;
+    min-width: 40px;
+}
+
+.music-progress-bar {
+    flex: 1;
+    height: 6px;
+    position: relative;
+    overflow: hidden;
+}
+
+.music-progress-fill {
+    height: 100%;
+    transition: width 0.3s linear;
+}
+
+.music-player-controls-large {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.music-control-btn-large {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.5rem;
+}
+
+.music-control-play-pause-large {
+    width: 5rem;
+    height: 5rem;
+    font-size: 2rem;
+}
+
+.music-no-playback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 2rem;
+    text-align: center;
+}
+
+.music-no-playback-icon {
+    font-size: 5rem;
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+.music-no-playback-text {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.music-no-playback-hint {
+    font-size: 1rem;
+    opacity: 0.7;
+}
+
+/* Devices List */
+.music-devices {
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 500px;
+}
+
+.music-devices-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.music-devices-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.music-device-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.device-icon {
+    font-size: 1.5rem;
+}
+
+.device-name {
+    flex: 1;
+}
+
+.device-badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* Playlists Grid */
+.music-playlists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    padding: 0.5rem;
+}
+
+.music-playlist-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.music-playlist-art {
+    width: 100%;
+    aspect-ratio: 1;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+}
+
+.music-playlist-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.music-playlist-name {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.music-playlist-tracks {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Recent Tracks List */
+.music-recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.5rem;
+}
+
+.music-recent-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.music-recent-art {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.music-recent-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.music-no-art-small {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    opacity: 0.3;
+}
+
+.music-recent-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.music-recent-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.music-recent-artist {
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Loading State */
+.music-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 300px;
+}
+
+.loading-text {
+    font-size: 1.5rem;
+}
+
+/* Devices Manager */
+.music-devices-manager {
+    padding: 1rem;
+}
+
+.music-devices-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+}
+
+.devices-title {
+    font-size: 1.5rem;
+}
+
+.devices-refresh-btn {
+    background: transparent;
+    padding: 0.5rem 1rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.device-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.device-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.device-type {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.device-status {
+    font-size: 1.1rem;
+}
+
+.status-badge {
+    padding: 0.3rem 0.8rem;
+    font-size: 1rem;
+}
+
+/* Mode Info */
+.music-mode-info {
+    padding: 1rem;
+    text-align: center;
+}
+
+.mode-info-label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.mode-info-value {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+/* Mode indicator */
+.mode-indicator {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: bold;
+}
+
+/* Search Tab */
+.music-search {
+    padding: 1rem;
+}
+
+.music-search-input-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.music-search-input {
+    flex: 1;
+    padding: 0.8rem;
+    font-size: 1.3rem;
+}
+
+.music-search-btn {
+    background: transparent;
+    padding: 0.8rem 1.5rem;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.music-search-empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    opacity: 0.5;
+    font-size: 1.2rem;
+}
+
+.music-search-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.music-search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.search-result-art {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+}
+
+.search-result-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.search-result-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.search-result-name {
+    font-size: 1.3rem;
+}
+
+.search-result-artist {
+    font-size: 1.1rem;
+}
+
+.search-result-album {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.search-result-play {
+    font-size: 2rem;
+}
+
+/* Panel Header Click/Hover */
+.music-widget .widget-header,
+.timer-widget .widget-header {
+    cursor: pointer;
+    user-select: none;
+}

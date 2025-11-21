@@ -4,11 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CYBER TERMINAL</title>
-    <link rel="stylesheet" href="css/style.css">
+    <!-- Base styles (theme-agnostic) -->
+    <link rel="stylesheet" href="css/themes/base.css">
+    <!-- Theme CSS (loaded dynamically by theme-manager.js, cyberpunk as fallback) -->
+    <link id="theme-css" rel="stylesheet" href="css/themes/cyberpunk.css">
+    <!-- Responsive overrides -->
     <link rel="stylesheet" href="css/responsive.css">
+    <!-- Legacy styles (will be phased out) -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Bebas+Neue&family=Oswald:wght@400;700&family=Montserrat:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- CRT Overlay Effects -->
@@ -136,6 +143,9 @@
 
     <!-- Spotify Web Playback SDK wrapper -->
     <script src="js/spotify-player-sdk.js"></script>
+
+    <!-- Theme Manager (should load early) -->
+    <script src="js/theme-manager.js"></script>
 
     <script src="js/panels/panel-registry.js"></script>
     <script src="js/panels/base-panel.js"></script>
