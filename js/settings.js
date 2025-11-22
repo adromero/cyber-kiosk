@@ -47,7 +47,31 @@ class SettingsManager {
         // Warn user about unsaved changes
         this.setupUnsavedChangesWarning();
 
+        // Initialize layout editor
+        this.setupLayoutEditor();
+
         console.log('[Settings] Settings manager ready');
+    }
+
+    /**
+     * Set up layout editor
+     */
+    setupLayoutEditor() {
+        if (window.layoutEditor) {
+            window.layoutEditor.init();
+
+            // Load layout from current settings if available
+            if (this.currentSettings && this.currentSettings.layout) {
+                window.layoutEditor.loadLayout(this.currentSettings.layout);
+            }
+
+            // Listen for panel toggle changes to update palette
+            document.querySelectorAll('[data-panel]').forEach(toggle => {
+                toggle.addEventListener('change', () => {
+                    window.layoutEditor.updatePanelPalette();
+                });
+            });
+        }
     }
 
     /**
@@ -95,7 +119,8 @@ class SettingsManager {
                 animations,
                 fontSize,
                 refreshInterval,
-                panels: panelConfig.activePanels || []
+                panels: panelConfig.activePanels || [],
+                layout: panelConfig.layout || null
             };
 
             console.log('[Settings] Loaded settings:', this.currentSettings);
@@ -362,23 +387,34 @@ class SettingsManager {
             // Apply font size
             document.documentElement.setAttribute('data-font-size', fontSize);
 
+            // Get layout configuration from layout editor
+            const layout = window.layoutEditor ? window.layoutEditor.getLayout() : null;
+
             // Update current settings
             this.currentSettings.crtEffects = crtEffects;
             this.currentSettings.animations = animations;
             this.currentSettings.fontSize = fontSize;
             this.currentSettings.refreshInterval = refreshInterval;
             this.currentSettings.panels = panels;
+            this.currentSettings.layout = layout;
 
             // Try to save panel config to server
             try {
+                const configData = {
+                    activePanels: panels
+                };
+
+                // Add layout if configured
+                if (layout && layout.panels && layout.panels.length > 0) {
+                    configData.layout = layout;
+                }
+
                 const response = await fetch('/config/panels', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        activePanels: panels
-                    })
+                    body: JSON.stringify(configData)
                 });
 
                 if (!response.ok) {
