@@ -3477,32 +3477,37 @@ input:checked + .toggle-slider:before {
     opacity: 0.7;
 }
 
+.row-selector,
 .column-selector {
     display: flex;
     gap: 10px;
 }
 
+.row-btn,
 .column-btn {
-    padding: 15px 25px;
+    padding: 20px 30px;
     background: transparent;
-    border: 2px solid var(--neon-cyan);
+    border: 3px solid var(--neon-cyan);
     color: var(--neon-cyan);
     font-family: 'VT323', monospace;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     cursor: pointer;
-    transition: all 0.3s ease;
-    min-width: 60px;
+    transition: all 0.2s ease;
+    min-width: 70px;
+    touch-action: manipulation;
 }
 
-.column-btn:hover {
-    background: rgba(0, 255, 255, 0.1);
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+.row-btn:active,
+.column-btn:active {
+    transform: scale(0.95);
+    background: rgba(0, 255, 255, 0.2);
 }
 
+.row-btn.active,
 .column-btn.active {
     background: var(--neon-cyan);
     color: var(--dark-bg);
-    box-shadow: 0 0 15px var(--neon-cyan);
+    box-shadow: 0 0 20px var(--neon-cyan);
 }
 
 .grid-editor {
@@ -3522,17 +3527,20 @@ input:checked + .toggle-slider:before {
 }
 
 .btn-small {
-    padding: 8px 15px;
+    padding: 12px 20px;
     background: transparent;
     border: 2px solid var(--neon-cyan);
     color: var(--neon-cyan);
     font-family: 'VT323', monospace;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+    min-height: 44px;
 }
 
-.btn-small:hover {
+.btn-small:active {
+    transform: scale(0.95);
     background: var(--neon-cyan);
     color: var(--dark-bg);
 }
@@ -3542,20 +3550,22 @@ input:checked + .toggle-slider:before {
     color: var(--error-red);
 }
 
-.btn-small.btn-danger:hover {
+.btn-small.btn-danger:active {
     background: var(--error-red);
     color: var(--dark-bg);
 }
 
 .grid-preview {
     display: grid;
-    gap: 10px;
-    min-height: 400px;
+    gap: 12px;
     background: rgba(0, 0, 0, 0.3);
-    padding: 15px;
-    border: 1px solid rgba(0, 255, 255, 0.2);
+    padding: 20px;
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    position: relative;
+    isolation: isolate;
 }
 
+/* Column layouts */
 .grid-preview[data-columns="1"] {
     grid-template-columns: 1fr;
 }
@@ -3572,61 +3582,126 @@ input:checked + .toggle-slider:before {
     grid-template-columns: repeat(4, 1fr);
 }
 
+/* Row layouts */
+.grid-preview[data-rows="1"] {
+    grid-template-rows: 1fr;
+}
+
+.grid-preview[data-rows="2"] {
+    grid-template-rows: repeat(2, 1fr);
+}
+
+.grid-preview[data-rows="3"] {
+    grid-template-rows: repeat(3, 1fr);
+}
+
+.grid-preview[data-rows="4"] {
+    grid-template-rows: repeat(4, 1fr);
+}
+
 .grid-cell {
-    border: 1px dashed rgba(0, 255, 255, 0.3);
-    min-height: 120px;
+    border: 2px dashed rgba(0, 255, 255, 0.4);
+    min-height: 140px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     position: relative;
+    cursor: pointer;
+    touch-action: manipulation;
 }
 
-.grid-cell.drop-target {
-    border-color: var(--neon-green);
-    background: rgba(0, 255, 0, 0.1);
+.grid-cell:active {
+    background: rgba(0, 255, 255, 0.15);
+    transform: scale(0.98);
 }
 
 .grid-cell.occupied {
-    border: 2px solid var(--neon-cyan);
-    background: rgba(0, 255, 255, 0.1);
+    border: 2px solid rgba(0, 255, 255, 0.2);
+    background: rgba(0, 255, 255, 0.05);
+    cursor: default;
+}
+
+.grid-cell.occupied:active {
+    transform: none;
 }
 
 .grid-panel-item {
-    padding: 15px;
-    background: rgba(0, 255, 255, 0.05);
-    border: 2px solid var(--neon-cyan);
+    padding: 20px;
+    background: rgba(0, 255, 255, 0.1);
+    border: 3px solid var(--neon-cyan);
     color: var(--neon-cyan);
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     user-select: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    touch-action: manipulation;
+    min-height: 140px;
+    position: relative;
+    pointer-events: auto;
 }
 
-.grid-panel-item:hover {
-    background: rgba(0, 255, 255, 0.15);
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+.grid-panel-item:active {
+    transform: scale(0.97);
+    background: rgba(0, 255, 255, 0.2);
 }
 
 .grid-panel-item.selected {
     border-color: var(--neon-green);
-    background: rgba(0, 255, 0, 0.1);
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+    background: rgba(0, 255, 0, 0.15);
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.6);
+    border-width: 4px;
+}
+
+.grid-panel-item .panel-drag-handle {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 1.5rem;
+    opacity: 0.5;
+    letter-spacing: -4px;
+    cursor: grab;
+    user-select: none;
+}
+
+.grid-panel-item:hover .panel-drag-handle {
+    opacity: 1;
 }
 
 .grid-panel-item .panel-icon-small {
-    font-size: 2rem;
-    margin-bottom: 5px;
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+}
+
+.grid-panel-item .panel-name-display {
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+}
+
+.grid-panel-item .panel-size-display {
+    font-size: 1.1rem;
+    opacity: 0.7;
+}
+
+/* Drag and Drop Styles */
+.grid-panel-item {
+    cursor: grab;
+}
+
+.grid-panel-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.grid-cell.drop-target {
+    background: rgba(0, 255, 0, 0.2);
+    border-color: var(--neon-green);
+    border-style: solid;
 }
 
 .available-panels {
@@ -3642,79 +3717,126 @@ input:checked + .toggle-slider:before {
 .panel-palette {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    padding: 15px;
-    border: 1px solid rgba(0, 255, 255, 0.3);
+    gap: 12px;
+    padding: 20px;
+    border: 2px solid rgba(0, 255, 255, 0.3);
     background: rgba(0, 0, 0, 0.2);
-    min-height: 80px;
+    min-height: 100px;
 }
 
 .palette-panel {
-    padding: 10px 20px;
+    padding: 18px 28px;
     background: rgba(0, 255, 255, 0.1);
-    border: 2px solid var(--neon-cyan);
+    border: 3px solid var(--neon-cyan);
     color: var(--neon-cyan);
-    font-size: 1.1rem;
-    cursor: grab;
-    transition: all 0.3s ease;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
     user-select: none;
     display: flex;
     align-items: center;
-    gap: 8px;
-}
-
-.palette-panel:hover {
-    background: rgba(0, 255, 255, 0.2);
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    gap: 10px;
+    touch-action: manipulation;
+    min-height: 60px;
 }
 
 .palette-panel:active {
-    cursor: grabbing;
+    transform: scale(0.95);
+    background: rgba(0, 255, 255, 0.2);
 }
 
-.palette-panel.dragging {
-    opacity: 0.5;
+.palette-panel.selected {
+    background: var(--neon-green);
+    color: var(--dark-bg);
+    border-color: var(--neon-green);
+    box-shadow: 0 0 20px var(--neon-green);
+}
+
+.palette-panel .palette-icon {
+    font-size: 1.6rem;
+}
+
+.palette-panel .palette-name {
+    font-weight: bold;
+}
+
+.palette-empty-message {
+    color: var(--neon-green);
+    padding: 20px;
+    text-align: center;
+    font-size: 1.2rem;
 }
 
 .panel-size-controls {
-    padding: 20px;
-    border: 1px solid var(--neon-cyan);
-    background: rgba(0, 255, 255, 0.05);
+    padding: 25px;
+    border: 2px solid var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.08);
     margin-bottom: 20px;
 }
 
 .size-control-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 25px;
     align-items: center;
 }
 
 .size-control-group label {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
 }
 
 .size-control-group label > span:first-child {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: var(--neon-cyan);
+    font-weight: bold;
 }
 
-.size-input {
-    padding: 8px 12px;
-    background: var(--dark-bg);
-    border: 2px solid var(--neon-cyan);
+.size-control-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.size-value-display {
+    font-size: 2rem;
+    color: var(--neon-green);
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+}
+
+.size-btn {
+    padding: 15px 20px;
+    background: transparent;
+    border: 3px solid var(--neon-cyan);
     color: var(--neon-cyan);
     font-family: 'VT323', monospace;
-    font-size: 1.2rem;
-    width: 80px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+    min-width: 50px;
+    min-height: 50px;
+    line-height: 1;
 }
 
-.size-input:focus {
-    outline: none;
-    border-color: var(--neon-green);
-    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+.size-btn:active {
+    transform: scale(0.95);
+    background: var(--neon-cyan);
+    color: var(--dark-bg);
+}
+
+.size-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.size-btn:disabled:active {
+    transform: none;
+    background: transparent;
+    color: var(--neon-cyan);
 }
 
 .layout-note {
@@ -3723,6 +3845,45 @@ input:checked + .toggle-slider:before {
     background: rgba(0, 255, 0, 0.05);
     color: var(--text-primary);
     font-size: 1.1rem;
+}
+
+.layout-message {
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    text-align: center;
+    display: none;
+    animation: slideIn 0.3s ease;
+}
+
+.layout-message.info {
+    background: rgba(0, 255, 255, 0.15);
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+.layout-message.success {
+    background: rgba(0, 255, 0, 0.15);
+    border: 2px solid var(--neon-green);
+    color: var(--neon-green);
+}
+
+.layout-message.error {
+    background: rgba(255, 0, 64, 0.15);
+    border: 2px solid var(--error-red);
+    color: var(--error-red);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Responsive Settings Page */

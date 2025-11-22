@@ -47,85 +47,40 @@ async function loadConfig() {
     }
 }
 
-// Load panel configuration and apply visibility
-async function loadPanelConfig() {
+// DEPRECATED: Old panel config loading - now handled by GridLayoutManager
+// Kept for backward compatibility if GridLayoutManager fails
+async function loadPanelConfigLegacy() {
     try {
         const response = await fetch('/config/panels');
         if (response.ok) {
             const panelConfig = await response.json();
-            console.log('> PANEL CONFIG LOADED');
-
-            // Apply panel visibility based on config
-            applyPanelVisibility(panelConfig);
-
+            console.log('> PANEL CONFIG LOADED (LEGACY MODE)');
             return panelConfig;
-        } else {
-            console.warn('> PANEL CONFIG NOT AVAILABLE - SHOWING ALL PANELS');
-            return null;
         }
     } catch (error) {
-        console.error('> ERROR LOADING PANEL CONFIG:', error);
-        console.warn('> SHOWING ALL PANELS BY DEFAULT');
-        return null;
+        console.error('> ERROR LOADING PANEL CONFIG (LEGACY):', error);
     }
+    return null;
 }
 
-// Apply panel visibility based on configuration
-function applyPanelVisibility(panelConfig) {
-    // Get all panels in the DOM
-    const allPanels = document.querySelectorAll('[data-panel-id]');
-
-    if (!panelConfig || !panelConfig.activePanels) {
-        console.log('> NO PANEL CONFIG - ALL PANELS VISIBLE');
-        return;
-    }
-
-    // Create a map of panel visibility
-    const visibilityMap = {};
-    panelConfig.activePanels.forEach(panel => {
-        visibilityMap[panel.id] = panel.visible;
-    });
-
-    // Also check panelSettings for enabled flags
-    if (panelConfig.panelSettings) {
-        Object.keys(panelConfig.panelSettings).forEach(panelId => {
-            const settings = panelConfig.panelSettings[panelId];
-            if (settings.enabled !== undefined) {
-                visibilityMap[panelId] = settings.enabled;
-            }
-        });
-    }
-
-    console.log('> PANEL VISIBILITY MAP:', visibilityMap);
-
-    // Apply visibility to each panel
-    allPanels.forEach(panelEl => {
-        const panelId = panelEl.getAttribute('data-panel-id');
-        const isVisible = visibilityMap[panelId];
-
-        if (isVisible === false) {
-            panelEl.style.display = 'none';
-            console.log(`> PANEL "${panelId}": HIDDEN`);
-        } else {
-            panelEl.style.display = '';
-            console.log(`> PANEL "${panelId}": VISIBLE`);
+// Load and apply panel configuration using GridLayoutManager
+async function loadPanelConfig() {
+    try {
+        // Initialize GridLayoutManager if not already created
+        if (!window.gridLayoutManager) {
+            window.gridLayoutManager = new GridLayoutManager();
         }
-    });
 
-    // Update grid layout based on visible panels count
-    updateGridLayout();
-}
+        // Load and apply the custom grid layout
+        await window.gridLayoutManager.init();
 
-// Update grid layout based on number of visible panels
-function updateGridLayout() {
-    const mainGrid = document.querySelector('.main-grid');
-    if (!mainGrid) return;
-
-    const visiblePanels = document.querySelectorAll('[data-panel-id]:not([style*="display: none"])');
-    const visibleCount = visiblePanels.length;
-
-    mainGrid.setAttribute('data-panels', visibleCount);
-    console.log(`> GRID LAYOUT: ${visibleCount} VISIBLE PANELS`);
+        console.log('> PANEL LAYOUT APPLIED VIA GRID LAYOUT MANAGER');
+        return true;
+    } catch (error) {
+        console.error('> ERROR IN GRID LAYOUT MANAGER:', error);
+        console.warn('> FALLING BACK TO DEFAULT LAYOUT');
+        return false;
+    }
 }
 
 // State

@@ -400,8 +400,12 @@ class SettingsManager {
 
             // Try to save panel config to server
             try {
+                // Build complete config data matching panels.json structure
                 const configData = {
-                    activePanels: panels
+                    version: "1.0.0",
+                    description: "Configuration for Cyber Kiosk responsive system",
+                    activePanels: panels,
+                    lastUpdated: new Date().toISOString()
                 };
 
                 // Add layout if configured
@@ -419,9 +423,25 @@ class SettingsManager {
 
                 if (!response.ok) {
                     console.warn('[Settings] Could not save panel config to server');
+                    // Try alternative endpoint
+                    const altResponse = await fetch('/api/save-panels', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(configData)
+                    });
+
+                    if (!altResponse.ok) {
+                        console.warn('[Settings] Could not save to alternative endpoint either');
+                    }
                 }
             } catch (error) {
                 console.warn('[Settings] Could not save panel config to server:', error);
+                console.log('[Settings] Config would be saved as:', {
+                    activePanels: panels,
+                    layout: layout
+                });
             }
 
             // Clear unsaved changes flag

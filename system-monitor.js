@@ -1214,6 +1214,75 @@ const server = http.createServer(async (req, res) => {
             screensaverImageInterval: parseInt(ENV.SCREENSAVER_IMAGE_INTERVAL) || 600000,
             port: PORT
         }));
+    } else if (pathname === '/config/panels' && req.method === 'GET') {
+        // Get panels configuration
+        res.setHeader('Content-Type', 'application/json');
+        const panelsConfigFile = path.join(__dirname, 'config', 'panels.json');
+
+        try {
+            if (fs.existsSync(panelsConfigFile)) {
+                const panelsConfig = fs.readFileSync(panelsConfigFile, 'utf8');
+                res.writeHead(200);
+                res.end(panelsConfig);
+            } else {
+                res.writeHead(404);
+                res.end(JSON.stringify({ error: 'Panels config not found' }));
+            }
+        } catch (error) {
+            console.error('Error reading panels config:', error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: 'Failed to read panels config' }));
+        }
+    } else if (pathname === '/config/panels' && req.method === 'POST') {
+        // Save panels configuration
+        res.setHeader('Content-Type', 'application/json');
+        let body = '';
+
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+
+        req.on('end', () => {
+            try {
+                const data = JSON.parse(body);
+                const panelsConfigFile = path.join(__dirname, 'config', 'panels.json');
+
+                // Read existing config to preserve other settings
+                let existingConfig = {};
+                try {
+                    if (fs.existsSync(panelsConfigFile)) {
+                        existingConfig = JSON.parse(fs.readFileSync(panelsConfigFile, 'utf8'));
+                    }
+                } catch (error) {
+                    console.warn('Could not read existing panels config, creating new one');
+                }
+
+                // Merge with existing config, preserving structure
+                const updatedConfig = {
+                    ...existingConfig,
+                    activePanels: data.activePanels || existingConfig.activePanels || [],
+                    layout: data.layout || existingConfig.layout,
+                    lastUpdated: new Date().toISOString()
+                };
+
+                // Ensure config directory exists
+                const configDir = path.join(__dirname, 'config');
+                if (!fs.existsSync(configDir)) {
+                    fs.mkdirSync(configDir, { recursive: true });
+                }
+
+                // Write updated config
+                fs.writeFileSync(panelsConfigFile, JSON.stringify(updatedConfig, null, 2), 'utf8');
+
+                console.log('> Panels config saved successfully');
+                res.writeHead(200);
+                res.end(JSON.stringify({ success: true, config: updatedConfig }));
+            } catch (error) {
+                console.error('Error saving panels config:', error);
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: 'Failed to save panels config' }));
+            }
+        });
     } else if (pathname === '/device-id' && req.method === 'GET') {
         // Get stored device ID
         res.setHeader('Content-Type', 'application/json');
