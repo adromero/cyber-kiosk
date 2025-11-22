@@ -193,15 +193,12 @@ class SettingsManager {
     selectTheme(themeName) {
         console.log('[Settings] Selecting theme:', themeName);
 
-        // Update theme manager
+        // Update theme manager (this will apply the theme and reload)
         if (window.themeManager) {
-            window.themeManager.switchTheme(themeName);
+            window.themeManager.applyTheme(themeName);
             this.currentSettings.theme = themeName;
             this.markUnsavedChanges();
             this.updateCurrentThemeIndicator();
-
-            // Theme switching causes a reload, so we'll auto-save
-            this.saveSettings();
         } else {
             console.error('[Settings] ThemeManager not available');
         }
@@ -512,8 +509,14 @@ class SettingsManager {
         const modalTitle = document.getElementById('modal-title');
         const modalContent = document.getElementById('modal-content');
         const modalClose = document.getElementById('modal-close');
+        const modalContainer = document.querySelector('.modal-container');
 
         if (!modalOverlay || !modalTitle || !modalContent) return;
+
+        // Add small class for simple messages
+        if (modalContainer) {
+            modalContainer.classList.add('modal-small');
+        }
 
         modalTitle.textContent = title;
         modalContent.innerHTML = `<p>${message}</p>`;
@@ -522,6 +525,10 @@ class SettingsManager {
         // Close modal handlers
         const closeModal = () => {
             modalOverlay.style.display = 'none';
+            // Remove small class when closing
+            if (modalContainer) {
+                modalContainer.classList.remove('modal-small');
+            }
         };
 
         if (modalClose) {

@@ -609,6 +609,15 @@ a.system-name:hover {
     position: relative;
 }
 
+/* Small modal for simple messages */
+.modal-container.modal-small {
+    width: auto;
+    min-width: 300px;
+    max-width: 500px;
+    height: auto;
+    max-height: 300px;
+}
+
 @keyframes slideIn {
     from {
         transform: scale(0.9);
