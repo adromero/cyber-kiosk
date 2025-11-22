@@ -1546,6 +1546,74 @@ const server = http.createServer(async (req, res) => {
         const data = await spotifyApiRequest(`/search?${searchParams}`);
         res.writeHead(200);
         res.end(JSON.stringify(data));
+    } else if (pathname === '/config/panels' && req.method === 'GET') {
+        // Get panel configuration
+        res.setHeader('Content-Type', 'application/json');
+        const configPath = path.join(__dirname, 'config', 'panels.json');
+        try {
+            const configData = fs.readFileSync(configPath, 'utf8');
+            res.writeHead(200);
+            res.end(configData);
+        } catch (error) {
+            console.error('Error reading panel config:', error);
+            res.writeHead(404);
+            res.end(JSON.stringify({ error: 'Configuration file not found' }));
+        }
+    } else if (pathname === '/config/panels' && req.method === 'POST') {
+        // Save panel configuration
+        res.setHeader('Content-Type', 'application/json');
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+        req.on('end', () => {
+            try {
+                const newConfig = JSON.parse(body);
+                const configPath = path.join(__dirname, 'config', 'panels.json');
+
+                // Read existing config to preserve other settings
+                let existingConfig = {};
+                try {
+                    existingConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                } catch (error) {
+                    // If file doesn't exist, start with empty config
+                }
+
+                // Merge new panel settings with existing config
+                const updatedConfig = {
+                    ...existingConfig,
+                    ...newConfig,
+                    lastUpdated: new Date().toISOString()
+                };
+
+                // Write updated config
+                fs.writeFileSync(configPath, JSON.stringify(updatedConfig, null, 2));
+
+                res.writeHead(200);
+                res.end(JSON.stringify({ success: true, message: 'Configuration saved' }));
+            } catch (error) {
+                console.error('Error saving panel config:', error);
+                res.writeHead(400);
+                res.end(JSON.stringify({ error: 'Invalid configuration data' }));
+            }
+        });
+    } else if (pathname === '/config/panels/reset' && req.method === 'POST') {
+        // Reset panel configuration to defaults
+        res.setHeader('Content-Type', 'application/json');
+        const defaultsPath = path.join(__dirname, 'config', 'defaults.json');
+        const configPath = path.join(__dirname, 'config', 'panels.json');
+
+        try {
+            const defaultsData = fs.readFileSync(defaultsPath, 'utf8');
+            fs.writeFileSync(configPath, defaultsData);
+
+            res.writeHead(200);
+            res.end(JSON.stringify({ success: true, message: 'Configuration reset to defaults' }));
+        } catch (error) {
+            console.error('Error resetting panel config:', error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: 'Failed to reset configuration' }));
+        }
     } else {
         // Serve static files with enhanced security
         let filePath = pathname === '/' ? '/index.html' : pathname;

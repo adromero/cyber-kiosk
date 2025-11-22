@@ -1,0 +1,543 @@
+/**
+ * Settings Page Logic
+ * Handles theme switching, panel configuration, display settings, and about info
+ */
+
+class SettingsManager {
+    constructor() {
+        this.hasUnsavedChanges = false;
+        this.currentSettings = null;
+        this.defaultSettings = null;
+
+        // Initialize on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.init());
+        } else {
+            this.init();
+        }
+    }
+
+    async init() {
+        console.log('[Settings] Initializing settings manager...');
+
+        // Load current settings
+        await this.loadSettings();
+
+        // Set up tab navigation
+        this.setupTabs();
+
+        // Set up theme selector
+        this.setupThemeSelector();
+
+        // Set up panel toggles
+        this.setupPanelToggles();
+
+        // Set up display settings
+        this.setupDisplaySettings();
+
+        // Set up action buttons
+        this.setupActionButtons();
+
+        // Populate about tab
+        this.populateAboutInfo();
+
+        // Update current theme indicator
+        this.updateCurrentThemeIndicator();
+
+        // Warn user about unsaved changes
+        this.setupUnsavedChangesWarning();
+
+        console.log('[Settings] Settings manager ready');
+    }
+
+    /**
+     * Load current settings from localStorage and config files
+     */
+    async loadSettings() {
+        try {
+            // Load from localStorage (client-side settings)
+            const theme = localStorage.getItem('theme') || 'cyberpunk';
+            const crtEffects = localStorage.getItem('crtEffects') !== 'false';
+            const animations = localStorage.getItem('animations') !== 'false';
+            const fontSize = localStorage.getItem('fontSize') || 'medium';
+            const refreshInterval = localStorage.getItem('refreshInterval') || '300000';
+
+            // Try to load panel configuration from server
+            let panelConfig = null;
+            try {
+                const response = await fetch('/config/panels.json');
+                if (response.ok) {
+                    panelConfig = await response.json();
+                }
+            } catch (error) {
+                console.warn('[Settings] Could not load panel config from server:', error);
+            }
+
+            // Fallback to default panel config
+            if (!panelConfig) {
+                panelConfig = {
+                    activePanels: [
+                        { id: 'weather', visible: true },
+                        { id: 'markets', visible: true },
+                        { id: 'news', visible: true },
+                        { id: 'timer', visible: true },
+                        { id: 'music', visible: true },
+                        { id: 'cyberspace', visible: true },
+                        { id: 'video', visible: false },
+                        { id: 'system', visible: false }
+                    ]
+                };
+            }
+
+            this.currentSettings = {
+                theme,
+                crtEffects,
+                animations,
+                fontSize,
+                refreshInterval,
+                panels: panelConfig.activePanels || []
+            };
+
+            console.log('[Settings] Loaded settings:', this.currentSettings);
+
+            // Apply settings to UI
+            this.applySettingsToUI();
+
+        } catch (error) {
+            console.error('[Settings] Error loading settings:', error);
+        }
+    }
+
+    /**
+     * Apply loaded settings to the settings UI
+     */
+    applySettingsToUI() {
+        const { panels, crtEffects, animations, fontSize, refreshInterval } = this.currentSettings;
+
+        // Apply panel toggles
+        panels.forEach(panel => {
+            const checkbox = document.getElementById(`panel-${panel.id}`);
+            if (checkbox) {
+                checkbox.checked = panel.visible;
+            }
+        });
+
+        // Apply display settings
+        const crtCheckbox = document.getElementById('crt-effects');
+        if (crtCheckbox) crtCheckbox.checked = crtEffects;
+
+        const animCheckbox = document.getElementById('animations');
+        if (animCheckbox) animCheckbox.checked = animations;
+
+        const fontSelect = document.getElementById('font-size');
+        if (fontSelect) fontSelect.value = fontSize;
+
+        const refreshSelect = document.getElementById('refresh-interval');
+        if (refreshSelect) refreshSelect.value = refreshInterval;
+    }
+
+    /**
+     * Set up tab navigation
+     */
+    setupTabs() {
+        const tabs = document.querySelectorAll('.settings-tab');
+        const tabContents = document.querySelectorAll('.settings-tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+
+                // Remove active class from all tabs and content
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                const targetContent = document.getElementById(`tab-${targetTab}`);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            });
+        });
+    }
+
+    /**
+     * Set up theme selector cards
+     */
+    setupThemeSelector() {
+        const themeButtons = document.querySelectorAll('.theme-select-btn');
+
+        themeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const themeName = button.getAttribute('data-theme');
+                this.selectTheme(themeName);
+            });
+        });
+
+        // Add click handlers to entire theme cards as well
+        const themeCards = document.querySelectorAll('.theme-card');
+        themeCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                // Don't trigger if clicking the button directly (to avoid double-fire)
+                if (e.target.classList.contains('theme-select-btn')) return;
+
+                const themeName = card.getAttribute('data-theme');
+                this.selectTheme(themeName);
+            });
+        });
+    }
+
+    /**
+     * Select and apply a theme
+     */
+    selectTheme(themeName) {
+        console.log('[Settings] Selecting theme:', themeName);
+
+        // Update theme manager
+        if (window.themeManager) {
+            window.themeManager.switchTheme(themeName);
+            this.currentSettings.theme = themeName;
+            this.markUnsavedChanges();
+            this.updateCurrentThemeIndicator();
+
+            // Theme switching causes a reload, so we'll auto-save
+            this.saveSettings();
+        } else {
+            console.error('[Settings] ThemeManager not available');
+        }
+    }
+
+    /**
+     * Update the current theme indicator
+     */
+    updateCurrentThemeIndicator() {
+        const indicator = document.getElementById('current-theme-name');
+        if (indicator) {
+            const themeName = this.currentSettings.theme.charAt(0).toUpperCase() +
+                             this.currentSettings.theme.slice(1);
+            indicator.textContent = themeName;
+        }
+
+        // Highlight active theme card
+        document.querySelectorAll('.theme-card').forEach(card => {
+            if (card.getAttribute('data-theme') === this.currentSettings.theme) {
+                card.classList.add('active');
+            } else {
+                card.classList.remove('active');
+            }
+        });
+    }
+
+    /**
+     * Set up panel toggle switches
+     */
+    setupPanelToggles() {
+        const toggles = document.querySelectorAll('[data-panel]');
+
+        toggles.forEach(toggle => {
+            toggle.addEventListener('change', () => {
+                this.markUnsavedChanges();
+            });
+        });
+    }
+
+    /**
+     * Set up display settings controls
+     */
+    setupDisplaySettings() {
+        const controls = [
+            document.getElementById('crt-effects'),
+            document.getElementById('animations'),
+            document.getElementById('font-size'),
+            document.getElementById('refresh-interval')
+        ];
+
+        controls.forEach(control => {
+            if (control) {
+                control.addEventListener('change', () => {
+                    this.markUnsavedChanges();
+                });
+            }
+        });
+    }
+
+    /**
+     * Set up Save, Reset, and Cancel buttons
+     */
+    setupActionButtons() {
+        const saveBtn = document.getElementById('save-settings');
+        const resetBtn = document.getElementById('reset-settings');
+        const cancelBtn = document.getElementById('cancel-settings');
+
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.saveSettings());
+        }
+
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetToDefaults());
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', (e) => {
+                if (this.hasUnsavedChanges) {
+                    const confirm = window.confirm('You have unsaved changes. Are you sure you want to leave?');
+                    if (!confirm) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Mark that there are unsaved changes
+     */
+    markUnsavedChanges() {
+        this.hasUnsavedChanges = true;
+        const indicator = document.getElementById('unsaved-changes-indicator');
+        if (indicator) {
+            indicator.textContent = 'YES';
+            indicator.style.color = 'var(--accent, #ff006e)';
+        }
+    }
+
+    /**
+     * Clear unsaved changes flag
+     */
+    clearUnsavedChanges() {
+        this.hasUnsavedChanges = false;
+        const indicator = document.getElementById('unsaved-changes-indicator');
+        if (indicator) {
+            indicator.textContent = 'NO';
+            indicator.style.color = '';
+        }
+    }
+
+    /**
+     * Warn user about unsaved changes when leaving page
+     */
+    setupUnsavedChangesWarning() {
+        window.addEventListener('beforeunload', (e) => {
+            if (this.hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        });
+    }
+
+    /**
+     * Save settings
+     */
+    async saveSettings() {
+        console.log('[Settings] Saving settings...');
+
+        try {
+            // Gather panel settings
+            const panelToggles = document.querySelectorAll('[data-panel]');
+            const panels = [];
+
+            panelToggles.forEach(toggle => {
+                panels.push({
+                    id: toggle.getAttribute('data-panel'),
+                    visible: toggle.checked
+                });
+            });
+
+            // Gather display settings
+            const crtEffects = document.getElementById('crt-effects')?.checked ?? true;
+            const animations = document.getElementById('animations')?.checked ?? true;
+            const fontSize = document.getElementById('font-size')?.value || 'medium';
+            const refreshInterval = document.getElementById('refresh-interval')?.value || '300000';
+
+            // Save to localStorage (client-side settings)
+            localStorage.setItem('crtEffects', crtEffects);
+            localStorage.setItem('animations', animations);
+            localStorage.setItem('fontSize', fontSize);
+            localStorage.setItem('refreshInterval', refreshInterval);
+
+            // Apply CRT effects immediately
+            this.applyCRTEffects(crtEffects);
+
+            // Apply animations setting
+            document.body.style.setProperty('--animation-speed', animations ? '1' : '0');
+
+            // Apply font size
+            document.documentElement.setAttribute('data-font-size', fontSize);
+
+            // Update current settings
+            this.currentSettings.crtEffects = crtEffects;
+            this.currentSettings.animations = animations;
+            this.currentSettings.fontSize = fontSize;
+            this.currentSettings.refreshInterval = refreshInterval;
+            this.currentSettings.panels = panels;
+
+            // Try to save panel config to server
+            try {
+                const response = await fetch('/config/panels', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        activePanels: panels
+                    })
+                });
+
+                if (!response.ok) {
+                    console.warn('[Settings] Could not save panel config to server');
+                }
+            } catch (error) {
+                console.warn('[Settings] Could not save panel config to server:', error);
+            }
+
+            // Clear unsaved changes flag
+            this.clearUnsavedChanges();
+
+            // Show success message
+            this.showModal('Settings Saved', 'Your settings have been saved successfully. Some changes may require a page reload to take effect.');
+
+            console.log('[Settings] Settings saved successfully');
+
+        } catch (error) {
+            console.error('[Settings] Error saving settings:', error);
+            this.showModal('Error', 'Failed to save settings. Please try again.');
+        }
+    }
+
+    /**
+     * Apply or remove CRT effects
+     */
+    applyCRTEffects(enabled) {
+        const crtOverlay = document.querySelector('.crt');
+        const scanlines = document.querySelector('.scanlines');
+
+        if (crtOverlay) {
+            crtOverlay.style.display = enabled ? 'block' : 'none';
+        }
+        if (scanlines) {
+            scanlines.style.display = enabled ? 'block' : 'none';
+        }
+    }
+
+    /**
+     * Reset all settings to defaults
+     */
+    async resetToDefaults() {
+        const confirm = window.confirm('Are you sure you want to reset all settings to their default values?');
+
+        if (!confirm) return;
+
+        console.log('[Settings] Resetting to defaults...');
+
+        try {
+            // Clear localStorage
+            localStorage.removeItem('theme');
+            localStorage.removeItem('crtEffects');
+            localStorage.removeItem('animations');
+            localStorage.removeItem('fontSize');
+            localStorage.removeItem('refreshInterval');
+
+            // Try to reset server config
+            try {
+                await fetch('/config/panels/reset', {
+                    method: 'POST'
+                });
+            } catch (error) {
+                console.warn('[Settings] Could not reset server config:', error);
+            }
+
+            // Reload settings
+            await this.loadSettings();
+
+            // Clear unsaved changes
+            this.clearUnsavedChanges();
+
+            // Show success message
+            this.showModal('Settings Reset', 'All settings have been reset to their default values. The page will reload.');
+
+            // Reload page after a delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+
+        } catch (error) {
+            console.error('[Settings] Error resetting settings:', error);
+            this.showModal('Error', 'Failed to reset settings. Please try again.');
+        }
+    }
+
+    /**
+     * Populate About tab with system information
+     */
+    populateAboutInfo() {
+        // Browser info
+        const browserInfo = document.getElementById('browser-info');
+        if (browserInfo) {
+            const ua = navigator.userAgent;
+            let browser = 'Unknown';
+            if (ua.includes('Firefox')) browser = 'Firefox';
+            else if (ua.includes('Chrome')) browser = 'Chrome/Chromium';
+            else if (ua.includes('Safari')) browser = 'Safari';
+            browserInfo.textContent = browser;
+        }
+
+        // Screen size
+        const screenInfo = document.getElementById('screen-info');
+        if (screenInfo) {
+            screenInfo.textContent = `${window.screen.width}x${window.screen.height}`;
+        }
+
+        // Current layout (from LayoutManager if available)
+        const layoutInfo = document.getElementById('layout-info');
+        if (layoutInfo && window.layoutManager) {
+            layoutInfo.textContent = window.layoutManager.currentBreakpoint || 'Unknown';
+        } else if (layoutInfo) {
+            layoutInfo.textContent = 'N/A';
+        }
+
+        // Active panels count
+        const panelsInfo = document.getElementById('panels-info');
+        if (panelsInfo) {
+            const activePanels = this.currentSettings?.panels?.filter(p => p.visible).length || 0;
+            panelsInfo.textContent = `${activePanels} enabled`;
+        }
+    }
+
+    /**
+     * Show modal dialog
+     */
+    showModal(title, message) {
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+        const modalClose = document.getElementById('modal-close');
+
+        if (!modalOverlay || !modalTitle || !modalContent) return;
+
+        modalTitle.textContent = title;
+        modalContent.innerHTML = `<p>${message}</p>`;
+        modalOverlay.style.display = 'flex';
+
+        // Close modal handlers
+        const closeModal = () => {
+            modalOverlay.style.display = 'none';
+        };
+
+        if (modalClose) {
+            modalClose.onclick = closeModal;
+        }
+
+        modalOverlay.onclick = (e) => {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        };
+    }
+}
+
+// Initialize settings manager when script loads
+const settingsManager = new SettingsManager();
+
+// Make it globally accessible for debugging
+window.settingsManager = settingsManager;

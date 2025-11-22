@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER TERMINAL - Settings</title>
+    <!-- Base styles (theme-agnostic) -->
+    <link rel="stylesheet" href="css/themes/base.css">
+    <!-- Theme CSS (loaded dynamically by theme-manager.js, cyberpunk as fallback) -->
+    <link id="theme-css" rel="stylesheet" href="css/themes/cyberpunk.css">
+    <!-- Responsive overrides -->
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Legacy styles (will be phased out) -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Bebas+Neue&family=Oswald:wght@400;700&family=Montserrat:wght@400;600;700&family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- CRT Overlay Effects -->
+    <div class="crt"></div>
+    <div class="scanlines"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <span class="system-name">SETTINGS//CONFIG_v2.1</span>
+            </div>
+            <div class="header-right">
+                <a href="index.html" class="header-link">&lt; BACK TO DASHBOARD</a>
+            </div>
+        </header>
+
+        <div class="separator"></div>
+
+        <!-- Settings Content -->
+        <div class="settings-container">
+            <!-- Tab Navigation -->
+            <nav class="settings-tabs">
+                <button class="settings-tab active" data-tab="theme">
+                    <span class="tab-icon">&#127912;</span>
+                    <span class="tab-label">THEME</span>
+                </button>
+                <button class="settings-tab" data-tab="panels">
+                    <span class="tab-icon">&#128190;</span>
+                    <span class="tab-label">PANELS</span>
+                </button>
+                <button class="settings-tab" data-tab="display">
+                    <span class="tab-icon">&#128247;</span>
+                    <span class="tab-label">DISPLAY</span>
+                </button>
+                <button class="settings-tab" data-tab="about">
+                    <span class="tab-icon">&#8505;</span>
+                    <span class="tab-label">ABOUT</span>
+                </button>
+            </nav>
+
+            <!-- Tab Content -->
+            <div class="settings-content">
+
+                <!-- Theme Tab -->
+                <div id="tab-theme" class="settings-tab-content active">
+                    <div class="settings-section">
+                        <h2 class="section-title">&gt; THEME_SELECTION</h2>
+                        <p class="section-description">Choose your visual theme. Changes apply immediately.</p>
+
+                        <div class="theme-selector">
+                            <div class="theme-card" data-theme="cyberpunk">
+                                <div class="theme-preview theme-preview-cyberpunk">
+                                    <div class="preview-header">CYBERPUNK</div>
+                                    <div class="preview-content">
+                                        <div class="preview-accent"></div>
+                                        <div class="preview-text">Neon // Future</div>
+                                    </div>
+                                </div>
+                                <div class="theme-info">
+                                    <h3 class="theme-name">Cyberpunk</h3>
+                                    <p class="theme-description">Neon cyan and magenta with retro CRT effects</p>
+                                </div>
+                                <button class="theme-select-btn" data-theme="cyberpunk">SELECT</button>
+                            </div>
+
+                            <div class="theme-card" data-theme="hiphop">
+                                <div class="theme-preview theme-preview-hiphop">
+                                    <div class="preview-header">HIP-HOP</div>
+                                    <div class="preview-content">
+                                        <div class="preview-accent"></div>
+                                        <div class="preview-text">Gold // Streets</div>
+                                    </div>
+                                </div>
+                                <div class="theme-info">
+                                    <h3 class="theme-name">Hip-Hop</h3>
+                                    <p class="theme-description">Gold and black with bold typography</p>
+                                </div>
+                                <button class="theme-select-btn" data-theme="hiphop">SELECT</button>
+                            </div>
+
+                            <div class="theme-card" data-theme="california">
+                                <div class="theme-preview theme-preview-california">
+                                    <div class="preview-header">CALIFORNIA</div>
+                                    <div class="preview-content">
+                                        <div class="preview-accent"></div>
+                                        <div class="preview-text">Sunset // Chill</div>
+                                    </div>
+                                </div>
+                                <div class="theme-info">
+                                    <h3 class="theme-name">California</h3>
+                                    <p class="theme-description">Sunset orange and pacific blue with beach vibes</p>
+                                </div>
+                                <button class="theme-select-btn" data-theme="california">SELECT</button>
+                            </div>
+                        </div>
+
+                        <div class="current-theme-indicator">
+                            <span class="label">CURRENT THEME:</span>
+                            <span id="current-theme-name" class="value">Cyberpunk</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panels Tab -->
+                <div id="tab-panels" class="settings-tab-content">
+                    <div class="settings-section">
+                        <h2 class="section-title">&gt; PANEL_CONFIGURATION</h2>
+                        <p class="section-description">Enable or disable dashboard panels. Changes require page reload.</p>
+
+                        <div class="panel-grid">
+                            <div class="panel-config-card">
+                                <div class="panel-icon">&#9728;</div>
+                                <div class="panel-details">
+                                    <h3 class="panel-name">Weather</h3>
+                                    <p class="panel-description">Current conditions and 5-day forecast</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="panel-weather" data-panel="weather" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="panel-config-card">
+                                <div class="panel-icon">&#128200;</div>
+                                <div class="panel-details">
+                                    <h3 class="panel-name">Markets</h3>
+                                    <p class="panel-description">Stock prices and crypto data</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="panel-markets" data-panel="markets" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="panel-config-card">
+                                <div class="panel-icon">&#128240;</div>
+                                <div class="panel-details">
+                                    <h3 class="panel-name">News Feed</h3>
+                                    <p class="panel-description">Latest headlines from multiple sources</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="panel-news" data-panel="news" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="panel-config-card">
+                                <div class="panel-icon">&#9200;</div>
+                                <div class="panel-details">
+                                    <h3 class="panel-name">Timer & Alarms</h3>
+                                    <p class="panel-description">Countdown timers and scheduled alarms</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="panel-timer" data-panel="timer" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="panel-config-card">
+                                <div class="panel-icon">&#127925;</div>
+                                <div class="panel-details">
+                                    <h3 class="panel-name">Music Player</h3>
+                                    <p class="panel-description">Spotify playback and controls</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="panel-music" data-panel="music" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="panel-config-card">
+                                <div class="panel-icon">&#127760;</div>
+                                <div class="panel-details">
+                                    <h3 class="panel-name">Cyberspace</h3>
+                                    <p class="panel-description">Interactive cyberspace visualization</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="panel-cyberspace" data-panel="cyberspace" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="panel-config-card">
+                                <div class="panel-icon">&#128250;</div>
+                                <div class="panel-details">
+                                    <h3 class="panel-name">Video Player</h3>
+                                    <p class="panel-description">YouTube and video streaming</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="panel-video" data-panel="video">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="panel-config-card">
+                                <div class="panel-icon">&#128187;</div>
+                                <div class="panel-details">
+                                    <h3 class="panel-name">System Monitor</h3>
+                                    <p class="panel-description">CPU, memory, and network stats</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="panel-system" data-panel="system">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="panel-note">
+                            <strong>Note:</strong> Panel changes will take effect after saving and reloading the dashboard.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Display Tab -->
+                <div id="tab-display" class="settings-tab-content">
+                    <div class="settings-section">
+                        <h2 class="section-title">&gt; DISPLAY_SETTINGS</h2>
+                        <p class="section-description">Customize visual effects and display preferences.</p>
+
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label for="crt-effects" class="form-label">
+                                    <span>CRT Effects</span>
+                                    <span class="form-description">Scanlines and screen curvature (Cyberpunk theme only)</span>
+                                </label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="crt-effects" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="animations" class="form-label">
+                                    <span>Animations</span>
+                                    <span class="form-description">Enable UI animations and transitions</span>
+                                </label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="animations" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="font-size" class="form-label">
+                                    <span>Font Size</span>
+                                    <span class="form-description">Adjust text size for readability</span>
+                                </label>
+                                <select id="font-size" class="form-select">
+                                    <option value="small">Small</option>
+                                    <option value="medium" selected>Medium (Default)</option>
+                                    <option value="large">Large</option>
+                                    <option value="xlarge">Extra Large</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="refresh-interval" class="form-label">
+                                    <span>Data Refresh Interval</span>
+                                    <span class="form-description">How often to update weather, news, and market data</span>
+                                </label>
+                                <select id="refresh-interval" class="form-select">
+                                    <option value="60000">1 minute</option>
+                                    <option value="300000" selected>5 minutes</option>
+                                    <option value="600000">10 minutes</option>
+                                    <option value="1800000">30 minutes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About Tab -->
+                <div id="tab-about" class="settings-tab-content">
+                    <div class="settings-section">
+                        <h2 class="section-title">&gt; SYSTEM_INFO</h2>
+
+                        <div class="about-content">
+                            <div class="about-section">
+                                <h3 class="about-heading">Cyber Kiosk Dashboard</h3>
+                                <p class="about-version">Version 2.1.0</p>
+                                <p class="about-description">
+                                    A responsive, multi-theme dashboard system designed for Raspberry Pi touchscreens,
+                                    featuring real-time data feeds, music playback, and customizable panels.
+                                </p>
+                            </div>
+
+                            <div class="about-section">
+                                <h3 class="about-heading">Features</h3>
+                                <ul class="about-list">
+                                    <li>Responsive design from 4" to 27" screens</li>
+                                    <li>Three visual themes: Cyberpunk, Hip-Hop, California</li>
+                                    <li>Modular panel system with 8+ available panels</li>
+                                    <li>Spotify Web Playback integration</li>
+                                    <li>Real-time weather, news, and market data</li>
+                                    <li>Timer and alarm functionality</li>
+                                </ul>
+                            </div>
+
+                            <div class="about-section">
+                                <h3 class="about-heading">System Information</h3>
+                                <div class="system-info-grid">
+                                    <div class="info-item">
+                                        <span class="info-label">Browser:</span>
+                                        <span class="info-value" id="browser-info">--</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Screen Size:</span>
+                                        <span class="info-value" id="screen-info">--</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Current Layout:</span>
+                                        <span class="info-value" id="layout-info">--</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Active Panels:</span>
+                                        <span class="info-value" id="panels-info">--</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="about-section">
+                                <h3 class="about-heading">Links</h3>
+                                <div class="about-links">
+                                    <a href="https://github.com/yourusername/cyber-kiosk" class="about-link" target="_blank">GitHub Repository</a>
+                                    <a href="index.html" class="about-link">Return to Dashboard</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="separator"></div>
+        <div class="settings-actions">
+            <button id="save-settings" class="btn btn-primary">
+                <span class="btn-icon">&#128190;</span>
+                <span class="btn-text">SAVE CHANGES</span>
+            </button>
+            <button id="reset-settings" class="btn btn-secondary">
+                <span class="btn-icon">&#8635;</span>
+                <span class="btn-text">RESET TO DEFAULTS</span>
+            </button>
+            <a href="index.html" id="cancel-settings" class="btn btn-tertiary">
+                <span class="btn-icon">&times;</span>
+                <span class="btn-text">CANCEL</span>
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="separator"></div>
+        <footer class="footer">
+            <span class="footer-text">
+                SETTINGS_MODE: ACTIVE | UNSAVED_CHANGES: <span id="unsaved-changes-indicator">NO</span>
+            </span>
+        </footer>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span class="modal-title" id="modal-title"></span>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-content" id="modal-content">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Manager (should load early) -->
+    <script src="js/theme-manager.js"></script>
+    <script src="js/panels/panel-registry.js"></script>
+    <script src="js/settings.js"></script>
+</body>
+</html>
