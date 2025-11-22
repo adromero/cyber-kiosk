@@ -26,10 +26,9 @@
         <!-- Header -->
         <header class="header">
             <div class="header-left">
-                <span class="system-name">CYBER//TERMINAL_v2.1</span>
+                <a href="settings.html" class="system-name" title="Settings">CYBER//TERMINAL_v2.1</a>
             </div>
             <div class="header-right">
-                <a href="settings.html" class="settings-link" title="Settings">&#9881;</a>
                 <span id="system-temp" class="temp-display" title="Click for system stats">--°C</span>
                 <span id="current-time" class="time-display"></span>
                 <span id="current-date" class="date-display"></span>
@@ -41,7 +40,7 @@
         <!-- Main Content Grid -->
         <div class="main-grid" data-panels="5">
             <!-- Panel 1: Weather Info -->
-            <div class="grid-panel grid-panel-1">
+            <div class="grid-panel grid-panel-1" data-panel-id="weather">
                 <div class="widget weather-widget">
                     <div class="widget-header">
                         <span class="widget-title">&gt; INFO_FEED</span>
@@ -71,7 +70,7 @@
             </div>
 
             <!-- Panel 2: News Feed -->
-            <div class="grid-panel grid-panel-2">
+            <div class="grid-panel grid-panel-2" data-panel-id="news">
                 <div class="widget news-widget">
                     <div class="widget-header">
                         <span class="widget-title">&gt; NEWS_FEED</span>
@@ -85,7 +84,7 @@
             </div>
 
             <!-- Panel 3: Cyberspace -->
-            <div class="grid-panel grid-panel-3">
+            <div class="grid-panel grid-panel-3" data-panel-id="cyberspace">
                 <div class="widget cyberspace-widget">
                     <div class="widget-header">
                         <span class="widget-title">&gt; CY_SPC</span>
@@ -102,12 +101,12 @@
             </div>
 
             <!-- Panel 4: Timer (replacing Video for testing) -->
-            <div class="grid-panel grid-panel-4" id="timer-panel-container">
+            <div class="grid-panel grid-panel-4" data-panel-id="timer" id="timer-panel-container">
                 <!-- Timer panel will be initialized here by JavaScript -->
             </div>
 
             <!-- Panel 5: Music Player (Spotify) -->
-            <div class="grid-panel grid-panel-5" id="music-panel-container">
+            <div class="grid-panel grid-panel-5" data-panel-id="music" id="music-panel-container">
                 <!-- Music panel will be initialized here by JavaScript -->
             </div>
         </div>

@@ -132,6 +132,14 @@ body {
 .system-name {
     color: var(--neon-cyan);
     letter-spacing: 3px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+a.system-name:hover {
+    color: var(--neon-green);
+    text-shadow: 0 0 10px var(--neon-green);
 }
 
 .header-right {

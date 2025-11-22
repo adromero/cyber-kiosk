@@ -5,31 +5,35 @@
   "activePanels": [
     {
       "id": "weather",
-      "position": 1,
-      "size": "medium",
-      "visible": true,
-      "gridArea": "panel1"
+      "visible": true
+    },
+    {
+      "id": "markets",
+      "visible": true
     },
     {
       "id": "news",
-      "position": 2,
-      "size": "large",
-      "visible": true,
-      "gridArea": "panel2"
+      "visible": true
+    },
+    {
+      "id": "timer",
+      "visible": false
+    },
+    {
+      "id": "music",
+      "visible": false
     },
     {
       "id": "cyberspace",
-      "position": 3,
-      "size": "medium",
-      "visible": true,
-      "gridArea": "panel3"
+      "visible": true
     },
     {
       "id": "video",
-      "position": 4,
-      "size": "medium",
-      "visible": true,
-      "gridArea": "panel4"
+      "visible": true
+    },
+    {
+      "id": "system",
+      "visible": true
     }
   ],
   "panelSettings": {
@@ -39,7 +43,9 @@
       "refreshInterval": 600000
     },
     "news": {
-      "sources": ["hackernews"],
+      "sources": [
+        "hackernews"
+      ],
       "maxItems": 20,
       "refreshInterval": 300000
     },
@@ -75,5 +81,6 @@
     "autoAdjust": true,
     "preserveAspectRatio": true,
     "compactMode": false
-  }
+  },
+  "lastUpdated": "2025-11-22T15:38:19.865Z"
 }
