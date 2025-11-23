@@ -36,7 +36,7 @@
         "height": 2
       },
       {
-        "id": "calendar",
+        "id": "system",
         "row": 2,
         "col": 0,
         "width": 1,
@@ -71,7 +71,7 @@
       "priority": 3
     },
     "video": {
-      "enabled": false,
+      "enabled": true,
       "defaultVideo": "cyberpunk",
       "autoplay": false,
       "defaultSize": "medium",
@@ -99,7 +99,7 @@
       "priority": 7
     },
     "system": {
-      "enabled": false,
+      "enabled": true,
       "showInHeader": true,
       "refreshInterval": 5000,
       "defaultSize": "medium",
@@ -192,16 +192,16 @@
     },
     {
       "id": "video",
-      "visible": false
-    },
-    {
-      "id": "calendar",
       "visible": true
     },
     {
-      "id": "system",
+      "id": "calendar",
       "visible": false
+    },
+    {
+      "id": "system",
+      "visible": true
     }
   ],
-  "lastUpdated": "2025-11-23T02:58:11.725Z"
+  "lastUpdated": "2025-11-23T04:05:03.826Z"
 }

@@ -58,7 +58,8 @@ class CalendarPanel extends BasePanel {
         this.container.innerHTML = `
             <div class="calendar-widget">
                 <div class="widget-header" style="cursor: pointer;" title="Click to open full calendar">
-                    <span class="widget-title">📅 CALENDAR</span>
+                    <span class="widget-title">&gt; CALENDAR</span>
+                    <span class="widget-status">READY</span>
                 </div>
                 <div class="calendar-day-view">
                     ${this.renderDayView()}

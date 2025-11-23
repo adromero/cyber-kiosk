@@ -202,6 +202,78 @@ function initCalendarPanel() {
     }
 }
 
+// Video Panel - declare early to avoid hoisting issues
+let videoPanel;
+function initVideoPanel() {
+    const container = document.getElementById('video-panel-container');
+
+    if (!container) {
+        console.error('> VIDEO PANEL: Container not found');
+        return;
+    }
+
+    if (typeof VideoPanel === 'undefined') {
+        console.error('> VIDEO PANEL: VideoPanel class not loaded');
+        return;
+    }
+
+    try {
+        videoPanel = new VideoPanel({
+            id: 'video',
+            title: 'VIDEO',
+            container: container,
+            settings: {
+                autoplay: true
+            }
+        });
+
+        videoPanel.init();
+        console.log('> VIDEO PANEL: INITIALIZED');
+
+        // Make video panel globally accessible
+        window.videoPanelInstance = videoPanel;
+
+    } catch (error) {
+        console.error('> ERROR INITIALIZING VIDEO PANEL:', error);
+    }
+}
+
+// System Panel - System monitoring with live metrics
+let systemPanel;
+function initSystemPanel() {
+    const container = document.getElementById('system-panel-container');
+
+    if (!container) {
+        console.error('> SYSTEM PANEL: Container not found');
+        return;
+    }
+
+    if (typeof SystemPanel === 'undefined') {
+        console.error('> SYSTEM PANEL: SystemPanel class not loaded');
+        return;
+    }
+
+    try {
+        systemPanel = new SystemPanel({
+            id: 'system',
+            title: 'SYSTEM',
+            container: container,
+            settings: {
+                autoUpdate: true
+            }
+        });
+
+        systemPanel.init();
+        console.log('> SYSTEM PANEL: INITIALIZED');
+
+        // Make system panel globally accessible
+        window.systemPanelInstance = systemPanel;
+
+    } catch (error) {
+        console.error('> ERROR INITIALIZING SYSTEM PANEL:', error);
+    }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('> CYBER TERMINAL INITIALIZING...');
@@ -233,6 +305,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize Calendar Panel (modal-based)
     initCalendarPanel();
+
+    // Initialize Video Panel
+    initVideoPanel();
+
+    // Initialize System Panel
+    initSystemPanel();
 
     // Set up header click handlers now that panels are ready
     setupHeaderClickHandlers();
@@ -1424,9 +1502,14 @@ document.querySelector('#network-status').addEventListener('click', async () => 
     await showNetworkModal();
 });
 
-// System temperature click handler
+// System temperature click handler - now uses SystemPanel modal
 document.querySelector('#system-temp').addEventListener('click', async () => {
-    await showSystemStatusModal();
+    if (window.systemPanelInstance) {
+        window.systemPanelInstance.showModal();
+    } else {
+        // Fallback to old modal if panel not initialized
+        await showSystemStatusModal();
+    }
 });
 
 // System name click handler - Theme Selector

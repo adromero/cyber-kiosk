@@ -411,9 +411,21 @@ body {
 .video-widget,
 .news-widget,
 .music-widget,
-.timer-widget {
+.timer-widget,
+.calendar-widget {
     cursor: pointer;
     transition: all 0.3s ease;
+}
+
+/* Widget Hover Zoom Effect */
+.weather-widget:hover,
+.cyberspace-widget:hover,
+.video-widget:hover,
+.news-widget:hover,
+.music-widget:hover,
+.timer-widget:hover,
+.calendar-widget:hover {
+    transform: scale(1.02);
 }
 
 /* Modal Weather */
@@ -1727,7 +1739,362 @@ body {
 
 /* Panel Header Click/Hover */
 .music-widget .widget-header,
-.timer-widget .widget-header {
+.timer-widget .widget-header,
+.calendar-widget .widget-header {
     cursor: pointer;
     user-select: none;
+}
+
+/* ============================================
+   CALENDAR PANEL STYLES
+   ============================================ */
+
+/* Calendar Widget Container */
+.calendar-widget {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.calendar-widget .widget-content {
+    padding: 0;
+}
+
+/* Calendar Day View (compact panel view) */
+.calendar-day-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 15px;
+}
+
+.calendar-day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+}
+
+.calendar-day-nav {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: all 0.2s ease;
+    color: inherit;
+}
+
+.calendar-day-date {
+    text-align: center;
+    flex: 1;
+}
+
+.calendar-day-weekday {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    letter-spacing: 1px;
+}
+
+.calendar-day-number {
+    font-size: 3rem;
+    font-weight: bold;
+    line-height: 1;
+    margin: 5px 0;
+}
+
+.calendar-day-month {
+    font-size: 1rem;
+    opacity: 0.8;
+    letter-spacing: 1px;
+}
+
+.calendar-day-today-badge {
+    display: inline-block;
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    margin-top: 5px;
+    letter-spacing: 1px;
+}
+
+.calendar-day-events {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+.calendar-day-no-events {
+    text-align: center;
+    padding: 30px 15px;
+    opacity: 0.5;
+    font-size: 1.1rem;
+}
+
+.calendar-day-event {
+    padding: 10px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+}
+
+.calendar-day-event-time {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-bottom: 5px;
+}
+
+.calendar-day-event-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.calendar-day-event-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.calendar-day-event-info {
+    flex: 1;
+}
+
+.calendar-day-event-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.calendar-day-event-desc {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.calendar-day-today-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background: transparent;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 1px;
+}
+
+/* Calendar Modal Styles */
+.calendar-container {
+    display: flex;
+    gap: 2rem;
+    height: 100%;
+    padding: 1rem;
+}
+
+.calendar-month-view {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.calendar-month-title {
+    font-size: 2rem;
+    letter-spacing: 2px;
+}
+
+.calendar-nav-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 10px 15px;
+    transition: all 0.2s ease;
+    color: inherit;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.calendar-weekday {
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 10px;
+    opacity: 0.7;
+    letter-spacing: 1px;
+}
+
+.calendar-grid {
+    flex: 1;
+}
+
+.calendar-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-bottom: 5px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.calendar-day.other-month {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.calendar-day-number {
+    font-size: 1.2rem;
+}
+
+.calendar-day-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-top: 4px;
+}
+
+.calendar-section-title {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    letter-spacing: 2px;
+}
+
+.calendar-no-events {
+    text-align: center;
+    padding: 2rem;
+    opacity: 0.5;
+    font-size: 1.1rem;
+}
+
+.calendar-event-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.calendar-event-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.calendar-event-details {
+    flex: 1;
+}
+
+.calendar-event-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.calendar-event-date {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.calendar-event-delete {
+    background: transparent;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 5px;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    color: inherit;
+}
+
+.calendar-toggle-form-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+}
+
+.calendar-add-form {
+    padding: 1rem;
+}
+
+.calendar-form-group {
+    margin-bottom: 1rem;
+}
+
+.calendar-form-group label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    opacity: 0.8;
+    letter-spacing: 1px;
+}
+
+.calendar-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1.1rem;
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+}
+
+.calendar-input::placeholder {
+    opacity: 0.5;
+}
+
+.calendar-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 1.5rem;
+}
+
+.calendar-btn {
+    flex: 1;
+    padding: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 1px;
+    background: transparent;
+    border: none;
+    color: inherit;
+}
+
+.calendar-btn-primary {
+    font-weight: bold;
+}
+
+.calendar-btn-secondary {
+    opacity: 0.7;
 }

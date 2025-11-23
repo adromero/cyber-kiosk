@@ -1872,6 +1872,253 @@ a.system-name:hover {
     box-shadow: 0 0 8px var(--neon-green);
 }
 
+/* Video Modal Overlay */
+.video-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s;
+}
+
+.video-modal-overlay.active {
+    display: flex;
+}
+
+.video-modal-container {
+    background: var(--bg-primary);
+    border: 2px solid var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+    max-width: 1200px;
+    width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideIn 0.3s;
+}
+
+.video-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.05);
+}
+
+.video-modal-title {
+    font-size: 2rem;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.video-modal-close {
+    background: rgba(255, 0, 0, 0.1);
+    border: 2px solid #ff0055;
+    color: #ff0055;
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'VT323', monospace;
+    line-height: 1;
+}
+
+.video-modal-close:hover {
+    background: rgba(255, 0, 0, 0.3);
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+    transform: scale(1.1);
+}
+
+.video-modal-close:active {
+    transform: scale(0.95);
+}
+
+.video-modal-content {
+    padding: 2rem;
+}
+
+/* Video Modal Specific Styles */
+.video-player-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.video-embed {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    background: #000;
+    border: 1px solid var(--neon-cyan);
+}
+
+.video-embed iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.video-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.video-selector-title {
+    font-size: 1.5rem;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    font-family: 'VT323', monospace;
+}
+
+.video-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.video-list-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.video-list-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.video-list-item.active {
+    background: rgba(0, 255, 255, 0.2);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.video-list-thumbnail {
+    width: 120px;
+    height: 90px;
+    object-fit: cover;
+    border: 1px solid var(--neon-cyan);
+}
+
+.video-list-title {
+    flex: 1;
+    color: var(--text-primary);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem;
+}
+
+/* Video Panel Thumbnail View */
+.video-thumbnail-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.video-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.video-thumbnail-container:hover .video-thumbnail {
+    transform: scale(1.05);
+}
+
+.video-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.video-play-icon {
+    font-size: 3rem;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 20px var(--neon-cyan);
+    transition: all 0.3s;
+}
+
+.video-thumbnail-container:hover .video-play-icon {
+    transform: scale(1.2);
+    text-shadow: 0 0 30px var(--neon-cyan);
+}
+
+.video-title {
+    color: var(--text-primary);
+    font-family: 'Share Tech Mono', monospace;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.video-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 1rem;
+    color: var(--text-secondary);
+}
+
+.video-empty-icon {
+    font-size: 4rem;
+    opacity: 0.5;
+}
+
+.video-empty-text {
+    font-family: 'VT323', monospace;
+    font-size: 1.5rem;
+}
+
+/* Modal scrollbar styling */
+.video-modal-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.video-modal-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.video-modal-container::-webkit-scrollbar-thumb {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.video-modal-container::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+}
+
 /* ===================================================================
    MUSIC PANEL STYLES - Spotify Integration
    =================================================================== */
@@ -2804,9 +3051,10 @@ a.system-name:hover {
    Panel Header Click/Hover
    =========================== */
 
-/* Music and Timer panels should zoom on hover like other panels */
+/* Music, Timer, and System panels should zoom on hover like other panels */
 .music-widget:hover,
-.timer-widget:hover {
+.timer-widget:hover,
+.system-widget-compact:hover {
     box-shadow: 0 0 25px rgba(0, 255, 255, 0.5),
                 inset 0 0 25px rgba(0, 255, 255, 0.15);
     transform: scale(1.02);
@@ -4600,3 +4848,332 @@ input:checked + .toggle-slider:before {
     }
 }
 
+
+/* ===========================
+   SYSTEM PANEL STYLES
+   =========================== */
+
+/* System Panel Widget (Compact View) */
+.system-widget-compact {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0.5rem;
+    gap: 1rem;
+}
+
+.system-stat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 255, 255, 0.05);
+    border: 2px solid var(--neon-cyan);
+}
+
+.system-stat-main .system-stat-label {
+    font-size: 1rem;
+    color: rgba(0, 255, 255, 0.7);
+    margin-bottom: 0.5rem;
+}
+
+.system-stat-main .system-stat-value {
+    font-size: 3rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.system-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.system-stat-item {
+    padding: 0.75rem 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.system-stat-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+.system-stat-item .system-stat-label {
+    font-size: 0.9rem;
+    color: rgba(0, 255, 255, 0.7);
+    margin-bottom: 0.25rem;
+}
+
+.system-stat-item .system-stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.system-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 1rem;
+}
+
+.system-empty-icon {
+    font-size: 4rem;
+    opacity: 0.5;
+}
+
+.system-empty-text {
+    font-family: 'VT323', monospace;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+}
+
+/* System Modal Overlay */
+.system-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s;
+}
+
+.system-modal-overlay.active {
+    display: flex;
+}
+
+.system-modal-container {
+    background: var(--bg-primary);
+    border: 2px solid var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+    max-width: 800px;
+    width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideIn 0.3s;
+}
+
+.system-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.05);
+}
+
+.system-modal-title {
+    font-size: 2rem;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.system-modal-close {
+    background: rgba(255, 0, 0, 0.1);
+    border: 2px solid #ff0055;
+    color: #ff0055;
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'VT323', monospace;
+    line-height: 1;
+}
+
+.system-modal-close:hover {
+    background: rgba(255, 0, 0, 0.3);
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+    transform: scale(1.1);
+}
+
+.system-modal-close:active {
+    transform: scale(0.95);
+}
+
+.system-modal-content {
+    padding: 2rem;
+}
+
+/* System Modal Stats */
+.system-modal-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.system-modal-section-main {
+    text-align: center;
+    padding: 2rem 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--neon-cyan);
+}
+
+.system-modal-temp-main {
+    font-size: 4rem;
+    font-weight: bold;
+    text-shadow: 0 0 20px currentColor;
+    line-height: 1;
+}
+
+.system-modal-label {
+    font-size: 1.3rem;
+    color: var(--neon-cyan);
+    margin-top: 0.5rem;
+    opacity: 0.8;
+}
+
+.system-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.system-modal-stat {
+    padding: 1.5rem;
+    border: 1px solid var(--neon-cyan);
+    background: rgba(0, 255, 255, 0.05);
+    transition: all 0.3s;
+}
+
+.system-modal-stat:hover {
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.system-modal-stat-label {
+    font-size: 1rem;
+    color: rgba(0, 255, 255, 0.7);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.system-modal-stat-value {
+    font-size: 2.2rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.system-modal-stat-detail {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-top: 0.3rem;
+    opacity: 0.8;
+}
+
+.system-modal-info {
+    padding: 1.5rem;
+    border-top: 1px solid var(--neon-cyan);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.system-modal-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.system-modal-info-row:last-child {
+    border-bottom: none;
+}
+
+.system-modal-info-label {
+    font-size: 1.3rem;
+    color: var(--neon-cyan);
+}
+
+.system-modal-info-value {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    font-family: monospace;
+}
+
+.system-modal-actions {
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+}
+
+.system-modal-refresh {
+    padding: 1rem 2rem;
+    background: rgba(0, 255, 0, 0.1);
+    border: 2px solid var(--neon-green);
+    color: var(--neon-green);
+    font-family: 'VT323', monospace;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.system-modal-refresh:hover {
+    background: rgba(0, 255, 0, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+    transform: translateY(-2px);
+}
+
+.system-modal-refresh:active {
+    transform: translateY(0);
+}
+
+.system-modal-footer {
+    margin-top: 2rem;
+    padding: 1rem;
+    border: 1px solid var(--neon-green);
+    background: rgba(0, 255, 0, 0.1);
+    text-align: center;
+}
+
+/* Modal scrollbar styling */
+.system-modal-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.system-modal-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.system-modal-container::-webkit-scrollbar-thumb {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.system-modal-container::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .system-modal-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .system-stat-main .system-stat-value {
+        font-size: 2.5rem;
+    }
+    
+    .system-modal-temp-main {
+        font-size: 3rem;
+    }
+}

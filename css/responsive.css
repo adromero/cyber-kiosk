@@ -63,6 +63,8 @@
 .grid-panel-4 { grid-area: panel4; }
 .grid-panel-5 { grid-area: panel5; }
 .grid-panel-6 { grid-area: panel6; }
+.grid-panel-7 { grid-area: panel7; }
+.grid-panel-8 { grid-area: panel8; }
 
 /* ============================================================================
    BREAKPOINT: EXTRA SMALL (4-6" phones)
@@ -398,7 +400,14 @@
     }
 
     /* Reduce hover effects on touch devices */
-    .widget:hover {
+    .widget:hover,
+    .weather-widget:hover,
+    .cyberspace-widget:hover,
+    .video-widget:hover,
+    .news-widget:hover,
+    .music-widget:hover,
+    .timer-widget:hover,
+    .calendar-widget:hover {
         transform: none;
     }
 }
