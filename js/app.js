@@ -168,9 +168,12 @@ function initMusicPanel() {
     }
 }
 
-// Calendar Panel - Events and reminders (modal-based, no container needed)
+// Calendar Panel - Events and reminders (supports both container and modal modes)
 let calendarPanel;
 function initCalendarPanel() {
+    // Try to find container element
+    const container = document.getElementById('calendar-panel-container');
+
     if (typeof CalendarPanel === 'undefined') {
         console.error('> CALENDAR PANEL: CalendarPanel class not loaded');
         return;
@@ -180,11 +183,17 @@ function initCalendarPanel() {
         calendarPanel = new CalendarPanel({
             id: 'calendar',
             title: 'CALENDAR',
+            container: container || null, // Optional container for homescreen widget
             settings: {}
         });
 
         calendarPanel.init();
-        console.log('> CALENDAR PANEL: INITIALIZED');
+
+        if (container) {
+            console.log('> CALENDAR PANEL: INITIALIZED (WITH CONTAINER)');
+        } else {
+            console.log('> CALENDAR PANEL: INITIALIZED (MODAL-ONLY)');
+        }
 
         // Make calendar panel globally accessible for header click handler
         window.calendarPanelInstance = calendarPanel;

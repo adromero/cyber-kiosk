@@ -103,11 +103,11 @@ const AVAILABLE_PANELS = {
         name: 'Calendar',
         icon: '📅',
         component: 'CalendarPanel',
-        minSize: 'medium',
-        defaultSize: 'large',
+        minSize: 'small',
+        defaultSize: 'medium',
         category: 'tools',
-        description: 'Calendar with events and reminders (accessible via header date click)',
-        enabled: false, // Modal-only for now, no container implementation yet
+        description: 'Calendar with events and reminders. Click header to expand.',
+        enabled: true,
         priority: 8
     },
 

@@ -15,6 +15,13 @@
     "columns": 4,
     "panels": [
       {
+        "id": "music",
+        "row": 2,
+        "col": 1,
+        "width": 1,
+        "height": 2
+      },
+      {
         "id": "news",
         "row": 0,
         "col": 2,
@@ -32,13 +39,6 @@
         "id": "cyberspace",
         "row": 2,
         "col": 0,
-        "width": 1,
-        "height": 2
-      },
-      {
-        "id": "music",
-        "row": 2,
-        "col": 1,
         "width": 1,
         "height": 2
       }
@@ -71,35 +71,35 @@
       "priority": 3
     },
     "video": {
-      "enabled": true,
+      "enabled": false,
       "defaultVideo": "cyberpunk",
       "autoplay": false,
       "defaultSize": "medium",
       "priority": 4
     },
     "markets": {
-      "enabled": false,
+      "enabled": true,
       "sources": [],
       "refreshInterval": 60000,
       "defaultSize": "medium",
       "priority": 5
     },
     "timer": {
-      "enabled": false,
+      "enabled": true,
       "defaultSound": "cyber-beep.mp3",
       "volume": 0.7,
       "defaultSize": "small",
       "priority": 6
     },
     "music": {
-      "enabled": false,
+      "enabled": true,
       "spotifyConnected": false,
       "autoPlay": false,
       "defaultSize": "medium",
       "priority": 7
     },
     "system": {
-      "enabled": true,
+      "enabled": false,
       "showInHeader": true,
       "refreshInterval": 5000,
       "defaultSize": "medium",
@@ -199,5 +199,5 @@
       "visible": false
     }
   ],
-  "lastUpdated": "2025-11-22T19:24:36.481Z"
+  "lastUpdated": "2025-11-23T01:48:48.040Z"
 }

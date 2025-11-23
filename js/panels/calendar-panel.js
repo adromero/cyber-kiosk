@@ -43,7 +43,166 @@ class CalendarPanel extends BasePanel {
             });
         }
 
-        // Don't render here - will render when modal is opened
+        // If container exists, render compact view
+        if (this.container) {
+            this.renderContainer();
+        }
+    }
+
+    /**
+     * Render compact calendar view in container
+     */
+    renderContainer() {
+        if (!this.container) return;
+
+        this.container.innerHTML = `
+            <div class="calendar-widget">
+                <div class="widget-header" style="cursor: pointer;">
+                    <span class="widget-title">📅 CALENDAR</span>
+                </div>
+                <div class="calendar-compact-view">
+                    ${this.renderCompactMonth()}
+                </div>
+                <div class="calendar-upcoming-mini">
+                    ${this.renderUpcomingMini()}
+                </div>
+            </div>
+        `;
+
+        // Click handler to open full modal
+        const header = this.container.querySelector('.widget-header');
+        if (header) {
+            header.addEventListener('click', () => this.showModal());
+        }
+
+        // Navigation buttons
+        this.container.addEventListener('click', (e) => {
+            if (e.target.dataset.action === 'prev-month-mini') {
+                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+                this.refreshContainer();
+            } else if (e.target.dataset.action === 'next-month-mini') {
+                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                this.refreshContainer();
+            } else if (e.target.dataset.action === 'today') {
+                this.currentDate = new Date();
+                this.refreshContainer();
+            }
+        });
+    }
+
+    /**
+     * Refresh the container view
+     */
+    refreshContainer() {
+        const compactView = this.container?.querySelector('.calendar-compact-view');
+        const upcomingView = this.container?.querySelector('.calendar-upcoming-mini');
+
+        if (compactView) {
+            compactView.innerHTML = this.renderCompactMonth();
+        }
+        if (upcomingView) {
+            upcomingView.innerHTML = this.renderUpcomingMini();
+        }
+    }
+
+    /**
+     * Render compact month view for container
+     */
+    renderCompactMonth() {
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth();
+        const monthName = this.currentDate.toLocaleDateString('en-US', { month: 'short' });
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDayOfWeek = firstDay.getDay();
+
+        let daysHTML = '';
+        let dayCounter = 1;
+
+        // Week headers
+        const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+        let weekdaysHTML = weekdays.map(day =>
+            `<div class="calendar-mini-weekday">${day}</div>`
+        ).join('');
+
+        // Calendar days (up to 6 rows)
+        for (let row = 0; row < 6; row++) {
+            for (let col = 0; col < 7; col++) {
+                const cellIndex = row * 7 + col;
+
+                if (cellIndex < startingDayOfWeek || dayCounter > daysInMonth) {
+                    daysHTML += '<div class="calendar-mini-day empty"></div>';
+                } else {
+                    const cellDate = new Date(year, month, dayCounter);
+                    const isToday = this.isToday(cellDate);
+                    const hasEvents = this.getEventsForDate(cellDate).length > 0;
+
+                    daysHTML += `
+                        <div class="calendar-mini-day ${isToday ? 'today' : ''} ${hasEvents ? 'has-events' : ''}">
+                            ${dayCounter}
+                        </div>
+                    `;
+                    dayCounter++;
+                }
+            }
+            if (dayCounter > daysInMonth) break;
+        }
+
+        return `
+            <div class="calendar-mini-header">
+                <button class="calendar-mini-nav" data-action="prev-month-mini">◀</button>
+                <div class="calendar-mini-title">${monthName} ${year}</div>
+                <button class="calendar-mini-nav" data-action="next-month-mini">▶</button>
+            </div>
+            <div class="calendar-mini-weekdays">
+                ${weekdaysHTML}
+            </div>
+            <div class="calendar-mini-grid">
+                ${daysHTML}
+            </div>
+            <button class="calendar-mini-today-btn" data-action="today">TODAY</button>
+        `;
+    }
+
+    /**
+     * Render upcoming events mini list for container
+     */
+    renderUpcomingMini() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const upcomingEvents = this.events
+            .filter(event => {
+                const eventDate = new Date(event.date);
+                eventDate.setHours(0, 0, 0, 0);
+                return eventDate >= today;
+            })
+            .sort((a, b) => a.date - b.date)
+            .slice(0, 3);
+
+        if (upcomingEvents.length === 0) {
+            return '<div class="calendar-mini-no-events">No upcoming events</div>';
+        }
+
+        return upcomingEvents.map(event => {
+            const eventType = this.eventTypes[event.type] || this.eventTypes.other;
+            const dateStr = new Date(event.date).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            });
+
+            return `
+                <div class="calendar-mini-event">
+                    <span class="calendar-mini-event-icon" style="color: ${eventType.color}">${eventType.icon}</span>
+                    <div class="calendar-mini-event-info">
+                        <div class="calendar-mini-event-title">${this.escapeHtml(event.title)}</div>
+                        <div class="calendar-mini-event-date">${dateStr}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     /**

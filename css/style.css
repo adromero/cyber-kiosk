@@ -3270,6 +3270,199 @@ textarea.calendar-input {
 
 
 /* ===========================
+   CALENDAR WIDGET (COMPACT)
+   =========================== */
+
+.calendar-widget {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+}
+
+.calendar-compact-view {
+    flex: 1;
+    margin-bottom: 1rem;
+}
+
+.calendar-mini-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid var(--neon-cyan);
+}
+
+.calendar-mini-title {
+    font-size: 1.3rem;
+    color: var(--neon-cyan);
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
+.calendar-mini-nav {
+    padding: 0.25rem 0.75rem;
+    min-height: 30px;
+    min-width: 30px;
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    touch-action: manipulation;
+}
+
+.calendar-mini-nav:hover {
+    background: rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.calendar-mini-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 0.25rem;
+}
+
+.calendar-mini-weekday {
+    padding: 0.25rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--neon-amber);
+    font-weight: bold;
+}
+
+.calendar-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 0.75rem;
+}
+
+.calendar-mini-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    color: var(--neon-cyan);
+    transition: all 0.3s;
+}
+
+.calendar-mini-day.empty {
+    opacity: 0.2;
+}
+
+.calendar-mini-day.today {
+    background: rgba(0, 255, 0, 0.15);
+    border: 2px solid var(--neon-green);
+    color: var(--neon-green);
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+}
+
+.calendar-mini-day.has-events {
+    border-color: var(--neon-magenta);
+    position: relative;
+}
+
+.calendar-mini-day.has-events::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    width: 4px;
+    height: 4px;
+    background: var(--neon-magenta);
+    border-radius: 50%;
+    box-shadow: 0 0 3px var(--neon-magenta);
+}
+
+.calendar-mini-today-btn {
+    width: 100%;
+    padding: 0.5rem;
+    min-height: 40px;
+    background: rgba(0, 255, 0, 0.1);
+    border: 1px solid var(--neon-green);
+    color: var(--neon-green);
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    font-weight: bold;
+    touch-action: manipulation;
+}
+
+.calendar-mini-today-btn:hover {
+    background: rgba(0, 255, 0, 0.3);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Calendar Upcoming Mini Events */
+.calendar-upcoming-mini {
+    border-top: 1px solid var(--neon-cyan);
+    padding-top: 0.75rem;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.calendar-mini-no-events {
+    text-align: center;
+    padding: 1rem;
+    color: rgba(0, 255, 255, 0.5);
+    font-size: 1rem;
+}
+
+.calendar-mini-event {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    transition: all 0.3s;
+}
+
+.calendar-mini-event:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: var(--neon-cyan);
+}
+
+.calendar-mini-event-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.calendar-mini-event-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.calendar-mini-event-title {
+    font-size: 1rem;
+    color: var(--neon-cyan);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendar-mini-event-date {
+    font-size: 0.85rem;
+    color: rgba(0, 255, 255, 0.7);
+}
+
+
+/* ===========================
    SETTINGS PAGE STYLES
    =========================== */
 
