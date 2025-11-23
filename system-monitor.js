@@ -1292,6 +1292,210 @@ const server = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: 'Failed to save panels config' }));
             }
         });
+    } else if (pathname === '/profiles' && req.method === 'GET') {
+        // Get list of all user profiles
+        res.setHeader('Content-Type', 'application/json');
+        const profilesDir = path.join(__dirname, 'config', 'profiles');
+
+        try {
+            // Ensure profiles directory exists
+            if (!fs.existsSync(profilesDir)) {
+                fs.mkdirSync(profilesDir, { recursive: true });
+            }
+
+            const files = fs.readdirSync(profilesDir);
+            const profiles = files
+                .filter(f => f.endsWith('.json'))
+                .map(f => {
+                    try {
+                        const profileData = JSON.parse(fs.readFileSync(path.join(profilesDir, f), 'utf8'));
+                        return {
+                            id: profileData.id,
+                            name: profileData.name,
+                            emoji: profileData.emoji || '👤',
+                            createdAt: profileData.createdAt,
+                            lastUsed: profileData.lastUsed
+                        };
+                    } catch (error) {
+                        console.error(`Error reading profile ${f}:`, error);
+                        return null;
+                    }
+                })
+                .filter(p => p !== null);
+
+            res.writeHead(200);
+            res.end(JSON.stringify({ profiles }));
+        } catch (error) {
+            console.error('Error reading profiles:', error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: 'Failed to read profiles' }));
+        }
+    } else if (pathname === '/profiles' && req.method === 'POST') {
+        // Create a new user profile
+        res.setHeader('Content-Type', 'application/json');
+        let body = '';
+
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+
+        req.on('end', () => {
+            try {
+                const { name, emoji } = JSON.parse(body);
+
+                if (!name || name.trim().length === 0) {
+                    res.writeHead(400);
+                    res.end(JSON.stringify({ error: 'Profile name is required' }));
+                    return;
+                }
+
+                const profilesDir = path.join(__dirname, 'config', 'profiles');
+
+                // Ensure profiles directory exists
+                if (!fs.existsSync(profilesDir)) {
+                    fs.mkdirSync(profilesDir, { recursive: true });
+                }
+
+                // Generate profile ID from name (sanitized)
+                const profileId = name.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 32);
+                const profileFile = path.join(profilesDir, `${profileId}.json`);
+
+                // Check if profile already exists
+                if (fs.existsSync(profileFile)) {
+                    res.writeHead(409);
+                    res.end(JSON.stringify({ error: 'Profile with this name already exists' }));
+                    return;
+                }
+
+                // Load default configuration
+                const defaultsFile = path.join(__dirname, 'config', 'defaults.json');
+                let defaultConfig = {};
+                try {
+                    if (fs.existsSync(defaultsFile)) {
+                        defaultConfig = JSON.parse(fs.readFileSync(defaultsFile, 'utf8'));
+                    }
+                } catch (error) {
+                    console.warn('Could not load defaults.json, using empty config');
+                }
+
+                // Create new profile with defaults
+                const newProfile = {
+                    id: profileId,
+                    name: name.trim(),
+                    emoji: emoji || '👤',
+                    createdAt: new Date().toISOString(),
+                    lastUsed: new Date().toISOString(),
+                    theme: 'cyberpunk',
+                    settings: {
+                        crtEffects: true,
+                        animations: true,
+                        fontSize: 'medium',
+                        refreshInterval: 300000
+                    },
+                    panels: defaultConfig.panels || {},
+                    layout: defaultConfig.layout || { rows: 2, columns: 2, panels: [] },
+                    activePanels: defaultConfig.activePanels || []
+                };
+
+                fs.writeFileSync(profileFile, JSON.stringify(newProfile, null, 2), 'utf8');
+
+                console.log(`> Created new profile: ${name} (${profileId})`);
+                res.writeHead(201);
+                res.end(JSON.stringify({ success: true, profile: newProfile }));
+            } catch (error) {
+                console.error('Error creating profile:', error);
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: 'Failed to create profile' }));
+            }
+        });
+    } else if (pathname.startsWith('/profiles/') && req.method === 'GET') {
+        // Get specific profile data
+        res.setHeader('Content-Type', 'application/json');
+        const profileId = pathname.split('/')[2];
+        const profileFile = path.join(__dirname, 'config', 'profiles', `${profileId}.json`);
+
+        try {
+            if (fs.existsSync(profileFile)) {
+                const profileData = fs.readFileSync(profileFile, 'utf8');
+                const profile = JSON.parse(profileData);
+
+                // Update lastUsed timestamp
+                profile.lastUsed = new Date().toISOString();
+                fs.writeFileSync(profileFile, JSON.stringify(profile, null, 2), 'utf8');
+
+                res.writeHead(200);
+                res.end(profileData);
+            } else {
+                res.writeHead(404);
+                res.end(JSON.stringify({ error: 'Profile not found' }));
+            }
+        } catch (error) {
+            console.error('Error reading profile:', error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: 'Failed to read profile' }));
+        }
+    } else if (pathname.startsWith('/profiles/') && req.method === 'PUT') {
+        // Update specific profile
+        res.setHeader('Content-Type', 'application/json');
+        const profileId = pathname.split('/')[2];
+        const profileFile = path.join(__dirname, 'config', 'profiles', `${profileId}.json`);
+        let body = '';
+
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+
+        req.on('end', () => {
+            try {
+                if (!fs.existsSync(profileFile)) {
+                    res.writeHead(404);
+                    res.end(JSON.stringify({ error: 'Profile not found' }));
+                    return;
+                }
+
+                const existingProfile = JSON.parse(fs.readFileSync(profileFile, 'utf8'));
+                const updates = JSON.parse(body);
+
+                // Merge updates with existing profile
+                const updatedProfile = {
+                    ...existingProfile,
+                    ...updates,
+                    id: existingProfile.id, // Don't allow ID changes
+                    lastUsed: new Date().toISOString()
+                };
+
+                fs.writeFileSync(profileFile, JSON.stringify(updatedProfile, null, 2), 'utf8');
+
+                console.log(`> Updated profile: ${updatedProfile.name} (${profileId})`);
+                res.writeHead(200);
+                res.end(JSON.stringify({ success: true, profile: updatedProfile }));
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: 'Failed to update profile' }));
+            }
+        });
+    } else if (pathname.startsWith('/profiles/') && req.method === 'DELETE') {
+        // Delete a profile
+        res.setHeader('Content-Type', 'application/json');
+        const profileId = pathname.split('/')[2];
+        const profileFile = path.join(__dirname, 'config', 'profiles', `${profileId}.json`);
+
+        try {
+            if (fs.existsSync(profileFile)) {
+                fs.unlinkSync(profileFile);
+                console.log(`> Deleted profile: ${profileId}`);
+                res.writeHead(200);
+                res.end(JSON.stringify({ success: true }));
+            } else {
+                res.writeHead(404);
+                res.end(JSON.stringify({ error: 'Profile not found' }));
+            }
+        } catch (error) {
+            console.error('Error deleting profile:', error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: 'Failed to delete profile' }));
+        }
     } else if (pathname === '/device-id' && req.method === 'GET') {
         // Get stored device ID
         res.setHeader('Content-Type', 'application/json');

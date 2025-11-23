@@ -20,6 +20,12 @@ class SettingsManager {
     async init() {
         console.log('[Settings] Initializing settings manager...');
 
+        // Initialize profile manager first
+        await window.profileManager.init();
+
+        // Set up profile management UI
+        this.setupProfileManagement();
+
         // Load current settings
         await this.loadSettings();
 
@@ -72,6 +78,221 @@ class SettingsManager {
                 });
             });
         }
+    }
+
+    /**
+     * Set up profile management UI
+     */
+    setupProfileManagement() {
+        console.log('[Settings] Setting up profile management...');
+
+        // Update current profile display
+        this.updateCurrentProfileDisplay();
+
+        // Load and display all profiles
+        this.loadProfilesList();
+
+        // Set up create profile button
+        const createBtn = document.getElementById('create-profile-btn');
+        if (createBtn) {
+            createBtn.addEventListener('click', () => this.showCreateProfileDialog());
+        }
+
+        // Listen for profile changes
+        window.addEventListener('profileChanged', () => {
+            this.updateCurrentProfileDisplay();
+            this.loadProfilesList();
+        });
+    }
+
+    /**
+     * Update current profile display banner
+     */
+    updateCurrentProfileDisplay() {
+        const profile = window.profileManager.getCurrentProfile();
+        if (!profile) return;
+
+        const emojiEl = document.getElementById('current-profile-emoji');
+        const nameEl = document.getElementById('current-profile-name');
+
+        if (emojiEl) emojiEl.textContent = profile.emoji || '👤';
+        if (nameEl) nameEl.textContent = profile.name || 'Unknown';
+    }
+
+    /**
+     * Load and display profiles list
+     */
+    async loadProfilesList() {
+        const profilesList = document.getElementById('profiles-list');
+        if (!profilesList) return;
+
+        const profiles = await window.profileManager.loadProfiles();
+        const currentProfile = window.profileManager.getCurrentProfile();
+
+        profilesList.innerHTML = '';
+
+        profiles.forEach(profile => {
+            const isCurrent = currentProfile && profile.id === currentProfile.id;
+
+            const profileCard = document.createElement('div');
+            profileCard.className = 'profile-card' + (isCurrent ? ' profile-card-active' : '');
+            profileCard.innerHTML = `
+                <div class="profile-card-header">
+                    <span class="profile-emoji">${profile.emoji || '👤'}</span>
+                    <div class="profile-info">
+                        <div class="profile-name">${profile.name}</div>
+                        <div class="profile-meta">
+                            ${isCurrent ? '<span class="profile-badge">ACTIVE</span>' : ''}
+                            <span class="profile-last-used">Last used: ${this.formatDate(profile.lastUsed)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-card-actions">
+                    ${!isCurrent ? `<button class="btn btn-secondary profile-switch-btn" data-profile-id="${profile.id}">SWITCH</button>` : ''}
+                    <button class="btn btn-secondary profile-edit-btn" data-profile-id="${profile.id}">EDIT</button>
+                    ${profiles.length > 1 ? `<button class="btn btn-danger profile-delete-btn" data-profile-id="${profile.id}">DELETE</button>` : ''}
+                </div>
+            `;
+
+            profilesList.appendChild(profileCard);
+        });
+
+        // Attach event listeners to profile action buttons
+        profilesList.querySelectorAll('.profile-switch-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const profileId = e.target.dataset.profileId;
+                await this.switchToProfile(profileId);
+            });
+        });
+
+        profilesList.querySelectorAll('.profile-edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const profileId = e.target.dataset.profileId;
+                this.showEditProfileDialog(profileId);
+            });
+        });
+
+        profilesList.querySelectorAll('.profile-delete-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const profileId = e.target.dataset.profileId;
+                await this.deleteProfile(profileId);
+            });
+        });
+    }
+
+    /**
+     * Show create profile dialog
+     */
+    showCreateProfileDialog() {
+        const name = prompt('Enter profile name:');
+        if (!name || name.trim().length === 0) return;
+
+        const emoji = prompt('Enter an emoji for this profile (or leave blank for 👤):', '👤');
+
+        this.createProfile(name.trim(), emoji || '👤');
+    }
+
+    /**
+     * Create a new profile
+     */
+    async createProfile(name, emoji) {
+        try {
+            await window.profileManager.createProfile(name, emoji);
+            this.showModal('Success', `Profile "${name}" created successfully!`);
+            this.loadProfilesList();
+        } catch (error) {
+            this.showModal('Error', `Failed to create profile: ${error.message}`);
+        }
+    }
+
+    /**
+     * Switch to a different profile
+     */
+    async switchToProfile(profileId) {
+        try {
+            await window.profileManager.switchProfile(profileId);
+            this.showModal('Profile Switched', 'Reloading page to apply profile settings...');
+
+            // Reload page after short delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } catch (error) {
+            this.showModal('Error', `Failed to switch profile: ${error.message}`);
+        }
+    }
+
+    /**
+     * Show edit profile dialog
+     */
+    showEditProfileDialog(profileId) {
+        const profiles = window.profileManager.getAllProfiles();
+        const profile = profiles.find(p => p.id === profileId);
+        if (!profile) return;
+
+        const newName = prompt('Enter new name:', profile.name);
+        if (!newName || newName.trim().length === 0) return;
+
+        const newEmoji = prompt('Enter new emoji:', profile.emoji || '👤');
+
+        this.updateProfileInfo(profileId, newName.trim(), newEmoji || '👤');
+    }
+
+    /**
+     * Update profile name and emoji
+     */
+    async updateProfileInfo(profileId, name, emoji) {
+        try {
+            const profile = await window.profileManager.getProfile(profileId);
+            profile.name = name;
+            profile.emoji = emoji;
+
+            await window.profileManager.updateProfile(profile);
+            this.showModal('Success', 'Profile updated successfully!');
+            this.loadProfilesList();
+            this.updateCurrentProfileDisplay();
+        } catch (error) {
+            this.showModal('Error', `Failed to update profile: ${error.message}`);
+        }
+    }
+
+    /**
+     * Delete a profile
+     */
+    async deleteProfile(profileId) {
+        const profiles = window.profileManager.getAllProfiles();
+        const profile = profiles.find(p => p.id === profileId);
+        if (!profile) return;
+
+        if (!confirm(`Are you sure you want to delete profile "${profile.name}"?`)) return;
+
+        try {
+            await window.profileManager.deleteProfile(profileId);
+            this.showModal('Success', 'Profile deleted successfully!');
+            this.loadProfilesList();
+        } catch (error) {
+            this.showModal('Error', `Failed to delete profile: ${error.message}`);
+        }
+    }
+
+    /**
+     * Format date for display
+     */
+    formatDate(dateString) {
+        if (!dateString) return 'Never';
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins} min ago`;
+        if (diffHours < 24) return `${diffHours} hr ago`;
+        if (diffDays < 7) return `${diffDays} days ago`;
+
+        return date.toLocaleDateString();
     }
 
     /**

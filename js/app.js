@@ -278,6 +278,9 @@ function initSystemPanel() {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('> CYBER TERMINAL INITIALIZING...');
 
+    // Initialize profile manager first (this loads user preferences)
+    await window.profileManager.init();
+
     // Load configuration first
     await loadConfig();
 
@@ -314,6 +317,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Set up header click handlers now that panels are ready
     setupHeaderClickHandlers();
+
+    // Set up profile switcher in header
+    setupProfileSwitcher();
 
     // loadVideos(); // Commented out - replaced with timer panel
     fetchWeatherOrFinancial();
@@ -392,6 +398,106 @@ function setupHeaderClickHandlers() {
             window.calendarPanelInstance.showModal();
         });
     }
+}
+
+// Set up profile switcher in header
+function setupProfileSwitcher() {
+    const profileSwitcher = document.getElementById('profile-switcher');
+    const profileEmojiEl = document.getElementById('profile-switcher-emoji');
+    const profileNameEl = document.getElementById('profile-switcher-name');
+
+    if (!profileSwitcher || !window.profileManager) return;
+
+    // Update display with current profile
+    const updateProfileDisplay = () => {
+        const currentProfile = window.profileManager.getCurrentProfile();
+        if (currentProfile) {
+            if (profileEmojiEl) profileEmojiEl.textContent = currentProfile.emoji || '👤';
+            if (profileNameEl) profileNameEl.textContent = currentProfile.name || 'User';
+        }
+    };
+
+    // Initial update
+    updateProfileDisplay();
+
+    // Listen for profile changes
+    window.addEventListener('profileChanged', updateProfileDisplay);
+
+    // Click to show profile switcher menu
+    profileSwitcher.addEventListener('click', async () => {
+        const profiles = await window.profileManager.loadProfiles();
+        const currentProfile = window.profileManager.getCurrentProfile();
+
+        // Create a simple modal to show available profiles
+        showProfileSwitcherMenu(profiles, currentProfile);
+    });
+}
+
+// Show profile switcher menu
+function showProfileSwitcherMenu(profiles, currentProfile) {
+    // Check if menu already exists
+    let menu = document.getElementById('profile-switcher-menu');
+    if (menu) {
+        menu.remove();
+    }
+
+    // Create menu
+    menu = document.createElement('div');
+    menu.id = 'profile-switcher-menu';
+    menu.className = 'profile-switcher-menu';
+
+    let menuHTML = '<div class="profile-menu-header">SWITCH PROFILE</div>';
+    menuHTML += '<div class="profile-menu-list">';
+
+    profiles.forEach(profile => {
+        const isCurrent = currentProfile && profile.id === currentProfile.id;
+        menuHTML += `
+            <button class="profile-menu-item ${isCurrent ? 'active' : ''}" data-profile-id="${profile.id}">
+                <span class="profile-menu-emoji">${profile.emoji || '👤'}</span>
+                <span class="profile-menu-name">${profile.name}</span>
+                ${isCurrent ? '<span class="profile-menu-badge">ACTIVE</span>' : ''}
+            </button>
+        `;
+    });
+
+    menuHTML += '</div>';
+    menuHTML += '<div class="profile-menu-footer">';
+    menuHTML += '<a href="settings.html" class="btn btn-secondary">MANAGE PROFILES</a>';
+    menuHTML += '</div>';
+
+    menu.innerHTML = menuHTML;
+    document.body.appendChild(menu);
+
+    // Add event listeners to profile items
+    menu.querySelectorAll('.profile-menu-item').forEach(item => {
+        item.addEventListener('click', async (e) => {
+            const profileId = e.currentTarget.dataset.profileId;
+            if (profileId && profileId !== currentProfile.id) {
+                try {
+                    await window.profileManager.switchProfile(profileId);
+                    // Reload page to apply new profile
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Failed to switch profile:', error);
+                    alert('Failed to switch profile: ' + error.message);
+                }
+            }
+            menu.remove();
+        });
+    });
+
+    // Close menu when clicking outside
+    const closeMenu = (e) => {
+        if (!menu.contains(e.target) && e.target.id !== 'profile-switcher') {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+        }
+    };
+
+    // Add slight delay to prevent immediate closing
+    setTimeout(() => {
+        document.addEventListener('click', closeMenu);
+    }, 100);
 }
 
 // Update System Temperature

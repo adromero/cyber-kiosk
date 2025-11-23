@@ -29,6 +29,10 @@
                 <a href="settings.html" class="system-name" title="Settings">CYBER//TERMINAL_v2.1</a>
             </div>
             <div class="header-right">
+                <button id="profile-switcher" class="profile-switcher" title="Switch User Profile">
+                    <span id="profile-switcher-emoji">👤</span>
+                    <span id="profile-switcher-name">User</span>
+                </button>
                 <span id="system-temp" class="temp-display" title="Click for system stats">--°C</span>
                 <span id="current-time" class="time-display"></span>
                 <span id="current-date" class="date-display"></span>
@@ -162,6 +166,7 @@
     <!-- Theme Manager (should load early) -->
     <script src="js/theme-manager.js"></script>
 
+    <script src="js/profile-manager.js"></script>
     <script src="js/panels/panel-registry.js"></script>
     <script src="js/panels/base-panel.js"></script>
     <script src="js/panels/timer-panel.js"></script>

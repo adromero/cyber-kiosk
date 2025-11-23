@@ -39,7 +39,11 @@
         <div class="settings-container">
             <!-- Tab Navigation -->
             <nav class="settings-tabs">
-                <button class="settings-tab active" data-tab="theme">
+                <button class="settings-tab active" data-tab="profiles">
+                    <span class="tab-icon">👤</span>
+                    <span class="tab-label">PROFILES</span>
+                </button>
+                <button class="settings-tab" data-tab="theme">
                     <span class="tab-icon">&#127912;</span>
                     <span class="tab-label">THEME</span>
                 </button>
@@ -60,8 +64,39 @@
             <!-- Tab Content -->
             <div class="settings-content">
 
+                <!-- Profiles Tab -->
+                <div id="tab-profiles" class="settings-tab-content active">
+                    <div class="settings-section">
+                        <h2 class="section-title">&gt; USER_PROFILES</h2>
+                        <p class="section-description">Manage user profiles. Each profile has its own theme, panels, and settings.</p>
+
+                        <!-- Current Profile Display -->
+                        <div class="current-profile-banner">
+                            <div class="current-profile-info">
+                                <span class="current-profile-emoji" id="current-profile-emoji">👤</span>
+                                <div class="current-profile-details">
+                                    <span class="current-profile-label">CURRENT USER:</span>
+                                    <span class="current-profile-name" id="current-profile-name">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile List -->
+                        <div class="profiles-list" id="profiles-list">
+                            <!-- Profiles will be loaded here dynamically -->
+                        </div>
+
+                        <!-- Create New Profile -->
+                        <div class="profile-actions">
+                            <button class="btn btn-primary" id="create-profile-btn">
+                                <span>+ CREATE NEW PROFILE</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Theme Tab -->
-                <div id="tab-theme" class="settings-tab-content active">
+                <div id="tab-theme" class="settings-tab-content">
                     <div class="settings-section">
                         <h2 class="section-title">&gt; THEME_SELECTION</h2>
                         <p class="section-description">Choose your visual theme. Changes apply immediately.</p>
@@ -493,6 +528,7 @@
 
     <!-- Theme Manager (should load early) -->
     <script src="js/theme-manager.js"></script>
+    <script src="js/profile-manager.js"></script>
     <script src="js/panels/panel-registry.js"></script>
     <script src="js/layout-editor.js"></script>
     <script src="js/settings.js"></script>
