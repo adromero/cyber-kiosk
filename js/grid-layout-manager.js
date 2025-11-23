@@ -112,7 +112,10 @@ class GridLayoutManager {
         gridElement.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
         gridElement.style.gap = '20px';
         gridElement.style.width = '100%';
-        gridElement.style.height = 'calc(100vh - 200px)'; // Account for header/footer
+        // Use flex: 1 to fill available space responsively (matches base.css)
+        // This allows the grid to adapt to any screen size naturally
+        gridElement.style.flex = '1';
+        gridElement.style.minHeight = '0'; // Important for flexbox children
 
         console.log(`[GridLayoutManager] Grid configured: ${columns} columns × ${rows} rows`);
     }
@@ -147,7 +150,8 @@ class GridLayoutManager {
             // Apply grid positioning (1-indexed for CSS grid)
             panelElement.style.gridColumn = `${col + 1} / span ${width}`;
             panelElement.style.gridRow = `${row + 1} / span ${height}`;
-            panelElement.style.display = 'block';
+            // Use flex instead of block to maintain proper flexbox layout for content
+            panelElement.style.display = 'flex';
 
             console.log(`[GridLayoutManager] Positioned panel "${id}" at (${row},${col}) with size ${width}×${height}`);
         });
@@ -179,48 +183,49 @@ class GridLayoutManager {
     }
 
     /**
-     * Apply panel visibility based on activePanels configuration
-     * This respects the enabled/disabled toggles from settings
+     * Apply panel visibility based on layout configuration
+     * Panels are visible if they are in the layout grid, regardless of other settings
      */
     applyPanelVisibility() {
-        if (!this.layoutConfig || !this.layoutConfig.activePanels) {
-            console.log('[GridLayoutManager] No activePanels config');
+        if (!this.layoutConfig || !this.layoutConfig.layout || !this.layoutConfig.layout.panels) {
+            console.log('[GridLayoutManager] No layout configuration found');
             return;
         }
 
-        const visibilityMap = {};
+        // Build a set of panel IDs that are in the grid layout
+        const panelsInLayout = new Set(
+            this.layoutConfig.layout.panels.map(panel => panel.id)
+        );
 
-        // Build visibility map from activePanels
-        this.layoutConfig.activePanels.forEach(panel => {
-            visibilityMap[panel.id] = panel.visible;
-        });
+        console.log('[GridLayoutManager] Panels in layout:', Array.from(panelsInLayout));
 
-        // Also check the panels config for enabled flags
-        if (this.layoutConfig.panels) {
-            Object.keys(this.layoutConfig.panels).forEach(panelId => {
-                const settings = this.layoutConfig.panels[panelId];
-                if (settings.enabled !== undefined) {
-                    visibilityMap[panelId] = settings.enabled;
+        // Additionally check activePanels for visibility overrides
+        const visibilityOverrides = {};
+        if (this.layoutConfig.activePanels) {
+            this.layoutConfig.activePanels.forEach(panel => {
+                // Only hide panels that are explicitly set to visible=false
+                // This allows users to disable panels from the panel toggles
+                if (panel.visible === false) {
+                    visibilityOverrides[panel.id] = false;
                 }
             });
         }
 
-        console.log('[GridLayoutManager] Visibility map:', visibilityMap);
+        console.log('[GridLayoutManager] Visibility overrides:', visibilityOverrides);
 
-        // Apply visibility
-        Object.keys(visibilityMap).forEach(panelId => {
-            const isVisible = visibilityMap[panelId];
-            const panelElement = document.querySelector(`[data-panel-id="${panelId}"]`);
-
-            if (panelElement) {
-                if (isVisible === false) {
+        // Hide panels that are explicitly disabled via toggles
+        Object.keys(visibilityOverrides).forEach(panelId => {
+            if (visibilityOverrides[panelId] === false) {
+                const panelElement = document.querySelector(`[data-panel-id="${panelId}"]`);
+                if (panelElement) {
                     panelElement.style.display = 'none';
-                    console.log(`[GridLayoutManager] Panel "${panelId}" hidden (disabled in settings)`);
+                    console.log(`[GridLayoutManager] Panel "${panelId}" hidden (disabled via toggle)`);
                 }
-                // Note: We don't set display='block' here because that's handled by positionPanels
-                // Only hide panels that are explicitly disabled
             }
         });
+
+        // Note: Panels in the layout are shown by positionPanels()
+        // This function only handles hiding panels that are explicitly disabled
     }
 
     /**

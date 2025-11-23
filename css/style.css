@@ -3563,6 +3563,13 @@ input:checked + .toggle-slider:before {
     border: 2px solid rgba(0, 255, 255, 0.3);
     position: relative;
     isolation: isolate;
+    /* Fixed width with aspect ratio for consistent preview across all screens */
+    width: 100%;
+    max-width: 600px;
+    /* Use aspect ratio that represents typical widescreen displays */
+    /* This creates a proportional height that matches real screen layouts */
+    aspect-ratio: 16 / 9;
+    height: auto;
 }
 
 /* Column layouts */
@@ -3601,7 +3608,8 @@ input:checked + .toggle-slider:before {
 
 .grid-cell {
     border: 2px dashed rgba(0, 255, 255, 0.4);
-    min-height: 140px;
+    /* Remove fixed min-height to allow proportional scaling */
+    min-height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3641,7 +3649,8 @@ input:checked + .toggle-slider:before {
     align-items: center;
     justify-content: center;
     touch-action: manipulation;
-    min-height: 140px;
+    /* Reduce min-height to allow proportional scaling with grid */
+    min-height: 60px;
     position: relative;
     pointer-events: auto;
 }

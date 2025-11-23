@@ -400,6 +400,20 @@ class SettingsManager {
 
             // Try to save panel config to server
             try {
+                // Build a set of panels that are in the grid layout
+                const panelsInLayout = new Set();
+                if (layout && layout.panels) {
+                    layout.panels.forEach(panel => {
+                        panelsInLayout.add(panel.id);
+                        // Also map container IDs to individual panels
+                        // e.g., info_feed -> weather, markets
+                        if (panel.id === 'info_feed') {
+                            panelsInLayout.add('weather');
+                            panelsInLayout.add('markets');
+                        }
+                    });
+                }
+
                 // Build complete config data matching panels.json structure
                 const configData = {
                     version: "1.0.0",
@@ -412,6 +426,15 @@ class SettingsManager {
                 if (layout && layout.panels && layout.panels.length > 0) {
                     configData.layout = layout;
                 }
+
+                // Build panels config with enabled flags synced to layout
+                // Panels in the grid layout should be marked as enabled
+                configData.panelsEnabled = {};
+                panels.forEach(panel => {
+                    // Panel is enabled if it's in the layout OR explicitly visible
+                    configData.panelsEnabled[panel.id] =
+                        panelsInLayout.has(panel.id) || panel.visible;
+                });
 
                 const response = await fetch('/config/panels', {
                     method: 'POST',

@@ -1257,6 +1257,15 @@ const server = http.createServer(async (req, res) => {
                     console.warn('Could not read existing panels config, creating new one');
                 }
 
+                // Update panels.enabled flags based on panelsEnabled data
+                if (data.panelsEnabled && existingConfig.panels) {
+                    Object.keys(data.panelsEnabled).forEach(panelId => {
+                        if (existingConfig.panels[panelId]) {
+                            existingConfig.panels[panelId].enabled = data.panelsEnabled[panelId];
+                        }
+                    });
+                }
+
                 // Merge with existing config, preserving structure
                 const updatedConfig = {
                     ...existingConfig,
