@@ -14,6 +14,7 @@ class GridLayoutManager {
             news: 'news',
             timer: 'timer',
             music: 'music',
+            calendar: 'calendar',
             cyberspace: 'cyberspace',
             video: 'video',
             system: 'system'
@@ -24,6 +25,7 @@ class GridLayoutManager {
             news: ['news'],
             timer: ['timer'],
             music: ['music'],
+            calendar: ['calendar'],
             cyberspace: ['cyberspace'],
             video: ['video'],
             system: ['system']

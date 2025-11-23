@@ -36,7 +36,7 @@
         "height": 2
       },
       {
-        "id": "cyberspace",
+        "id": "calendar",
         "row": 2,
         "col": 0,
         "width": 1,
@@ -195,9 +195,13 @@
       "visible": false
     },
     {
+      "id": "calendar",
+      "visible": true
+    },
+    {
       "id": "system",
       "visible": false
     }
   ],
-  "lastUpdated": "2025-11-23T01:48:48.040Z"
+  "lastUpdated": "2025-11-23T02:58:11.725Z"
 }
