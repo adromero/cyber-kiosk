@@ -128,8 +128,14 @@ function initTimerPanel() {
         timerPanel.init();
         console.log('> TIMER PANEL: INITIALIZED');
 
+        // Make timer panel globally accessible for header click handler
+        window.timerPanelInstance = timerPanel;
+
         // Request notification permission for alarms/timers
         timerPanel.requestNotificationPermission();
+
+        // Set up header click handlers now that timer panel is ready
+        setupHeaderClickHandlers();
     } catch (error) {
         console.error('> ERROR INITIALIZING TIMER PANEL:', error);
     }
@@ -165,6 +171,31 @@ function initMusicPanel() {
     }
 }
 
+// Calendar Panel - Events and reminders (modal-based, no container needed)
+let calendarPanel;
+function initCalendarPanel() {
+    if (typeof CalendarPanel === 'undefined') {
+        console.error('> CALENDAR PANEL: CalendarPanel class not loaded');
+        return;
+    }
+
+    try {
+        calendarPanel = new CalendarPanel({
+            id: 'calendar',
+            title: 'CALENDAR',
+            settings: {}
+        });
+
+        calendarPanel.init();
+        console.log('> CALENDAR PANEL: INITIALIZED');
+
+        // Make calendar panel globally accessible for header click handler
+        window.calendarPanelInstance = calendarPanel;
+    } catch (error) {
+        console.error('> ERROR INITIALIZING CALENDAR PANEL:', error);
+    }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('> CYBER TERMINAL INITIALIZING...');
@@ -193,6 +224,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize Music Panel (Spotify integration)
     initMusicPanel();
+
+    // Initialize Calendar Panel (modal-based)
+    initCalendarPanel();
 
     // loadVideos(); // Commented out - replaced with timer panel
     fetchWeatherOrFinancial();
@@ -248,6 +282,29 @@ function updateDateTime() {
 
     document.getElementById('current-time').textContent = timeString;
     document.getElementById('current-date').textContent = dateString.replace(/\//g, '.');
+}
+
+// Setup header click handlers for time/date functionality
+function setupHeaderClickHandlers() {
+    // Click on time display opens timer/alarm modal
+    const timeDisplay = document.getElementById('current-time');
+    if (timeDisplay && window.timerPanelInstance) {
+        timeDisplay.style.cursor = 'pointer';
+        timeDisplay.addEventListener('click', () => {
+            console.log('> TIME DISPLAY CLICKED - OPENING TIMER/ALARM MODAL');
+            window.timerPanelInstance.showModal('timer');
+        });
+    }
+
+    // Click on date display opens calendar (P4.2)
+    const dateDisplay = document.getElementById('current-date');
+    if (dateDisplay && window.calendarPanelInstance) {
+        dateDisplay.style.cursor = 'pointer';
+        dateDisplay.addEventListener('click', () => {
+            console.log('> DATE DISPLAY CLICKED - OPENING CALENDAR');
+            window.calendarPanelInstance.showModal();
+        });
+    }
 }
 
 // Update System Temperature
