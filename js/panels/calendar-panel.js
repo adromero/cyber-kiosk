@@ -57,14 +57,11 @@ class CalendarPanel extends BasePanel {
 
         this.container.innerHTML = `
             <div class="calendar-widget">
-                <div class="widget-header" style="cursor: pointer;">
+                <div class="widget-header" style="cursor: pointer;" title="Click to open full calendar">
                     <span class="widget-title">📅 CALENDAR</span>
                 </div>
-                <div class="calendar-compact-view">
-                    ${this.renderCompactMonth()}
-                </div>
-                <div class="calendar-upcoming-mini">
-                    ${this.renderUpcomingMini()}
+                <div class="calendar-day-view">
+                    ${this.renderDayView()}
                 </div>
             </div>
         `;
@@ -77,11 +74,11 @@ class CalendarPanel extends BasePanel {
 
         // Navigation buttons
         this.container.addEventListener('click', (e) => {
-            if (e.target.dataset.action === 'prev-month-mini') {
-                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+            if (e.target.dataset.action === 'prev-day') {
+                this.currentDate.setDate(this.currentDate.getDate() - 1);
                 this.refreshContainer();
-            } else if (e.target.dataset.action === 'next-month-mini') {
-                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+            } else if (e.target.dataset.action === 'next-day') {
+                this.currentDate.setDate(this.currentDate.getDate() + 1);
                 this.refreshContainer();
             } else if (e.target.dataset.action === 'today') {
                 this.currentDate = new Date();
@@ -94,115 +91,77 @@ class CalendarPanel extends BasePanel {
      * Refresh the container view
      */
     refreshContainer() {
-        const compactView = this.container?.querySelector('.calendar-compact-view');
-        const upcomingView = this.container?.querySelector('.calendar-upcoming-mini');
+        const dayView = this.container?.querySelector('.calendar-day-view');
 
-        if (compactView) {
-            compactView.innerHTML = this.renderCompactMonth();
-        }
-        if (upcomingView) {
-            upcomingView.innerHTML = this.renderUpcomingMini();
+        if (dayView) {
+            dayView.innerHTML = this.renderDayView();
         }
     }
 
     /**
-     * Render compact month view for container
+     * Render day view for container (shows current day's events)
      */
-    renderCompactMonth() {
-        const year = this.currentDate.getFullYear();
-        const month = this.currentDate.getMonth();
-        const monthName = this.currentDate.toLocaleDateString('en-US', { month: 'short' });
+    renderDayView() {
+        const displayDate = new Date(this.currentDate);
+        const isToday = this.isToday(displayDate);
 
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
-        const startingDayOfWeek = firstDay.getDay();
+        // Format date strings
+        const dayOfWeek = displayDate.toLocaleDateString('en-US', { weekday: 'short' });
+        const monthName = displayDate.toLocaleDateString('en-US', { month: 'short' });
+        const dayNum = displayDate.getDate();
+        const year = displayDate.getFullYear();
 
-        let daysHTML = '';
-        let dayCounter = 1;
+        // Get events for this day
+        const dayEvents = this.getEventsForDate(displayDate);
 
-        // Week headers
-        const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-        let weekdaysHTML = weekdays.map(day =>
-            `<div class="calendar-mini-weekday">${day}</div>`
-        ).join('');
+        // Render events list
+        let eventsHTML = '';
+        if (dayEvents.length === 0) {
+            eventsHTML = '<div class="calendar-day-no-events">No events today</div>';
+        } else {
+            eventsHTML = dayEvents
+                .sort((a, b) => {
+                    // Sort by time if available
+                    if (a.time && b.time) {
+                        return a.time.localeCompare(b.time);
+                    }
+                    return 0;
+                })
+                .map(event => {
+                    const eventType = this.eventTypes[event.type] || this.eventTypes.other;
+                    const timeStr = event.time || '';
 
-        // Calendar days (up to 6 rows)
-        for (let row = 0; row < 6; row++) {
-            for (let col = 0; col < 7; col++) {
-                const cellIndex = row * 7 + col;
-
-                if (cellIndex < startingDayOfWeek || dayCounter > daysInMonth) {
-                    daysHTML += '<div class="calendar-mini-day empty"></div>';
-                } else {
-                    const cellDate = new Date(year, month, dayCounter);
-                    const isToday = this.isToday(cellDate);
-                    const hasEvents = this.getEventsForDate(cellDate).length > 0;
-
-                    daysHTML += `
-                        <div class="calendar-mini-day ${isToday ? 'today' : ''} ${hasEvents ? 'has-events' : ''}">
-                            ${dayCounter}
+                    return `
+                        <div class="calendar-day-event">
+                            <div class="calendar-day-event-time">${timeStr}</div>
+                            <div class="calendar-day-event-content">
+                                <span class="calendar-day-event-icon" style="color: ${eventType.color}">${eventType.icon}</span>
+                                <div class="calendar-day-event-info">
+                                    <div class="calendar-day-event-title">${this.escapeHtml(event.title)}</div>
+                                    ${event.description ? `<div class="calendar-day-event-desc">${this.escapeHtml(event.description)}</div>` : ''}
+                                </div>
+                            </div>
                         </div>
                     `;
-                    dayCounter++;
-                }
-            }
-            if (dayCounter > daysInMonth) break;
+                }).join('');
         }
 
         return `
-            <div class="calendar-mini-header">
-                <button class="calendar-mini-nav" data-action="prev-month-mini">◀</button>
-                <div class="calendar-mini-title">${monthName} ${year}</div>
-                <button class="calendar-mini-nav" data-action="next-month-mini">▶</button>
-            </div>
-            <div class="calendar-mini-weekdays">
-                ${weekdaysHTML}
-            </div>
-            <div class="calendar-mini-grid">
-                ${daysHTML}
-            </div>
-            <button class="calendar-mini-today-btn" data-action="today">TODAY</button>
-        `;
-    }
-
-    /**
-     * Render upcoming events mini list for container
-     */
-    renderUpcomingMini() {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const upcomingEvents = this.events
-            .filter(event => {
-                const eventDate = new Date(event.date);
-                eventDate.setHours(0, 0, 0, 0);
-                return eventDate >= today;
-            })
-            .sort((a, b) => a.date - b.date)
-            .slice(0, 3);
-
-        if (upcomingEvents.length === 0) {
-            return '<div class="calendar-mini-no-events">No upcoming events</div>';
-        }
-
-        return upcomingEvents.map(event => {
-            const eventType = this.eventTypes[event.type] || this.eventTypes.other;
-            const dateStr = new Date(event.date).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric'
-            });
-
-            return `
-                <div class="calendar-mini-event">
-                    <span class="calendar-mini-event-icon" style="color: ${eventType.color}">${eventType.icon}</span>
-                    <div class="calendar-mini-event-info">
-                        <div class="calendar-mini-event-title">${this.escapeHtml(event.title)}</div>
-                        <div class="calendar-mini-event-date">${dateStr}</div>
-                    </div>
+            <div class="calendar-day-header">
+                <button class="calendar-day-nav" data-action="prev-day" title="Previous day">◀</button>
+                <div class="calendar-day-date">
+                    <div class="calendar-day-weekday">${dayOfWeek}</div>
+                    <div class="calendar-day-number">${dayNum}</div>
+                    <div class="calendar-day-month">${monthName} ${year}</div>
+                    ${isToday ? '<div class="calendar-day-today-badge">TODAY</div>' : ''}
                 </div>
-            `;
-        }).join('');
+                <button class="calendar-day-nav" data-action="next-day" title="Next day">▶</button>
+            </div>
+            <div class="calendar-day-events">
+                ${eventsHTML}
+            </div>
+            ${!isToday ? '<button class="calendar-day-today-btn" data-action="today">JUMP TO TODAY</button>' : ''}
+        `;
     }
 
     /**
