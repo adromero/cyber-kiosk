@@ -133,9 +133,6 @@ function initTimerPanel() {
 
         // Request notification permission for alarms/timers
         timerPanel.requestNotificationPermission();
-
-        // Set up header click handlers now that timer panel is ready
-        setupHeaderClickHandlers();
     } catch (error) {
         console.error('> ERROR INITIALIZING TIMER PANEL:', error);
     }
@@ -227,6 +224,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize Calendar Panel (modal-based)
     initCalendarPanel();
+
+    // Set up header click handlers now that panels are ready
+    setupHeaderClickHandlers();
 
     // loadVideos(); // Commented out - replaced with timer panel
     fetchWeatherOrFinancial();

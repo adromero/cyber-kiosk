@@ -98,6 +98,19 @@ const AVAILABLE_PANELS = {
         priority: 7
     },
 
+    calendar: {
+        id: 'calendar',
+        name: 'Calendar',
+        icon: '📅',
+        component: 'CalendarPanel',
+        minSize: 'medium',
+        defaultSize: 'large',
+        category: 'tools',
+        description: 'Calendar with events and reminders (accessible via header date click)',
+        enabled: false, // Modal-only for now, no container implementation yet
+        priority: 8
+    },
+
     system: {
         id: 'system',
         name: 'System Monitor',
@@ -108,7 +121,7 @@ const AVAILABLE_PANELS = {
         category: 'system',
         description: 'System temperature, memory, and status information',
         enabled: true,
-        priority: 8
+        priority: 9
     }
 };
 
