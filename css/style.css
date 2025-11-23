@@ -2835,8 +2835,8 @@ a.system-name:hover {
     display: flex;
     gap: 1.5rem;
     padding: 1rem;
-    max-height: 80vh;
-    overflow: hidden;
+    max-height: none;
+    overflow: visible;
 }
 
 /* Calendar Month View (Left Side) */
@@ -2986,15 +2986,13 @@ a.system-name:hover {
     flex-direction: column;
     gap: 1.5rem;
     min-width: 300px;
-    max-height: 80vh;
 }
 
 .calendar-events-section {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--neon-cyan);
     padding: 1rem;
-    overflow-y: auto;
-    max-height: 50vh;
+    flex: 1;
 }
 
 .calendar-events-section::-webkit-scrollbar {
