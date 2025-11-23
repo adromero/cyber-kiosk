@@ -8,14 +8,19 @@ A Neuromancer-inspired cyberpunk dashboard for Raspberry Pi with touchscreen. Fe
 
 ## Features
 
+- **Multi-User Profiles** - Individual user profiles with separate themes, panel layouts, and settings
+- **Multiple Themes** - Switch between Cyberpunk, Hip-Hop, and California visual themes
+- **Responsive Layout** - Adapts seamlessly from 4-inch mobile screens to 27-inch desktop displays
+- **Customizable Panels** - Drag-and-drop layout editor with 8+ configurable panels
 - **Retro CRT Display** - Scanlines, phosphor glow, and authentic terminal aesthetics
 - **Live Temperature Display** - Real-time CPU temperature shown in header (updates every 15 seconds)
 - **Weather & Financial Data** - Cycles between current weather/forecast and live market data (DOW, S&P 500, NASDAQ, Gold, USD/EUR)
 - **YouTube Integration** - Rotating cyberpunk-themed video thumbnails with full player and search modal
 - **Multi-Source News** - Rotates through Hacker News, NY Times Tech, and Dev.to every 5 minutes
+- **Timer & Alarms** - Multiple countdown timers and alarms with custom sounds
+- **Calendar System** - Event management with day view widget and full modal calendar
 - **System Status Modal** - Click temperature to view full diagnostics (CPU/GPU temp, memory, disk, load avg, uptime)
 - **Interactive Modals** - Click any widget for expanded detailed view
-- **Cyberpunk Aesthetic** - Neon cyan/magenta/amber/green color scheme with glowing text
 - **Burn-in Prevention** - Auto-dimming and subtle pixel shifting for 24/7 operation
 - **Hidden Exit** - Click bottom-right corner to exit kiosk mode
 
@@ -127,6 +132,71 @@ ALPHA_VANTAGE_API_KEY=your_key_here
 
 Timing intervals are configured in `system-monitor.js` and `js/app.js`.
 
+## User Profiles
+
+The kiosk supports multiple user profiles, each with individual settings and preferences.
+
+### Managing Profiles
+
+1. **Access Settings:** Click the settings gear icon in the header or navigate to `settings.html`
+
+2. **Profiles Tab:** The first tab shows all user profiles
+
+3. **Create New Profile:**
+   - Click "CREATE NEW PROFILE"
+   - Enter a name and emoji
+   - Profile starts with default settings
+
+4. **Switch Profiles:**
+   - Click the profile button in the dashboard header (shows current user emoji + name)
+   - Select from the dropdown menu
+   - Or use the SWITCH button in settings
+
+5. **Edit Profile:**
+   - Click EDIT on any profile card
+   - Update name or emoji
+
+6. **Delete Profile:**
+   - Click DELETE on any profile card
+   - At least one profile must remain
+
+### Per-Profile Settings
+
+Each profile stores:
+- **Theme:** Cyberpunk, Hip-Hop, or California
+- **Panel Layout:** Custom grid arrangement of widgets
+- **Active Panels:** Which panels are enabled
+- **Display Settings:** CRT effects, animations, font size
+- **Refresh Intervals:** Update frequency for data
+
+Profiles are stored in `config/profiles/` as JSON files.
+
+### Themes
+
+Switch between three distinct visual themes:
+
+- **Cyberpunk:** Neon cyan/magenta with CRT effects and scanlines
+- **Hip-Hop:** Gold and purple with bold typography and graffiti elements
+- **California:** Sunset orange and pacific blue with smooth gradients
+
+### Panel Customization
+
+Available panels:
+- Weather & Markets
+- News Feed
+- Timer & Alarms
+- Calendar
+- Music Player (Spotify)
+- Video Player
+- Cyberspace Browser
+- System Monitor
+
+Use the Layout Editor in settings to:
+- Set grid dimensions (1-4 rows/columns)
+- Drag panels to reposition
+- Resize panel areas
+- Enable/disable panels
+
 ### Customize YouTube Videos
 
 Edit `js/app.js` and modify the `YOUTUBE_VIDEOS` array:
@@ -150,34 +220,69 @@ See [docs/AUTOSTART_SETUP.md](docs/AUTOSTART_SETUP.md) for instructions on:
 ```
 cyber-kiosk/
 ├── index.html                 # Main dashboard
+├── settings.html              # Settings & configuration page
 ├── css/
-│   └── style.css             # Cyberpunk styling
+│   ├── style.css              # Main styling
+│   ├── responsive.css         # Responsive layout system
+│   └── themes/                # Theme files
+│       ├── base.css           # Shared base styles
+│       ├── cyberpunk.css      # Cyberpunk theme
+│       ├── hiphop.css         # Hip-Hop theme
+│       └── california.css     # California theme
 ├── js/
-│   └── app.js                # Application logic
-├── system-monitor.js         # Node.js backend (port 3001)
-├── .env                      # Your config with API keys (gitignored)
-├── .env.example              # Config template
-├── launch-kiosk.sh           # Kiosk launcher script
-├── setup.sh                  # Interactive setup
-├── package.json              # Node dependencies
-├── docs/                     # Additional documentation
+│   ├── app.js                 # Main application logic
+│   ├── theme-manager.js       # Theme switching
+│   ├── profile-manager.js     # User profile management
+│   ├── layout-manager.js      # Responsive layout
+│   ├── settings.js            # Settings page logic
+│   └── panels/                # Panel modules
+│       ├── panel-registry.js  # Panel definitions
+│       ├── base-panel.js      # Base panel class
+│       ├── timer-panel.js     # Timer & alarms
+│       ├── calendar-panel.js  # Calendar system
+│       ├── music-panel.js     # Spotify integration
+│       ├── video-panel.js     # Video player
+│       └── system-panel.js    # System monitor
+├── config/
+│   ├── panels.json            # Panel configuration
+│   ├── defaults.json          # Default settings
+│   └── profiles/              # User profiles (JSON files)
+├── system-monitor.js          # Node.js backend (port 3001)
+├── .env                       # Your config with API keys (gitignored)
+├── .env.example               # Config template
+├── launch-kiosk.sh            # Kiosk launcher script
+├── setup.sh                   # Interactive setup
+├── package.json               # Node dependencies
+├── docs/                      # Additional documentation
 │   ├── INSTALLATION.md
 │   ├── CONFIGURATION.md
 │   ├── TROUBLESHOOTING.md
 │   └── BURN_IN_PREVENTION.md
-└── README.md                 # This file
+└── README.md                  # This file
 ```
 
 ## System Monitor Backend
 
 The system monitor runs as a Node.js server on port 3001 and provides:
 
-- `/stats` - CPU/GPU temp, memory, disk, load average, uptime (powers the header temperature display and system status modal)
+**System Endpoints:**
+- `/stats` - CPU/GPU temp, memory, disk, load average, uptime
 - `/financial` - Market data (requires Alpha Vantage API key)
 - `/pihole` - Pi-hole network statistics (requires Pi-hole installation)
 - `/network` - Network bandwidth and connection stats (requires vnstat)
 - `/config` - Configuration loaded from .env file
 - `/health` - Health check
+
+**User Profile API:**
+- `GET /profiles` - List all user profiles
+- `POST /profiles` - Create new profile
+- `GET /profiles/:id` - Get specific profile
+- `PUT /profiles/:id` - Update profile
+- `DELETE /profiles/:id` - Delete profile
+
+**Panel Configuration:**
+- `GET /config/panels` - Get panel configuration
+- `POST /config/panels` - Save panel configuration
 
 ### Running as a Service
 
