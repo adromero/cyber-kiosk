@@ -1,13 +1,13 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-22T19:00:00Z",
+  "lastUpdated": "2025-11-22T19:30:00Z",
   "contextUsedPercent": 52,
-  "currentPhase": "Phase 5: Install & Migration",
+  "currentPhase": "Phase 4: Settings UI & Enhancements",
   "currentSession": 7,
   "overallProgress": {
-    "totalTasks": 44,
+    "totalTasks": 52,
     "completedTasks": 28,
-    "percentComplete": 64
+    "percentComplete": 54
   },
   "phases": {
     "phase1": {
@@ -197,8 +197,8 @@
       ]
     },
     "phase4": {
-      "name": "Phase 4: Settings UI",
-      "status": "completed",
+      "name": "Phase 4: Settings UI & Enhancements",
+      "status": "in_progress",
       "tasks": [
         {
           "id": "p4-t1",
@@ -255,6 +255,62 @@
           "priority": "low",
           "dependencies": ["p4-t1"],
           "notes": "Settings gear icon in header with hover animation"
+        },
+        {
+          "id": "p4.1-t1",
+          "description": "Add Timer/Alarm functionality to clicking on time in kiosk header",
+          "status": "pending",
+          "priority": "medium",
+          "dependencies": ["p2-t1", "p2-t2"],
+          "notes": "Click on time display should open timer/alarm modal or navigate to timer panel"
+        },
+        {
+          "id": "p4.2-t1",
+          "description": "Add Calendar System and link it to clicking on date in kiosk header",
+          "status": "pending",
+          "priority": "medium",
+          "dependencies": ["p4-t1"],
+          "notes": "Click on date display should open calendar view, potentially with events/reminders"
+        },
+        {
+          "id": "p4.3-t1",
+          "description": "Fix Hip-Hop theme: make it better and more distinct from Cyberpunk theme",
+          "status": "pending",
+          "priority": "medium",
+          "dependencies": ["p3-t4"],
+          "notes": "Current hip-hop theme too similar to cyberpunk. Needs more distinct visual identity with gold/black colors, different fonts, unique visual effects"
+        },
+        {
+          "id": "p4.5-t1",
+          "description": "Add User profiles system with backend support",
+          "status": "pending",
+          "priority": "high",
+          "dependencies": ["p4-t1", "p4-t2"],
+          "notes": "Multi-user support with individual settings, preferences, and panel configurations per profile"
+        },
+        {
+          "id": "p4.6-t1",
+          "description": "Migrate settings files to their own file system/directory structure",
+          "status": "pending",
+          "priority": "medium",
+          "dependencies": ["p4-t2"],
+          "notes": "Organize settings-related files separately from main application files for better maintainability"
+        },
+        {
+          "id": "p4.7-t1",
+          "description": "Make API key and account entry boxes in settings page",
+          "status": "pending",
+          "priority": "medium",
+          "dependencies": ["p4-t1"],
+          "notes": "Add settings UI for API keys (weather, news, Spotify, etc.) and account credentials with secure storage"
+        },
+        {
+          "id": "p4.8-t1",
+          "description": "Test complete kiosk system on laptop browser window",
+          "status": "pending",
+          "priority": "high",
+          "dependencies": ["p4-t1"],
+          "notes": "Comprehensive testing of all features in desktop browser environment (Chrome/Firefox) on laptop"
         }
       ]
     },
