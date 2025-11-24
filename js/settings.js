@@ -301,7 +301,7 @@ class SettingsManager {
     async loadSettings() {
         try {
             // Load from localStorage (client-side settings)
-            const theme = localStorage.getItem('theme') || 'cyberpunk';
+            const theme = localStorage.getItem('cyber-kiosk-theme') || 'cyberpunk';
             const crtEffects = localStorage.getItem('crtEffects') !== 'false';
             const animations = localStorage.getItem('animations') !== 'false';
             const fontSize = localStorage.getItem('fontSize') || 'medium';
@@ -688,6 +688,24 @@ class SettingsManager {
                 });
             }
 
+            // Save theme to user profile
+            if (window.profileManager && window.profileManager.getCurrentProfile()) {
+                try {
+                    await window.profileManager.saveCurrentState({
+                        theme: this.currentSettings.theme,
+                        settings: {
+                            crtEffects,
+                            animations,
+                            fontSize,
+                            refreshInterval
+                        }
+                    });
+                    console.log('[Settings] Theme and settings saved to profile');
+                } catch (error) {
+                    console.warn('[Settings] Could not save to profile:', error);
+                }
+            }
+
             // Clear unsaved changes flag
             this.clearUnsavedChanges();
 
@@ -729,7 +747,7 @@ class SettingsManager {
 
         try {
             // Clear localStorage
-            localStorage.removeItem('theme');
+            localStorage.removeItem('cyber-kiosk-theme');
             localStorage.removeItem('crtEffects');
             localStorage.removeItem('animations');
             localStorage.removeItem('fontSize');

@@ -3,13 +3,13 @@
   "name": "Test User",
   "emoji": "🧪",
   "createdAt": "2025-11-23T15:36:26.362Z",
-  "lastUsed": "2025-11-23T15:36:34.987Z",
-  "theme": "cyberpunk",
+  "lastUsed": "2025-11-24T20:46:30.359Z",
+  "theme": "california",
   "settings": {
     "crtEffects": true,
     "animations": true,
     "fontSize": "medium",
-    "refreshInterval": 300000
+    "refreshInterval": "300000"
   },
   "panels": {
     "weather": {

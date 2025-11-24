@@ -32,13 +32,20 @@
         "id": "info_feed",
         "row": 0,
         "col": 0,
-        "width": 2,
+        "width": 1,
         "height": 2
       },
       {
-        "id": "system",
+        "id": "video",
         "row": 2,
         "col": 0,
+        "width": 1,
+        "height": 2
+      },
+      {
+        "id": "cyberspace",
+        "row": 0,
+        "col": 1,
         "width": 1,
         "height": 2
       }
@@ -203,5 +210,5 @@
       "visible": true
     }
   ],
-  "lastUpdated": "2025-11-23T04:35:24.927Z"
+  "lastUpdated": "2025-11-24T20:04:33.555Z"
 }

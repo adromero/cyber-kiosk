@@ -21,12 +21,12 @@ class SystemPanel extends BasePanel {
     async onInit() {
         this.log('Initializing system panel');
 
-        // Get system monitor URL from global CONFIG if available
+        // Get system monitor URL from global CONFIG if available (use relative URL)
         if (typeof CONFIG !== 'undefined') {
-            this.systemMonitorUrl = CONFIG.systemMonitorUrl || `http://localhost:${CONFIG.port}/stats`;
+            this.systemMonitorUrl = CONFIG.systemMonitorUrl || `/stats`;
             this.port = CONFIG.port || 3001;
         } else {
-            this.systemMonitorUrl = `http://localhost:${this.port}/stats`;
+            this.systemMonitorUrl = `/stats`;
         }
 
         this.log(`System monitor URL: ${this.systemMonitorUrl}`);
