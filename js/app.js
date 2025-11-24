@@ -12,7 +12,7 @@ let CONFIG = {
     weatherUpdateInterval: 600000, // 10 minutes
     newsUpdateInterval: 300000, // 5 minutes (cycles through sources)
     weatherCycleInterval: 300000, // 5 minutes (cycles between weather and financial)
-    systemMonitorUrl: 'http://localhost:3001/stats',
+    systemMonitorUrl: '/stats',
     systemUpdateInterval: 30000, // 30 seconds
     port: 3001
 };
@@ -33,7 +33,7 @@ async function loadConfig() {
             console.log('> PORT:', CONFIG.port);
 
             // Update systemMonitorUrl with correct port
-            CONFIG.systemMonitorUrl = `http://localhost:${CONFIG.port}/stats`;
+            CONFIG.systemMonitorUrl = `/stats`;
 
             return true;
         } else {
@@ -587,8 +587,8 @@ async function fetchWeather() {
     try {
         statusEl.textContent = 'SYNCING...';
 
-        // Current weather - using backend API proxy
-        const currentUrl = `http://localhost:${CONFIG.port}/api/weather?zip=${encodeURIComponent(CONFIG.zipCode)}`;
+        // Current weather - using backend API proxy (relative URL works from any host)
+        const currentUrl = `/api/weather?zip=${encodeURIComponent(CONFIG.zipCode)}`;
         const currentResponse = await fetch(currentUrl);
 
         if (!currentResponse.ok) {
@@ -601,8 +601,8 @@ async function fetchWeather() {
             throw new Error(currentData.error);
         }
 
-        // Forecast - using backend API proxy
-        const forecastUrl = `http://localhost:${CONFIG.port}/api/weather/forecast?zip=${encodeURIComponent(CONFIG.zipCode)}`;
+        // Forecast - using backend API proxy (relative URL works from any host)
+        const forecastUrl = `/api/weather/forecast?zip=${encodeURIComponent(CONFIG.zipCode)}`;
         const forecastResponse = await fetch(forecastUrl);
 
         if (!forecastResponse.ok) {
@@ -615,7 +615,7 @@ async function fetchWeather() {
             throw new Error(forecastData.error);
         }
 
-        // Get forecast for next 3 days (at noon)
+        // Get forecast for next 5 days (at noon)
         const forecastItems = [];
         const processedDays = new Set();
 
@@ -625,7 +625,7 @@ async function fetchWeather() {
             const hour = date.getHours();
 
             // Get forecast around noon (12:00)
-            if (hour === 12 && !processedDays.has(day) && forecastItems.length < 3) {
+            if (hour === 12 && !processedDays.has(day) && forecastItems.length < 5) {
                 forecastItems.push({
                     day: day.toUpperCase(),
                     temp: Math.round(item.main.temp),
@@ -634,6 +634,12 @@ async function fetchWeather() {
                 processedDays.add(day);
             }
         }
+
+        // Get wind direction as compass
+        const windDeg = currentData.wind?.deg || 0;
+        const windDirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        const windDir = windDirs[Math.round(windDeg / 45) % 8];
+        const windSpeed = Math.round(currentData.wind?.speed || 0);
 
         // Rebuild the entire weather content structure
         contentEl.innerHTML = `
@@ -648,6 +654,10 @@ async function fetchWeather() {
                     <div class="weather-detail">
                         <span class="label">HUMIDITY:</span>
                         <span>${currentData.main.humidity}%</span>
+                    </div>
+                    <div class="weather-detail">
+                        <span class="label">WIND:</span>
+                        <span>${windSpeed} mph ${windDir}</span>
                     </div>
                 </div>
             </div>
@@ -758,7 +768,7 @@ async function fetchFinancial() {
 // Fetch financial data from local system monitor server
 async function fetchFinancialData() {
     try {
-        const response = await fetch(`http://localhost:${CONFIG.port}/financial`);
+        const response = await fetch(`/financial`);
 
         if (!response.ok) {
             throw new Error('Failed to fetch financial data');
@@ -871,7 +881,7 @@ async function fetchNYTimes() {
         }
 
         // Use backend API proxy
-        const url = `http://localhost:${CONFIG.port}/api/nytimes`;
+        const url = `/api/nytimes`;
         const response = await fetch(url);
 
         if (!response.ok) {
@@ -1705,14 +1715,14 @@ async function showWeatherModal() {
         }
 
         // Fetch current weather using backend API proxy
-        const currentUrl = `http://localhost:${CONFIG.port}/api/weather?zip=${encodeURIComponent(CONFIG.zipCode)}`;
+        const currentUrl = `/api/weather?zip=${encodeURIComponent(CONFIG.zipCode)}`;
         const currentResponse = await fetch(currentUrl);
         if (!currentResponse.ok) throw new Error('Failed to fetch weather');
         const currentData = await currentResponse.json();
         if (currentData.error) throw new Error(currentData.error);
 
         // Fetch 5-day forecast using backend API proxy
-        const forecastUrl = `http://localhost:${CONFIG.port}/api/weather/forecast?zip=${encodeURIComponent(CONFIG.zipCode)}`;
+        const forecastUrl = `/api/weather/forecast?zip=${encodeURIComponent(CONFIG.zipCode)}`;
         const forecastResponse = await fetch(forecastUrl);
         if (!forecastResponse.ok) throw new Error('Failed to fetch forecast');
         const forecastData = await forecastResponse.json();
@@ -2027,7 +2037,7 @@ async function searchYouTubeVideos() {
         titleEl.textContent = '> SEARCHING...';
 
         // Use backend API proxy
-        const url = `http://localhost:${CONFIG.port}/api/youtube/search?q=${encodeURIComponent(query)}`;
+        const url = `/api/youtube/search?q=${encodeURIComponent(query)}`;
         const response = await fetch(url);
 
         if (!response.ok) {
@@ -2179,7 +2189,7 @@ async function fetchNewsForModal(source) {
                 }
 
                 // Use backend API proxy
-                const nytUrl = `http://localhost:${CONFIG.port}/api/nytimes`;
+                const nytUrl = `/api/nytimes`;
                 const nytResponse = await fetch(nytUrl);
                 if (!nytResponse.ok) throw new Error('NYT fetch failed');
                 const nytData = await nytResponse.json();
@@ -2221,7 +2231,7 @@ async function showPiholeModal() {
         openModal('&gt; NETWORK_SHIELD', statusMsg);
 
         // Fetch Pi-hole stats from backend
-        const response = await fetch(`http://localhost:${CONFIG.port}/pihole`);
+        const response = await fetch(`/pihole`);
         if (!response.ok) throw new Error('Failed to fetch Pi-hole stats');
         const data = await response.json();
 
@@ -2320,7 +2330,7 @@ async function showNetworkModal() {
         openModal('&gt; NETWORK_MONITOR', statusMsg);
 
         // Fetch network stats from backend
-        const response = await fetch(`http://localhost:${CONFIG.port}/network`);
+        const response = await fetch(`/network`);
         if (!response.ok) throw new Error('Failed to fetch network stats');
         const data = await response.json();
 

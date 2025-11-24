@@ -223,6 +223,43 @@
     .financial-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    /* Weather details - compact for 7" screen */
+    .weather-temp {
+        font-size: 2.5rem !important;
+    }
+
+    .weather-condition {
+        font-size: 1.1rem !important;
+    }
+
+    .weather-details {
+        gap: 10px;
+    }
+
+    .weather-detail {
+        font-size: 0.95rem !important;
+    }
+
+    .weather-detail .label {
+        font-size: 0.75rem !important;
+    }
+
+    .forecast-item {
+        padding: 5px;
+    }
+
+    .forecast-day {
+        font-size: 0.85rem !important;
+    }
+
+    .forecast-temp {
+        font-size: 1.1rem !important;
+    }
+
+    .forecast-desc {
+        font-size: 0.75rem !important;
+    }
 }
 
 /* ============================================================================
@@ -273,6 +310,30 @@
 
     .financial-grid {
         grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* 5-day forecast for laptops */
+    .weather-forecast {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    /* Weather panel layout */
+    .weather-widget .widget-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .weather-current {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .weather-details {
+        margin-top: 1rem;
+        gap: 1.5rem;
     }
 }
 
@@ -333,7 +394,42 @@
     }
 
     .weather-forecast {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    /* Weather panel uses full height on desktop */
+    .weather-widget .widget-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .weather-current {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .weather-details {
+        margin-top: 1.5rem;
+        gap: 2rem;
+    }
+
+    .forecast-item {
+        padding: 1rem;
+    }
+
+    .forecast-day {
+        font-size: 1.2rem !important;
+    }
+
+    .forecast-temp {
+        font-size: 1.8rem !important;
+    }
+
+    .forecast-desc {
+        font-size: 1rem !important;
     }
 }
 
