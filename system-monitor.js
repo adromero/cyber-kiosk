@@ -1214,6 +1214,111 @@ const server = http.createServer(async (req, res) => {
             screensaverImageInterval: parseInt(ENV.SCREENSAVER_IMAGE_INTERVAL) || 600000,
             port: PORT
         }));
+    } else if (pathname === '/config/user-settings' && req.method === 'GET') {
+        // Get unified user settings
+        res.setHeader('Content-Type', 'application/json');
+        const userSettingsFile = path.join(__dirname, 'config', 'user-settings.json');
+
+        try {
+            if (fs.existsSync(userSettingsFile)) {
+                const userSettings = fs.readFileSync(userSettingsFile, 'utf8');
+                res.writeHead(200);
+                res.end(JSON.stringify({ settings: JSON.parse(userSettings) }));
+            } else {
+                // Return default settings if file doesn't exist
+                const defaultSettings = {
+                    version: '1.0.0',
+                    lastUpdated: new Date().toISOString(),
+                    theme: { current: 'cyberpunk', crtEffects: true, animations: true },
+                    display: { fontSize: 'medium', refreshInterval: 300000 },
+                    panels: {
+                        enabled: {
+                            weather: true, markets: true, news: true, timer: false,
+                            music: false, cyberspace: true, video: true, system: true, calendar: false
+                        },
+                        layout: null
+                    }
+                };
+                res.writeHead(200);
+                res.end(JSON.stringify({ settings: defaultSettings }));
+            }
+        } catch (error) {
+            console.error('Error reading user settings:', error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: 'Failed to read user settings' }));
+        }
+    } else if (pathname === '/config/user-settings' && req.method === 'POST') {
+        // Save unified user settings
+        res.setHeader('Content-Type', 'application/json');
+        let body = '';
+
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+
+        req.on('end', () => {
+            try {
+                const data = JSON.parse(body);
+                const userSettingsFile = path.join(__dirname, 'config', 'user-settings.json');
+
+                // Ensure config directory exists
+                const configDir = path.join(__dirname, 'config');
+                if (!fs.existsSync(configDir)) {
+                    fs.mkdirSync(configDir, { recursive: true });
+                }
+
+                // Update lastUpdated timestamp
+                const settingsToSave = data.settings || data;
+                settingsToSave.lastUpdated = new Date().toISOString();
+
+                // Write settings file
+                fs.writeFileSync(userSettingsFile, JSON.stringify(settingsToSave, null, 2), 'utf8');
+
+                console.log('> User settings saved successfully');
+                res.writeHead(200);
+                res.end(JSON.stringify({ success: true, settings: settingsToSave }));
+            } catch (error) {
+                console.error('Error saving user settings:', error);
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: 'Failed to save user settings' }));
+            }
+        });
+    } else if (pathname === '/config/user-settings/reset' && req.method === 'POST') {
+        // Reset user settings to defaults
+        res.setHeader('Content-Type', 'application/json');
+
+        try {
+            const userSettingsFile = path.join(__dirname, 'config', 'user-settings.json');
+            const defaultSettings = {
+                version: '1.0.0',
+                lastUpdated: new Date().toISOString(),
+                theme: { current: 'cyberpunk', crtEffects: true, animations: true },
+                display: { fontSize: 'medium', refreshInterval: 300000 },
+                panels: {
+                    enabled: {
+                        weather: true, markets: true, news: true, timer: false,
+                        music: false, cyberspace: true, video: true, system: true, calendar: false
+                    },
+                    layout: null
+                }
+            };
+
+            // Ensure config directory exists
+            const configDir = path.join(__dirname, 'config');
+            if (!fs.existsSync(configDir)) {
+                fs.mkdirSync(configDir, { recursive: true });
+            }
+
+            fs.writeFileSync(userSettingsFile, JSON.stringify(defaultSettings, null, 2), 'utf8');
+
+            console.log('> User settings reset to defaults');
+            res.writeHead(200);
+            res.end(JSON.stringify({ success: true, settings: defaultSettings }));
+        } catch (error) {
+            console.error('Error resetting user settings:', error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: 'Failed to reset user settings' }));
+        }
     } else if (pathname === '/config/panels' && req.method === 'GET') {
         // Get panels configuration
         res.setHeader('Content-Type', 'application/json');

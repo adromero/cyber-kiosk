@@ -29,30 +29,33 @@ class ThemeManager {
         // Apply theme on initialization
         this.applyTheme(this.currentTheme);
 
-        // Listen for storage changes (sync across tabs)
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'cyber-kiosk-theme') {
-                this.applyTheme(e.newValue || this.defaultTheme);
-            }
+        // Listen for settings service theme changes
+        window.addEventListener('settings:themeChange', (e) => {
+            this.applyTheme(e.detail || this.defaultTheme);
         });
     }
 
     /**
-     * Load saved theme from localStorage
+     * Load saved theme from SettingsService (with fallback)
      */
     loadTheme() {
-        const saved = localStorage.getItem('cyber-kiosk-theme');
-        if (saved && this.themes[saved]) {
-            return saved;
+        // Try to get theme from settings service
+        if (window.settingsService && window.settingsService.initialized) {
+            const theme = window.settingsService.getCurrentTheme();
+            if (theme && this.themes[theme]) {
+                return theme;
+            }
         }
         return this.defaultTheme;
     }
 
     /**
-     * Save theme to localStorage
+     * Save theme via SettingsService
      */
     saveTheme(themeName) {
-        localStorage.setItem('cyber-kiosk-theme', themeName);
+        if (window.settingsService && window.settingsService.initialized) {
+            window.settingsService.setTheme(themeName);
+        }
     }
 
     /**

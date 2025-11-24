@@ -1,13 +1,13 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-23T15:40:00Z",
-  "contextUsedPercent": 48,
+  "lastUpdated": "2025-11-24T22:20:00Z",
+  "contextUsedPercent": 35,
   "currentPhase": "Phase 4: Settings UI & Enhancements",
-  "currentSession": 14,
+  "currentSession": 16,
   "overallProgress": {
     "totalTasks": 52,
-    "completedTasks": 32,
-    "percentComplete": 62
+    "completedTasks": 33,
+    "percentComplete": 63
   },
   "phases": {
     "phase1": {
@@ -189,10 +189,10 @@
         {
           "id": "p3-t7",
           "description": "Test theme switching between all three themes",
-          "status": "pending",
+          "status": "completed",
           "priority": "high",
           "dependencies": ["p3-t6"],
-          "notes": "Manual testing required - use themeManager.switchTheme('hiphop') in console"
+          "notes": "Theme switching tested and working - all three themes (Cyberpunk, Hip-Hop, California) switch correctly"
         }
       ]
     },
@@ -291,10 +291,10 @@
         {
           "id": "p4.6-t1",
           "description": "Migrate settings files to their own file system/directory structure",
-          "status": "pending",
+          "status": "in_progress",
           "priority": "medium",
           "dependencies": ["p4-t2"],
-          "notes": "Organize settings-related files separately from main application files for better maintainability"
+          "notes": "SESSION 1 COMPLETE: Created unified SettingsService architecture. Files created: js/settings-service.js (500+ lines) - singleton service with getters/setters for theme, display, panels, layout settings; event system for cross-component communication; localStorage caching + server persistence; migration of old localStorage keys; legacy format compatibility. config/user-settings.json - unified config structure with theme, display, panels sections. Backend: Added 3 new API endpoints to system-monitor.js - GET/POST /config/user-settings, POST /config/user-settings/reset. Updated js/settings.js to use settingsService.toLegacyFormat() for loading and settingsService.update()/save() for saving. Added settings-service.js script to both settings.html and index.html. SESSION 2 TODO: Migrate theme-manager.js to use settings service, migrate profile-manager.js, remove direct localStorage calls from app.js and other files."
         },
         {
           "id": "p4.7-t1",
@@ -412,8 +412,7 @@
       "Created color-shifting boom-bap bounce animations and pop-in modal effects unique to Hip-Hop theme"
     ],
     "nextSteps": [
-      "Test Hip-Hop theme on actual Pi 7-inch screen to verify visual impact",
-      "Phase 4.5: User profiles system with backend support",
+      "Phase 4.6: Migrate settings files to their own directory structure",
       "Phase 4.7: API key and account entry in settings",
       "Phase 4.8: Test complete kiosk system on laptop browser",
       "Phase 5: Installation scripts and migration tools"
@@ -430,8 +429,10 @@
       "js/panels/video-panel.js",
       "js/panels/system-panel.js",
       "js/profile-manager.js",
+      "js/settings-service.js",
       "config/panels.json",
       "config/defaults.json",
+      "config/user-settings.json",
       "config/profiles/test_user.json",
       "THEME_COMPARISON.md"
     ],
@@ -595,6 +596,26 @@
       "filesCreated": ["js/profile-manager.js", "config/profiles/test_user.json"],
       "filesModified": ["system-monitor.js", "settings.html", "js/settings.js", "index.html", "js/app.js", "css/style.css", "proposal1-progress.json"],
       "notes": "Implemented comprehensive user profiles system. BACKEND (system-monitor.js): Added 5 REST API endpoints - GET /profiles (list all), POST /profiles (create new), GET /profiles/:id (get specific), PUT /profiles/:id (update), DELETE /profiles/:id (delete). Profiles stored in config/profiles/ as JSON files with sanitized IDs from names. Profile structure: id, name, emoji, createdAt, lastUsed, theme, settings (crtEffects/animations/fontSize/refreshInterval), panels config, layout, activePanels. Auto-creates profiles directory, loads defaults from config/defaults.json, validates inputs (409 conflict if duplicate, 400 if missing name, 404 if not found). FRONTEND CLIENT (js/profile-manager.js): ProfileManager class (268 lines) handles init, createProfile, loadProfiles, getProfile, switchProfile, updateProfile, deleteProfile, applyProfileSettings. Integrates with ThemeManager for theme switching, syncs to localStorage (currentProfile key), dispatches 'profileChanged' CustomEvents for cross-component reactivity. SETTINGS PAGE: Added PROFILES tab as first tab (before Theme). Current profile banner displays emoji + name with cyan glow styling. Profile list shows all profiles as cards with emoji, name, 'ACTIVE' badge, relative timestamps ('Just now', '2 min ago', '3 days ago'), SWITCH/EDIT/DELETE buttons. Create profile dialog uses native prompts for name + emoji. Auto-refreshes on profile changes. ~350 lines of CSS (profile-card, profile-banner, profile-actions, hover effects, animations). Added setupProfileManagement() method + 13 helper methods to js/settings.js (220 lines total). DASHBOARD HEADER: Profile switcher button in header-right showing emoji + name, styled with cyan borders and hover effects. Click opens dropdown menu (slideIn animation) listing all profiles with visual active indicator, MANAGE PROFILES link. setupProfileSwitcher() + showProfileSwitcherMenu() in js/app.js (~100 lines). ~340 lines of CSS for switcher button + dropdown menu with mobile responsive (hides name on small screens). INTEGRATION: ProfileManager.init() called first in both index.html and settings.html DOMContentLoaded handlers. Profile theme auto-applied via ThemeManager, settings synced to localStorage. TESTING: Backend API verified - created test_user profile successfully, GET /profiles returns array, GET /profiles/test_user returns full profile data, profile.json file created in config/profiles/. Total code: ~1000+ lines across 6 files. Phase 4.5 complete (62% overall, 32/52 tasks). Ready for Phase 4.7 (API key settings), Phase 4.8 (full system testing), or Phase 5 (install & migration)."
+    },
+    {
+      "session": 15,
+      "timestamp": "2025-11-24T17:00:00Z",
+      "contextUsed": 35,
+      "description": "P4.6 Session 1: Created unified SettingsService architecture for settings refactor",
+      "tasksCompleted": ["p3-t7"],
+      "filesCreated": ["js/settings-service.js", "config/user-settings.json"],
+      "filesModified": ["system-monitor.js", "js/settings.js", "settings.html", "index.html", "proposal1-progress.json"],
+      "notes": "Started P4.6 settings refactor (split into 2 sessions). SESSION 1 COMPLETE: Created js/settings-service.js (500+ lines) - SettingsService singleton class with: getters/setters for theme (current, crtEffects, animations), display (fontSize, refreshInterval), panels (enabled, layout); event system with on()/emit() for cross-component communication (themeChange, settingsChange, etc.); localStorage caching (cyber-kiosk-settings-cache) + server persistence; migrateOldSettings() to import old localStorage keys; toLegacyFormat()/fromLegacyFormat() for backwards compatibility; save() method that persists to both user-settings.json and panels.json. Created config/user-settings.json with unified structure: version, lastUpdated, theme{}, display{}, panels{enabled{}, layout}. BACKEND: Added 3 API endpoints to system-monitor.js - GET /config/user-settings (read with defaults fallback), POST /config/user-settings (save), POST /config/user-settings/reset (reset to defaults). Updated js/settings.js: init() now calls settingsService.init(), loadSettings() uses settingsService.toLegacyFormat(), saveSettings() uses settingsService.update()/save(), resetToDefaults() uses settingsService.reset(). Added settings-service.js script tag to settings.html and index.html (loads before theme-manager.js). Also marked p3-t7 (theme testing) as complete per user confirmation. SESSION 2 TODO: Migrate theme-manager.js to use settings service instead of direct localStorage, migrate profile-manager.js, remove direct localStorage calls from app.js and panel files."
+    },
+    {
+      "session": 16,
+      "timestamp": "2025-11-24T22:20:00Z",
+      "contextUsed": 25,
+      "description": "P4.6 Session 2 COMPLETE: Full SettingsService migration - theme-manager and profile-manager now use unified settings",
+      "tasksCompleted": [],
+      "filesCreated": [],
+      "filesModified": ["js/theme-manager.js", "js/profile-manager.js", "js/settings-service.js", "js/app.js", "proposal1-progress.json"],
+      "notes": "Completed P4.6 settings refactor session 2. THEME-MANAGER.JS: Replaced localStorage.getItem('cyber-kiosk-theme') with settingsService.getCurrentTheme(), replaced localStorage.setItem with settingsService.setTheme(), changed storage event listener to settings:themeChange event from SettingsService. PROFILE-MANAGER.JS: Replaced localStorage.getItem('currentProfile') with settingsService.getAll().currentProfile, replaced localStorage.setItem with settingsService.settings.currentProfile assignment, replaced all individual settings localStorage calls in applyProfileSettings() (crtEffects, animations, fontSize, refreshInterval) with SettingsService methods (setCrtEffects, setAnimations, setFontSize, setRefreshInterval). SETTINGS-SERVICE.JS: Added currentProfile field to default settings, added currentProfile to migration logic and reset cleanup keys, added themeChange and settingsLoaded event emissions on initialization to notify components of loaded settings. APP.JS: Added await window.settingsService.init() in DOMContentLoaded before profileManager.init() to ensure settings are loaded before other components initialize. INTENTIONALLY KEPT localStorage: Panel runtime state in base-panel.js and timer-panel.js (timers in progress, alarm data) - these are transient session state not user preferences. TESTING: All JS files pass syntax validation. Backend endpoints tested - GET/POST/RESET all working. Settings persist to config/user-settings.json. Phase 4.6 COMPLETE."
     }
   ]
 }

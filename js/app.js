@@ -278,7 +278,13 @@ function initSystemPanel() {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('> CYBER TERMINAL INITIALIZING...');
 
-    // Initialize profile manager first (this loads user preferences)
+    // Initialize settings service first (manages all user preferences)
+    if (window.settingsService) {
+        await window.settingsService.init();
+        console.log('> SETTINGS SERVICE: INITIALIZED');
+    }
+
+    // Initialize profile manager (uses settingsService for profile persistence)
     await window.profileManager.init();
 
     // Load configuration first

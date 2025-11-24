@@ -18,8 +18,12 @@ class ProfileManager {
 
         console.log('[ProfileManager] Initializing...');
 
-        // Get current profile from localStorage or use default
-        const savedProfileId = localStorage.getItem('currentProfile');
+        // Get current profile from SettingsService or fallback
+        let savedProfileId = null;
+        if (window.settingsService && window.settingsService.initialized) {
+            const settings = window.settingsService.getAll();
+            savedProfileId = settings.currentProfile || null;
+        }
 
         // Load all profiles
         await this.loadProfiles();
@@ -189,8 +193,11 @@ class ProfileManager {
             // Update current profile
             this.currentProfile = profile;
 
-            // Save to localStorage
-            localStorage.setItem('currentProfile', profileId);
+            // Save current profile to SettingsService
+            if (window.settingsService && window.settingsService.initialized) {
+                window.settingsService.settings.currentProfile = profileId;
+                window.settingsService.onSettingsChanged();
+            }
 
             // Apply profile settings
             this.applyProfileSettings(profile);
@@ -213,24 +220,24 @@ class ProfileManager {
      * Apply profile settings to the application
      */
     applyProfileSettings(profile) {
-        // Apply theme
+        // Apply theme via ThemeManager (which uses SettingsService)
         if (profile.theme && window.themeManager) {
             window.themeManager.applyTheme(profile.theme);
         }
 
-        // Apply display settings
-        if (profile.settings) {
+        // Apply display settings via SettingsService
+        if (profile.settings && window.settingsService && window.settingsService.initialized) {
             if (profile.settings.crtEffects !== undefined) {
-                localStorage.setItem('crtEffects', profile.settings.crtEffects);
+                window.settingsService.setCrtEffects(profile.settings.crtEffects);
             }
             if (profile.settings.animations !== undefined) {
-                localStorage.setItem('animations', profile.settings.animations);
+                window.settingsService.setAnimations(profile.settings.animations);
             }
             if (profile.settings.fontSize) {
-                localStorage.setItem('fontSize', profile.settings.fontSize);
+                window.settingsService.setFontSize(profile.settings.fontSize);
             }
             if (profile.settings.refreshInterval) {
-                localStorage.setItem('refreshInterval', profile.settings.refreshInterval);
+                window.settingsService.setRefreshInterval(profile.settings.refreshInterval);
             }
         }
 

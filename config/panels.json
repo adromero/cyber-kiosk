@@ -15,13 +15,6 @@
     "columns": 4,
     "panels": [
       {
-        "id": "music",
-        "row": 2,
-        "col": 1,
-        "width": 1,
-        "height": 2
-      },
-      {
         "id": "news",
         "row": 0,
         "col": 2,
@@ -32,7 +25,7 @@
         "id": "info_feed",
         "row": 0,
         "col": 0,
-        "width": 1,
+        "width": 2,
         "height": 2
       },
       {
@@ -43,8 +36,8 @@
         "height": 2
       },
       {
-        "id": "cyberspace",
-        "row": 0,
+        "id": "music",
+        "row": 2,
         "col": 1,
         "width": 1,
         "height": 2
@@ -92,7 +85,7 @@
       "priority": 5
     },
     "timer": {
-      "enabled": true,
+      "enabled": false,
       "defaultSound": "cyber-beep.mp3",
       "volume": 0.7,
       "defaultSize": "small",
@@ -187,7 +180,7 @@
     },
     {
       "id": "timer",
-      "visible": true
+      "visible": false
     },
     {
       "id": "music",
@@ -202,13 +195,13 @@
       "visible": true
     },
     {
-      "id": "calendar",
-      "visible": false
-    },
-    {
       "id": "system",
       "visible": true
+    },
+    {
+      "id": "calendar",
+      "visible": false
     }
   ],
-  "lastUpdated": "2025-11-24T20:04:33.555Z"
+  "lastUpdated": "2025-11-24T22:21:28.114Z"
 }

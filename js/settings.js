@@ -20,13 +20,18 @@ class SettingsManager {
     async init() {
         console.log('[Settings] Initializing settings manager...');
 
-        // Initialize profile manager first
+        // Initialize settings service first
+        if (window.settingsService) {
+            await window.settingsService.init();
+        }
+
+        // Initialize profile manager
         await window.profileManager.init();
 
         // Set up profile management UI
         this.setupProfileManagement();
 
-        // Load current settings
+        // Load current settings (now uses settings service)
         await this.loadSettings();
 
         // Set up tab navigation
@@ -296,55 +301,63 @@ class SettingsManager {
     }
 
     /**
-     * Load current settings from localStorage and config files
+     * Load current settings from settings service
      */
     async loadSettings() {
         try {
-            // Load from localStorage (client-side settings)
-            const theme = localStorage.getItem('cyber-kiosk-theme') || 'cyberpunk';
-            const crtEffects = localStorage.getItem('crtEffects') !== 'false';
-            const animations = localStorage.getItem('animations') !== 'false';
-            const fontSize = localStorage.getItem('fontSize') || 'medium';
-            const refreshInterval = localStorage.getItem('refreshInterval') || '300000';
+            // Use settings service if available
+            if (window.settingsService) {
+                // Get settings in legacy format for compatibility
+                this.currentSettings = window.settingsService.toLegacyFormat();
+                console.log('[Settings] Loaded settings from service:', this.currentSettings);
+            } else {
+                // Fallback to old localStorage method
+                console.warn('[Settings] Settings service not available, using localStorage fallback');
+                const theme = localStorage.getItem('cyber-kiosk-theme') || 'cyberpunk';
+                const crtEffects = localStorage.getItem('crtEffects') !== 'false';
+                const animations = localStorage.getItem('animations') !== 'false';
+                const fontSize = localStorage.getItem('fontSize') || 'medium';
+                const refreshInterval = localStorage.getItem('refreshInterval') || '300000';
 
-            // Try to load panel configuration from server
-            let panelConfig = null;
-            try {
-                const response = await fetch('/config/panels.json');
-                if (response.ok) {
-                    panelConfig = await response.json();
+                // Try to load panel configuration from server
+                let panelConfig = null;
+                try {
+                    const response = await fetch('/config/panels.json');
+                    if (response.ok) {
+                        panelConfig = await response.json();
+                    }
+                } catch (error) {
+                    console.warn('[Settings] Could not load panel config from server:', error);
                 }
-            } catch (error) {
-                console.warn('[Settings] Could not load panel config from server:', error);
-            }
 
-            // Fallback to default panel config
-            if (!panelConfig) {
-                panelConfig = {
-                    activePanels: [
-                        { id: 'weather', visible: true },
-                        { id: 'markets', visible: true },
-                        { id: 'news', visible: true },
-                        { id: 'timer', visible: true },
-                        { id: 'music', visible: true },
-                        { id: 'cyberspace', visible: true },
-                        { id: 'video', visible: false },
-                        { id: 'system', visible: false }
-                    ]
+                // Fallback to default panel config
+                if (!panelConfig) {
+                    panelConfig = {
+                        activePanels: [
+                            { id: 'weather', visible: true },
+                            { id: 'markets', visible: true },
+                            { id: 'news', visible: true },
+                            { id: 'timer', visible: true },
+                            { id: 'music', visible: true },
+                            { id: 'cyberspace', visible: true },
+                            { id: 'video', visible: false },
+                            { id: 'system', visible: false }
+                        ]
+                    };
+                }
+
+                this.currentSettings = {
+                    theme,
+                    crtEffects,
+                    animations,
+                    fontSize,
+                    refreshInterval,
+                    panels: panelConfig.activePanels || [],
+                    layout: panelConfig.layout || null
                 };
             }
 
-            this.currentSettings = {
-                theme,
-                crtEffects,
-                animations,
-                fontSize,
-                refreshInterval,
-                panels: panelConfig.activePanels || [],
-                layout: panelConfig.layout || null
-            };
-
-            console.log('[Settings] Loaded settings:', this.currentSettings);
+            console.log('[Settings] Current settings:', this.currentSettings);
 
             // Apply settings to UI
             this.applySettingsToUI();
@@ -579,12 +592,13 @@ class SettingsManager {
             // Gather panel settings
             const panelToggles = document.querySelectorAll('[data-panel]');
             const panels = [];
+            const panelsEnabled = {};
 
             panelToggles.forEach(toggle => {
-                panels.push({
-                    id: toggle.getAttribute('data-panel'),
-                    visible: toggle.checked
-                });
+                const id = toggle.getAttribute('data-panel');
+                const visible = toggle.checked;
+                panels.push({ id, visible });
+                panelsEnabled[id] = visible;
             });
 
             // Gather display settings
@@ -593,11 +607,74 @@ class SettingsManager {
             const fontSize = document.getElementById('font-size')?.value || 'medium';
             const refreshInterval = document.getElementById('refresh-interval')?.value || '300000';
 
-            // Save to localStorage (client-side settings)
-            localStorage.setItem('crtEffects', crtEffects);
-            localStorage.setItem('animations', animations);
-            localStorage.setItem('fontSize', fontSize);
-            localStorage.setItem('refreshInterval', refreshInterval);
+            // Get layout configuration from layout editor
+            const layout = window.layoutEditor ? window.layoutEditor.getLayout() : null;
+
+            // Update current settings object
+            this.currentSettings.crtEffects = crtEffects;
+            this.currentSettings.animations = animations;
+            this.currentSettings.fontSize = fontSize;
+            this.currentSettings.refreshInterval = refreshInterval;
+            this.currentSettings.panels = panels;
+            this.currentSettings.layout = layout;
+
+            // Use settings service if available
+            if (window.settingsService) {
+                // Update settings service with new values
+                window.settingsService.update({
+                    crtEffects,
+                    animations,
+                    fontSize,
+                    refreshInterval,
+                    panels: panelsEnabled,
+                    layout
+                });
+
+                // Save to server via settings service
+                const saved = await window.settingsService.save();
+                console.log('[Settings] Settings saved via service:', saved);
+            } else {
+                // Fallback to old localStorage method
+                localStorage.setItem('crtEffects', crtEffects);
+                localStorage.setItem('animations', animations);
+                localStorage.setItem('fontSize', fontSize);
+                localStorage.setItem('refreshInterval', refreshInterval);
+
+                // Try to save panel config to server (legacy method)
+                try {
+                    const panelsInLayout = new Set();
+                    if (layout && layout.panels) {
+                        layout.panels.forEach(panel => {
+                            panelsInLayout.add(panel.id);
+                            if (panel.id === 'info_feed') {
+                                panelsInLayout.add('weather');
+                                panelsInLayout.add('markets');
+                            }
+                        });
+                    }
+
+                    const configData = {
+                        version: "1.0.0",
+                        description: "Configuration for Cyber Kiosk responsive system",
+                        activePanels: panels,
+                        layout: layout,
+                        panelsEnabled: {},
+                        lastUpdated: new Date().toISOString()
+                    };
+
+                    panels.forEach(panel => {
+                        configData.panelsEnabled[panel.id] = panelsInLayout.has(panel.id) || panel.visible;
+                    });
+
+                    await fetch('/config/panels', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(configData)
+                    });
+                } catch (error) {
+                    console.warn('[Settings] Could not save panel config to server:', error);
+                }
+            }
 
             // Apply CRT effects immediately
             this.applyCRTEffects(crtEffects);
@@ -607,86 +684,6 @@ class SettingsManager {
 
             // Apply font size
             document.documentElement.setAttribute('data-font-size', fontSize);
-
-            // Get layout configuration from layout editor
-            const layout = window.layoutEditor ? window.layoutEditor.getLayout() : null;
-
-            // Update current settings
-            this.currentSettings.crtEffects = crtEffects;
-            this.currentSettings.animations = animations;
-            this.currentSettings.fontSize = fontSize;
-            this.currentSettings.refreshInterval = refreshInterval;
-            this.currentSettings.panels = panels;
-            this.currentSettings.layout = layout;
-
-            // Try to save panel config to server
-            try {
-                // Build a set of panels that are in the grid layout
-                const panelsInLayout = new Set();
-                if (layout && layout.panels) {
-                    layout.panels.forEach(panel => {
-                        panelsInLayout.add(panel.id);
-                        // Also map container IDs to individual panels
-                        // e.g., info_feed -> weather, markets
-                        if (panel.id === 'info_feed') {
-                            panelsInLayout.add('weather');
-                            panelsInLayout.add('markets');
-                        }
-                    });
-                }
-
-                // Build complete config data matching panels.json structure
-                const configData = {
-                    version: "1.0.0",
-                    description: "Configuration for Cyber Kiosk responsive system",
-                    activePanels: panels,
-                    lastUpdated: new Date().toISOString()
-                };
-
-                // Add layout if configured
-                if (layout && layout.panels && layout.panels.length > 0) {
-                    configData.layout = layout;
-                }
-
-                // Build panels config with enabled flags synced to layout
-                // Panels in the grid layout should be marked as enabled
-                configData.panelsEnabled = {};
-                panels.forEach(panel => {
-                    // Panel is enabled if it's in the layout OR explicitly visible
-                    configData.panelsEnabled[panel.id] =
-                        panelsInLayout.has(panel.id) || panel.visible;
-                });
-
-                const response = await fetch('/config/panels', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(configData)
-                });
-
-                if (!response.ok) {
-                    console.warn('[Settings] Could not save panel config to server');
-                    // Try alternative endpoint
-                    const altResponse = await fetch('/api/save-panels', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(configData)
-                    });
-
-                    if (!altResponse.ok) {
-                        console.warn('[Settings] Could not save to alternative endpoint either');
-                    }
-                }
-            } catch (error) {
-                console.warn('[Settings] Could not save panel config to server:', error);
-                console.log('[Settings] Config would be saved as:', {
-                    activePanels: panels,
-                    layout: layout
-                });
-            }
 
             // Save theme to user profile
             if (window.profileManager && window.profileManager.getCurrentProfile()) {
@@ -746,20 +743,25 @@ class SettingsManager {
         console.log('[Settings] Resetting to defaults...');
 
         try {
-            // Clear localStorage
-            localStorage.removeItem('cyber-kiosk-theme');
-            localStorage.removeItem('crtEffects');
-            localStorage.removeItem('animations');
-            localStorage.removeItem('fontSize');
-            localStorage.removeItem('refreshInterval');
+            // Use settings service if available
+            if (window.settingsService) {
+                await window.settingsService.reset();
+                console.log('[Settings] Reset via settings service');
+            } else {
+                // Fallback to old method
+                localStorage.removeItem('cyber-kiosk-theme');
+                localStorage.removeItem('crtEffects');
+                localStorage.removeItem('animations');
+                localStorage.removeItem('fontSize');
+                localStorage.removeItem('refreshInterval');
 
-            // Try to reset server config
-            try {
-                await fetch('/config/panels/reset', {
-                    method: 'POST'
-                });
-            } catch (error) {
-                console.warn('[Settings] Could not reset server config:', error);
+                // Try to reset server config
+                try {
+                    await fetch('/config/panels/reset', { method: 'POST' });
+                    await fetch('/config/user-settings/reset', { method: 'POST' });
+                } catch (error) {
+                    console.warn('[Settings] Could not reset server config:', error);
+                }
             }
 
             // Reload settings

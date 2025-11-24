@@ -1,0 +1,61 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-11-24T22:21:28.096Z",
+  "theme": {
+    "current": "cyberpunk",
+    "crtEffects": true,
+    "animations": true
+  },
+  "display": {
+    "fontSize": "medium",
+    "refreshInterval": 300000
+  },
+  "panels": {
+    "enabled": {
+      "weather": true,
+      "markets": true,
+      "news": true,
+      "timer": false,
+      "music": true,
+      "cyberspace": true,
+      "video": true,
+      "system": true,
+      "calendar": false
+    },
+    "layout": {
+      "rows": 4,
+      "columns": 4,
+      "panels": [
+        {
+          "id": "news",
+          "row": 0,
+          "col": 2,
+          "width": 2,
+          "height": 4
+        },
+        {
+          "id": "info_feed",
+          "row": 0,
+          "col": 0,
+          "width": 2,
+          "height": 2
+        },
+        {
+          "id": "video",
+          "row": 2,
+          "col": 0,
+          "width": 1,
+          "height": 2
+        },
+        {
+          "id": "music",
+          "row": 2,
+          "col": 1,
+          "width": 1,
+          "height": 2
+        }
+      ]
+    }
+  },
+  "currentProfile": "dad"
+}
