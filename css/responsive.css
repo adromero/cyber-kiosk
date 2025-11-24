@@ -262,6 +262,15 @@
         font-size: var(--font-size-xxl) !important;
     }
 
+    /* Weather details - Feels Like and Humidity */
+    .weather-detail {
+        font-size: var(--font-size-md) !important;
+    }
+
+    .label {
+        font-size: var(--font-size-base) !important;
+    }
+
     .financial-grid {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -308,6 +317,15 @@
 
     .weather-temp {
         font-size: 6rem !important;
+    }
+
+    /* Weather details - Feels Like and Humidity */
+    .weather-detail {
+        font-size: var(--font-size-lg) !important;
+    }
+
+    .label {
+        font-size: var(--font-size-md) !important;
     }
 
     .financial-grid {
