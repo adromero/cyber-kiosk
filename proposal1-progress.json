@@ -6,8 +6,8 @@
   "currentSession": 16,
   "overallProgress": {
     "totalTasks": 52,
-    "completedTasks": 33,
-    "percentComplete": 63
+    "completedTasks": 35,
+    "percentComplete": 67
   },
   "phases": {
     "phase1": {
@@ -291,18 +291,18 @@
         {
           "id": "p4.6-t1",
           "description": "Migrate settings files to their own file system/directory structure",
-          "status": "in_progress",
+          "status": "completed",
           "priority": "medium",
           "dependencies": ["p4-t2"],
-          "notes": "SESSION 1 COMPLETE: Created unified SettingsService architecture. Files created: js/settings-service.js (500+ lines) - singleton service with getters/setters for theme, display, panels, layout settings; event system for cross-component communication; localStorage caching + server persistence; migration of old localStorage keys; legacy format compatibility. config/user-settings.json - unified config structure with theme, display, panels sections. Backend: Added 3 new API endpoints to system-monitor.js - GET/POST /config/user-settings, POST /config/user-settings/reset. Updated js/settings.js to use settingsService.toLegacyFormat() for loading and settingsService.update()/save() for saving. Added settings-service.js script to both settings.html and index.html. SESSION 2 TODO: Migrate theme-manager.js to use settings service, migrate profile-manager.js, remove direct localStorage calls from app.js and other files."
+          "notes": "COMPLETE: Full SettingsService migration implemented. SESSION 1: Created js/settings-service.js (500+ lines) - singleton service with getters/setters for theme, display, panels, layout settings; event system for cross-component communication; localStorage caching + server persistence; migration of old localStorage keys; legacy format compatibility. config/user-settings.json - unified config structure with theme, display, panels sections. Backend: Added 3 API endpoints to system-monitor.js - GET/POST /config/user-settings, POST /config/user-settings/reset. SESSION 2: Migrated theme-manager.js and profile-manager.js to use SettingsService instead of direct localStorage calls. Added settingsService.init() to app.js DOMContentLoaded handler. All components now use unified settings system."
         },
         {
           "id": "p4.7-t1",
           "description": "Make API key and account entry boxes in settings page",
-          "status": "pending",
+          "status": "completed",
           "priority": "medium",
           "dependencies": ["p4-t1"],
-          "notes": "Add settings UI for API keys (weather, news, Spotify, etc.) and account credentials with secure storage"
+          "notes": "COMPLETE: Added full API Keys tab to settings page. HTML: New 'API KEYS' tab with input fields for OpenWeatherMap, NY Times, YouTube, Alpha Vantage, Spotify (Client ID + Redirect URI), Pi-hole (URL + Password), and ZIP code. Each key has show/hide toggle, TEST button, and status indicator. CSS: ~220 lines of styling in style.css for api-key-group cards, status indicators (configured/not-configured/testing/error states with animations), responsive mobile layout. Backend: Added 3 new endpoints to system-monitor.js - GET/POST /config/apikeys for reading/writing .env file, POST /config/apikeys/test for live API validation. Test functions for each service (testWeatherApi, testNytApi, testYoutubeApi, testAlphaVantageApi, testPiholeApi). JavaScript: Added setupApiKeysTab(), loadApiKeys(), saveApiKeys(), testApiKey(), testAllApiKeys() methods to SettingsManager class (~280 lines). Keys are stored in .env file, with server restart warning displayed. Files modified: settings.html, css/style.css, system-monitor.js, js/settings.js"
         },
         {
           "id": "p4.8-t1",
@@ -386,7 +386,7 @@
     }
   },
   "notes": {
-    "currentFocus": "Phase 4.5 COMPLETE - User profiles system fully implemented with backend API, settings UI, and header switcher. Ready for Phase 4.7 (API keys), Phase 4.8 (Testing), or Phase 5 (Install & Migration)",
+    "currentFocus": "Phase 4.7 COMPLETE - API Keys settings tab implemented. Ready for Phase 4.8 (Full system testing) or Phase 5 (Install & Migration)",
     "blockers": [],
     "decisions": [
       "Used CSS clamp() for fluid typography instead of fixed breakpoint sizes - provides smoother scaling",

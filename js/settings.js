@@ -52,6 +52,9 @@ class SettingsManager {
         // Populate about tab
         this.populateAboutInfo();
 
+        // Set up API keys tab
+        this.setupApiKeysTab();
+
         // Update current theme indicator
         this.updateCurrentThemeIndicator();
 
@@ -818,6 +821,289 @@ class SettingsManager {
         if (panelsInfo) {
             const activePanels = this.currentSettings?.panels?.filter(p => p.visible).length || 0;
             panelsInfo.textContent = `${activePanels} enabled`;
+        }
+    }
+
+    /**
+     * Set up API Keys tab functionality
+     */
+    setupApiKeysTab() {
+        console.log('[Settings] Setting up API keys tab...');
+
+        // Load current API keys
+        this.loadApiKeys();
+
+        // Set up show/hide toggle buttons
+        document.querySelectorAll('.api-key-toggle').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetId = e.target.dataset.target;
+                const input = document.getElementById(targetId);
+                if (input) {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        e.target.textContent = '🔒';
+                    } else {
+                        input.type = 'password';
+                        e.target.textContent = '👁️';
+                    }
+                }
+            });
+        });
+
+        // Set up individual test buttons
+        document.querySelectorAll('.api-key-test').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const api = e.target.dataset.api;
+                await this.testApiKey(api, e.target);
+            });
+        });
+
+        // Set up save button
+        const saveBtn = document.getElementById('save-api-keys');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => this.saveApiKeys());
+        }
+
+        // Set up test all button
+        const testAllBtn = document.getElementById('test-all-apis');
+        if (testAllBtn) {
+            testAllBtn.addEventListener('click', () => this.testAllApiKeys());
+        }
+
+        // Track changes on input fields
+        document.querySelectorAll('.api-key-input').forEach(input => {
+            input.addEventListener('input', () => this.markUnsavedChanges());
+        });
+    }
+
+    /**
+     * Load API keys from server
+     */
+    async loadApiKeys() {
+        try {
+            const response = await fetch('/config/apikeys');
+            if (!response.ok) throw new Error('Failed to load API keys');
+
+            const data = await response.json();
+            const { apiKeys } = data;
+
+            console.log('[Settings] Loaded API keys:', Object.keys(apiKeys));
+
+            // Populate form fields
+            const fieldMap = {
+                'openweather': 'openweather-api-key',
+                'nyt': 'nyt-api-key',
+                'youtube': 'youtube-api-key',
+                'alphavantage': 'alphavantage-api-key',
+                'spotifyClientId': 'spotify-client-id',
+                'spotifyRedirectUri': 'spotify-redirect-uri',
+                'piholeUrl': 'pihole-api-url',
+                'piholePassword': 'pihole-password',
+                'zipCode': 'zip-code'
+            };
+
+            const statusMap = {
+                'openweather': 'weather-api-status',
+                'nyt': 'nyt-api-status',
+                'youtube': 'youtube-api-status',
+                'alphavantage': 'alphavantage-api-status',
+                'spotifyClientId': 'spotify-api-status',
+                'piholeUrl': 'pihole-api-status'
+            };
+
+            for (const [key, fieldId] of Object.entries(fieldMap)) {
+                const input = document.getElementById(fieldId);
+                if (input && apiKeys[key]) {
+                    // For sensitive keys, show placeholder if configured; for non-sensitive, show actual value
+                    if (apiKeys[key].placeholder !== undefined) {
+                        // Sensitive key - show placeholder or empty
+                        input.value = apiKeys[key].placeholder || '';
+                        input.dataset.configured = apiKeys[key].configured ? 'true' : 'false';
+                    } else {
+                        // Non-sensitive key (URLs, ZIP code) - show actual value
+                        input.value = apiKeys[key].value || '';
+                    }
+                }
+            }
+
+            // Update status indicators
+            for (const [key, statusId] of Object.entries(statusMap)) {
+                const statusEl = document.getElementById(statusId);
+                if (statusEl && apiKeys[key]) {
+                    if (apiKeys[key].configured) {
+                        statusEl.classList.add('configured');
+                        statusEl.classList.remove('not-configured', 'error');
+                    } else {
+                        statusEl.classList.add('not-configured');
+                        statusEl.classList.remove('configured', 'error');
+                    }
+                }
+            }
+
+        } catch (error) {
+            console.error('[Settings] Error loading API keys:', error);
+        }
+    }
+
+    /**
+     * Save API keys to server
+     */
+    async saveApiKeys() {
+        console.log('[Settings] Saving API keys...');
+
+        const apiKeys = {
+            openweather: document.getElementById('openweather-api-key')?.value || '',
+            nyt: document.getElementById('nyt-api-key')?.value || '',
+            youtube: document.getElementById('youtube-api-key')?.value || '',
+            alphavantage: document.getElementById('alphavantage-api-key')?.value || '',
+            spotifyClientId: document.getElementById('spotify-client-id')?.value || '',
+            spotifyRedirectUri: document.getElementById('spotify-redirect-uri')?.value || '',
+            piholeUrl: document.getElementById('pihole-api-url')?.value || '',
+            piholePassword: document.getElementById('pihole-password')?.value || '',
+            zipCode: document.getElementById('zip-code')?.value || ''
+        };
+
+        try {
+            const response = await fetch('/config/apikeys', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ apiKeys })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.showModal('API Keys Saved', data.message);
+                this.clearUnsavedChanges();
+                // Reload to update status indicators
+                await this.loadApiKeys();
+            } else {
+                throw new Error(data.error || 'Unknown error');
+            }
+
+        } catch (error) {
+            console.error('[Settings] Error saving API keys:', error);
+            this.showModal('Error', 'Failed to save API keys: ' + error.message);
+        }
+    }
+
+    /**
+     * Test a single API key
+     */
+    async testApiKey(api, button) {
+        console.log(`[Settings] Testing ${api} API...`);
+
+        // Get the relevant input values
+        let key = null;
+        let url = null;
+
+        switch (api) {
+            case 'weather':
+                key = document.getElementById('openweather-api-key')?.value;
+                break;
+            case 'nyt':
+                key = document.getElementById('nyt-api-key')?.value;
+                break;
+            case 'youtube':
+                key = document.getElementById('youtube-api-key')?.value;
+                break;
+            case 'alphavantage':
+                key = document.getElementById('alphavantage-api-key')?.value;
+                break;
+            case 'spotify':
+                key = document.getElementById('spotify-client-id')?.value;
+                break;
+            case 'pihole':
+                url = document.getElementById('pihole-api-url')?.value;
+                break;
+        }
+
+        // Update button state
+        const originalText = button.textContent;
+        button.textContent = '...';
+        button.disabled = true;
+
+        // Update status indicator
+        const statusMap = {
+            'weather': 'weather-api-status',
+            'nyt': 'nyt-api-status',
+            'youtube': 'youtube-api-status',
+            'alphavantage': 'alphavantage-api-status',
+            'spotify': 'spotify-api-status',
+            'pihole': 'pihole-api-status'
+        };
+
+        const statusEl = document.getElementById(statusMap[api]);
+        if (statusEl) {
+            statusEl.classList.add('testing');
+            statusEl.classList.remove('configured', 'not-configured', 'error');
+        }
+
+        try {
+            const response = await fetch('/config/apikeys/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ api, key, url })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                button.textContent = 'OK';
+                button.style.borderColor = 'var(--neon-green)';
+                button.style.color = 'var(--neon-green)';
+                if (statusEl) {
+                    statusEl.classList.remove('testing');
+                    statusEl.classList.add('configured');
+                }
+            } else {
+                button.textContent = 'FAIL';
+                button.style.borderColor = 'var(--neon-red, #ff4444)';
+                button.style.color = 'var(--neon-red, #ff4444)';
+                if (statusEl) {
+                    statusEl.classList.remove('testing');
+                    statusEl.classList.add('error');
+                }
+                console.warn(`[Settings] ${api} API test failed:`, result.message);
+            }
+
+            // Reset button after delay
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.borderColor = '';
+                button.style.color = '';
+                button.disabled = false;
+            }, 2000);
+
+        } catch (error) {
+            console.error(`[Settings] Error testing ${api} API:`, error);
+            button.textContent = 'ERR';
+            button.disabled = false;
+            if (statusEl) {
+                statusEl.classList.remove('testing');
+                statusEl.classList.add('error');
+            }
+
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.borderColor = '';
+                button.style.color = '';
+            }, 2000);
+        }
+    }
+
+    /**
+     * Test all API keys
+     */
+    async testAllApiKeys() {
+        console.log('[Settings] Testing all APIs...');
+
+        const testButtons = document.querySelectorAll('.api-key-test');
+        for (const btn of testButtons) {
+            const api = btn.dataset.api;
+            await this.testApiKey(api, btn);
+            // Small delay between tests
+            await new Promise(resolve => setTimeout(resolve, 500));
         }
     }
 

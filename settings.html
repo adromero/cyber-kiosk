@@ -55,6 +55,10 @@
                     <span class="tab-icon">&#128247;</span>
                     <span class="tab-label">DISPLAY</span>
                 </button>
+                <button class="settings-tab" data-tab="apikeys">
+                    <span class="tab-icon">&#128273;</span>
+                    <span class="tab-label">API KEYS</span>
+                </button>
                 <button class="settings-tab" data-tab="about">
                     <span class="tab-icon">&#8505;</span>
                     <span class="tab-label">ABOUT</span>
@@ -420,6 +424,160 @@
                                     <option value="1800000">30 minutes</option>
                                 </select>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Keys Tab -->
+                <div id="tab-apikeys" class="settings-tab-content">
+                    <div class="settings-section">
+                        <h2 class="section-title">&gt; API_CONFIGURATION</h2>
+                        <p class="section-description">Configure API keys for external services. Keys are stored securely on the server.</p>
+
+                        <div class="api-keys-container">
+                            <!-- Weather API -->
+                            <div class="api-key-group">
+                                <div class="api-key-header">
+                                    <span class="api-key-icon">🌤️</span>
+                                    <div class="api-key-info">
+                                        <h3 class="api-key-title">OpenWeatherMap</h3>
+                                        <p class="api-key-description">Weather data for current conditions and forecasts</p>
+                                    </div>
+                                    <span class="api-key-status" id="weather-api-status">●</span>
+                                </div>
+                                <div class="api-key-input-group">
+                                    <input type="password" id="openweather-api-key" class="api-key-input" placeholder="Enter API key...">
+                                    <button class="api-key-toggle" data-target="openweather-api-key" title="Show/Hide">👁️</button>
+                                    <button class="api-key-test" data-api="weather" title="Test API">TEST</button>
+                                </div>
+                                <a href="https://openweathermap.org/api" target="_blank" class="api-key-link">Get API key →</a>
+                            </div>
+
+                            <!-- NY Times API -->
+                            <div class="api-key-group">
+                                <div class="api-key-header">
+                                    <span class="api-key-icon">📰</span>
+                                    <div class="api-key-info">
+                                        <h3 class="api-key-title">NY Times</h3>
+                                        <p class="api-key-description">News articles from The New York Times</p>
+                                    </div>
+                                    <span class="api-key-status" id="nyt-api-status">●</span>
+                                </div>
+                                <div class="api-key-input-group">
+                                    <input type="password" id="nyt-api-key" class="api-key-input" placeholder="Enter API key...">
+                                    <button class="api-key-toggle" data-target="nyt-api-key" title="Show/Hide">👁️</button>
+                                    <button class="api-key-test" data-api="nyt" title="Test API">TEST</button>
+                                </div>
+                                <a href="https://developer.nytimes.com/" target="_blank" class="api-key-link">Get API key →</a>
+                            </div>
+
+                            <!-- YouTube API -->
+                            <div class="api-key-group">
+                                <div class="api-key-header">
+                                    <span class="api-key-icon">📺</span>
+                                    <div class="api-key-info">
+                                        <h3 class="api-key-title">YouTube Data API</h3>
+                                        <p class="api-key-description">Video search and playlist data</p>
+                                    </div>
+                                    <span class="api-key-status" id="youtube-api-status">●</span>
+                                </div>
+                                <div class="api-key-input-group">
+                                    <input type="password" id="youtube-api-key" class="api-key-input" placeholder="Enter API key...">
+                                    <button class="api-key-toggle" data-target="youtube-api-key" title="Show/Hide">👁️</button>
+                                    <button class="api-key-test" data-api="youtube" title="Test API">TEST</button>
+                                </div>
+                                <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="api-key-link">Get API key →</a>
+                            </div>
+
+                            <!-- Alpha Vantage API -->
+                            <div class="api-key-group">
+                                <div class="api-key-header">
+                                    <span class="api-key-icon">📈</span>
+                                    <div class="api-key-info">
+                                        <h3 class="api-key-title">Alpha Vantage</h3>
+                                        <p class="api-key-description">Stock market and financial data</p>
+                                    </div>
+                                    <span class="api-key-status" id="alphavantage-api-status">●</span>
+                                </div>
+                                <div class="api-key-input-group">
+                                    <input type="password" id="alphavantage-api-key" class="api-key-input" placeholder="Enter API key...">
+                                    <button class="api-key-toggle" data-target="alphavantage-api-key" title="Show/Hide">👁️</button>
+                                    <button class="api-key-test" data-api="alphavantage" title="Test API">TEST</button>
+                                </div>
+                                <a href="https://www.alphavantage.co/support/#api-key" target="_blank" class="api-key-link">Get API key →</a>
+                            </div>
+
+                            <!-- Spotify -->
+                            <div class="api-key-group">
+                                <div class="api-key-header">
+                                    <span class="api-key-icon">🎵</span>
+                                    <div class="api-key-info">
+                                        <h3 class="api-key-title">Spotify</h3>
+                                        <p class="api-key-description">Music playback and playlists (PKCE authentication)</p>
+                                    </div>
+                                    <span class="api-key-status" id="spotify-api-status">●</span>
+                                </div>
+                                <div class="api-key-input-group">
+                                    <input type="text" id="spotify-client-id" class="api-key-input" placeholder="Client ID...">
+                                    <button class="api-key-toggle" data-target="spotify-client-id" title="Show/Hide">👁️</button>
+                                    <button class="api-key-test" data-api="spotify" title="Test API">TEST</button>
+                                </div>
+                                <div class="api-key-input-group" style="margin-top: 0.5rem;">
+                                    <input type="text" id="spotify-redirect-uri" class="api-key-input" placeholder="Redirect URI (e.g., http://localhost:3001/spotify/callback)">
+                                </div>
+                                <a href="https://developer.spotify.com/dashboard" target="_blank" class="api-key-link">Get Client ID →</a>
+                            </div>
+
+                            <!-- Pi-hole -->
+                            <div class="api-key-group">
+                                <div class="api-key-header">
+                                    <span class="api-key-icon">🛡️</span>
+                                    <div class="api-key-info">
+                                        <h3 class="api-key-title">Pi-hole</h3>
+                                        <p class="api-key-description">Network ad blocking statistics</p>
+                                    </div>
+                                    <span class="api-key-status" id="pihole-api-status">●</span>
+                                </div>
+                                <div class="api-key-input-group">
+                                    <input type="text" id="pihole-api-url" class="api-key-input" placeholder="Pi-hole URL (e.g., http://192.168.1.100)">
+                                </div>
+                                <div class="api-key-input-group" style="margin-top: 0.5rem;">
+                                    <input type="password" id="pihole-password" class="api-key-input" placeholder="Admin password...">
+                                    <button class="api-key-toggle" data-target="pihole-password" title="Show/Hide">👁️</button>
+                                    <button class="api-key-test" data-api="pihole" title="Test API">TEST</button>
+                                </div>
+                            </div>
+
+                            <!-- Location Settings -->
+                            <div class="api-key-group">
+                                <div class="api-key-header">
+                                    <span class="api-key-icon">📍</span>
+                                    <div class="api-key-info">
+                                        <h3 class="api-key-title">Location</h3>
+                                        <p class="api-key-description">ZIP code for weather data</p>
+                                    </div>
+                                </div>
+                                <div class="api-key-input-group">
+                                    <input type="text" id="zip-code" class="api-key-input" placeholder="ZIP code (e.g., 90210)" maxlength="10">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- API Keys Actions -->
+                        <div class="api-keys-actions">
+                            <button id="save-api-keys" class="btn btn-primary">
+                                <span class="btn-icon">&#128190;</span>
+                                <span class="btn-text">SAVE API KEYS</span>
+                            </button>
+                            <button id="test-all-apis" class="btn btn-secondary">
+                                <span class="btn-icon">&#9889;</span>
+                                <span class="btn-text">TEST ALL</span>
+                            </button>
+                        </div>
+
+                        <div class="api-keys-warning">
+                            <span class="warning-icon">⚠️</span>
+                            <span class="warning-text">API keys are stored in the server's .env file. Changes require a server restart to take effect.</span>
                         </div>
                     </div>
                 </div>

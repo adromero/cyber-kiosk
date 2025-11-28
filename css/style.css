@@ -5518,3 +5518,222 @@ input:checked + .toggle-slider:before {
         min-width: auto;
     }
 }
+
+/* ===== API KEYS TAB STYLES ===== */
+
+.api-keys-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.api-key-group {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.api-key-group:hover {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+.api-key-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.api-key-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+}
+
+.api-key-info {
+    flex: 1;
+}
+
+.api-key-title {
+    margin: 0;
+    color: var(--neon-cyan);
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.api-key-description {
+    margin: 0.25rem 0 0 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+}
+
+.api-key-status {
+    font-size: 1.5rem;
+    transition: color 0.3s ease;
+}
+
+.api-key-status.configured {
+    color: var(--neon-green);
+    text-shadow: 0 0 10px var(--neon-green);
+}
+
+.api-key-status.not-configured {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.api-key-status.error {
+    color: var(--neon-red, #ff4444);
+    text-shadow: 0 0 10px var(--neon-red, #ff4444);
+}
+
+.api-key-status.testing {
+    color: var(--neon-amber);
+    text-shadow: 0 0 10px var(--neon-amber);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.api-key-input-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.api-key-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    color: var(--neon-cyan);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.api-key-input:focus {
+    outline: none;
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.api-key-input::placeholder {
+    color: rgba(0, 255, 255, 0.4);
+}
+
+.api-key-toggle,
+.api-key-test {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 6px;
+    padding: 1rem;
+    color: var(--neon-cyan);
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 60px;
+    text-align: center;
+}
+
+.api-key-toggle:hover,
+.api-key-test:hover {
+    background: rgba(0, 255, 255, 0.2);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+}
+
+.api-key-test {
+    font-family: 'VT323', monospace;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    min-width: 80px;
+}
+
+.api-key-test:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.api-key-link {
+    display: inline-block;
+    margin-top: 0.75rem;
+    color: var(--neon-magenta);
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.api-key-link:hover {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.api-keys-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    justify-content: center;
+}
+
+.api-keys-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 170, 0, 0.1);
+    border: 1px solid var(--neon-amber);
+    border-radius: 6px;
+}
+
+.warning-icon {
+    font-size: 1.8rem;
+}
+
+.warning-text {
+    color: var(--neon-amber);
+    font-size: 1.1rem;
+}
+
+/* Responsive adjustments for API keys */
+@media (max-width: 768px) {
+    .api-key-header {
+        flex-wrap: wrap;
+    }
+
+    .api-key-icon {
+        font-size: 1.5rem;
+    }
+
+    .api-key-input-group {
+        flex-wrap: wrap;
+    }
+
+    .api-key-input {
+        width: 100%;
+        flex: none;
+    }
+
+    .api-key-toggle,
+    .api-key-test {
+        flex: 1;
+    }
+
+    .api-keys-actions {
+        flex-direction: column;
+    }
+
+    .api-keys-actions .btn {
+        width: 100%;
+    }
+}

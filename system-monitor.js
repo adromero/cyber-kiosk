@@ -872,6 +872,157 @@ async function proxyYouTubeSearchAPI(query) {
     });
 }
 
+// API Key Test Functions
+async function testWeatherApi(apiKey) {
+    if (!apiKey) {
+        return { success: false, message: 'No API key provided' };
+    }
+
+    return new Promise((resolve) => {
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=London&appid=${apiKey}`;
+
+        https.get(url, (response) => {
+            let data = '';
+            response.on('data', (chunk) => { data += chunk; });
+            response.on('end', () => {
+                try {
+                    const result = JSON.parse(data);
+                    if (result.cod === 200) {
+                        resolve({ success: true, message: 'API key is valid' });
+                    } else if (result.cod === 401) {
+                        resolve({ success: false, message: 'Invalid API key' });
+                    } else {
+                        resolve({ success: false, message: result.message || 'Unknown error' });
+                    }
+                } catch (error) {
+                    resolve({ success: false, message: 'Failed to parse response' });
+                }
+            });
+        }).on('error', (error) => {
+            resolve({ success: false, message: 'Connection error: ' + error.message });
+        });
+    });
+}
+
+async function testNytApi(apiKey) {
+    if (!apiKey) {
+        return { success: false, message: 'No API key provided' };
+    }
+
+    return new Promise((resolve) => {
+        const url = `https://api.nytimes.com/svc/topstories/v2/home.json?api-key=${apiKey}`;
+
+        https.get(url, (response) => {
+            let data = '';
+            response.on('data', (chunk) => { data += chunk; });
+            response.on('end', () => {
+                if (response.statusCode === 200) {
+                    resolve({ success: true, message: 'API key is valid' });
+                } else if (response.statusCode === 401 || response.statusCode === 403) {
+                    resolve({ success: false, message: 'Invalid or unauthorized API key' });
+                } else {
+                    resolve({ success: false, message: `HTTP ${response.statusCode}` });
+                }
+            });
+        }).on('error', (error) => {
+            resolve({ success: false, message: 'Connection error: ' + error.message });
+        });
+    });
+}
+
+async function testYoutubeApi(apiKey) {
+    if (!apiKey) {
+        return { success: false, message: 'No API key provided' };
+    }
+
+    return new Promise((resolve) => {
+        const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=dQw4w9WgXcQ&key=${apiKey}`;
+
+        https.get(url, (response) => {
+            let data = '';
+            response.on('data', (chunk) => { data += chunk; });
+            response.on('end', () => {
+                try {
+                    const result = JSON.parse(data);
+                    if (result.items) {
+                        resolve({ success: true, message: 'API key is valid' });
+                    } else if (result.error) {
+                        resolve({ success: false, message: result.error.message || 'API error' });
+                    } else {
+                        resolve({ success: false, message: 'Unknown response format' });
+                    }
+                } catch (error) {
+                    resolve({ success: false, message: 'Failed to parse response' });
+                }
+            });
+        }).on('error', (error) => {
+            resolve({ success: false, message: 'Connection error: ' + error.message });
+        });
+    });
+}
+
+async function testAlphaVantageApi(apiKey) {
+    if (!apiKey || apiKey === 'demo') {
+        return { success: false, message: 'No API key provided' };
+    }
+
+    return new Promise((resolve) => {
+        const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=${apiKey}`;
+
+        https.get(url, (response) => {
+            let data = '';
+            response.on('data', (chunk) => { data += chunk; });
+            response.on('end', () => {
+                try {
+                    const result = JSON.parse(data);
+                    if (result['Global Quote'] && Object.keys(result['Global Quote']).length > 0) {
+                        resolve({ success: true, message: 'API key is valid' });
+                    } else if (result.Note) {
+                        resolve({ success: false, message: 'Rate limit exceeded' });
+                    } else if (result['Error Message']) {
+                        resolve({ success: false, message: 'Invalid API key' });
+                    } else {
+                        resolve({ success: false, message: 'No data returned (may be valid key with rate limit)' });
+                    }
+                } catch (error) {
+                    resolve({ success: false, message: 'Failed to parse response' });
+                }
+            });
+        }).on('error', (error) => {
+            resolve({ success: false, message: 'Connection error: ' + error.message });
+        });
+    });
+}
+
+async function testPiholeApi(url) {
+    if (!url) {
+        return { success: false, message: 'No Pi-hole URL provided' };
+    }
+
+    return new Promise((resolve) => {
+        // Try to reach the Pi-hole admin interface
+        const testUrl = url.replace(/\/+$/, '') + '/admin/';
+
+        const protocol = testUrl.startsWith('https') ? https : http;
+        const req = protocol.get(testUrl, { timeout: 5000 }, (response) => {
+            if (response.statusCode === 200 || response.statusCode === 301 || response.statusCode === 302) {
+                resolve({ success: true, message: 'Pi-hole admin interface reachable' });
+            } else {
+                resolve({ success: false, message: `HTTP ${response.statusCode}` });
+            }
+        });
+
+        req.on('timeout', () => {
+            req.destroy();
+            resolve({ success: false, message: 'Connection timeout' });
+        });
+
+        req.on('error', (error) => {
+            resolve({ success: false, message: 'Connection error: ' + error.message });
+        });
+    });
+}
+
 // Helper function to serve static files with enhanced security
 function serveStaticFile(filePath, res) {
     // Detect path traversal attempts in the original path
@@ -2001,6 +2152,238 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(500);
             res.end(JSON.stringify({ error: 'Failed to reset configuration' }));
         }
+    } else if (pathname === '/config/apikeys' && req.method === 'GET') {
+        // Get API key configuration (masked values for security)
+        res.setHeader('Content-Type', 'application/json');
+
+        try {
+            const envPath = path.join(__dirname, '.env');
+            const envContent = fs.readFileSync(envPath, 'utf8');
+
+            // Parse .env file
+            const apiKeys = {};
+            const lines = envContent.split('\n');
+
+            for (const line of lines) {
+                if (!line || line.trim().startsWith('#')) continue;
+                const match = line.match(/^\s*([A-Z_]+)\s*=\s*(.*)$/);
+                if (match) {
+                    const key = match[1];
+                    let value = match[2].trim().replace(/^["']|["']$/g, '');
+
+                    // Map env vars to frontend-friendly names
+                    const keyMap = {
+                        'OPENWEATHER_API_KEY': 'openweather',
+                        'NYT_API_KEY': 'nyt',
+                        'YOUTUBE_API_KEY': 'youtube',
+                        'ALPHA_VANTAGE_API_KEY': 'alphavantage',
+                        'SPOTIFY_CLIENT_ID': 'spotifyClientId',
+                        'SPOTIFY_REDIRECT_URI': 'spotifyRedirectUri',
+                        'PIHOLE_API_URL': 'piholeUrl',
+                        'PIHOLE_PASSWORD': 'piholePassword',
+                        'ZIP_CODE': 'zipCode'
+                    };
+
+                    if (keyMap[key]) {
+                        // Return masked value for sensitive keys - NEVER send full values to frontend
+                        const sensitiveKeys = ['openweather', 'nyt', 'youtube', 'alphavantage', 'spotifyClientId', 'piholePassword'];
+                        const isConfigured = value && value !== 'your_' + key.toLowerCase() && value !== 'demo' && value.length > 0;
+
+                        if (sensitiveKeys.includes(keyMap[key])) {
+                            apiKeys[keyMap[key]] = {
+                                configured: isConfigured,
+                                // Only show placeholder, never the actual value
+                                placeholder: isConfigured ? '••••••••••••••••' : ''
+                            };
+                        } else {
+                            // Non-sensitive values (URLs, ZIP code) can be shown
+                            apiKeys[keyMap[key]] = {
+                                value: value,
+                                configured: !!value
+                            };
+                        }
+                    }
+                }
+            }
+
+            res.writeHead(200);
+            res.end(JSON.stringify({ apiKeys }));
+        } catch (error) {
+            console.error('Error reading API keys:', error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: 'Failed to read API configuration' }));
+        }
+    } else if (pathname === '/config/apikeys' && req.method === 'POST') {
+        // Save API key configuration to .env file
+        res.setHeader('Content-Type', 'application/json');
+        let body = '';
+        const MAX_BODY_SIZE = 10000; // 10KB limit
+
+        req.on('data', chunk => {
+            body += chunk.toString();
+            if (body.length > MAX_BODY_SIZE) {
+                res.writeHead(413);
+                res.end(JSON.stringify({ error: 'Payload too large' }));
+                req.destroy();
+                return;
+            }
+        });
+
+        req.on('end', () => {
+            try {
+                const { apiKeys } = JSON.parse(body);
+                const envPath = path.join(__dirname, '.env');
+
+                // Input validation patterns
+                const validators = {
+                    // API keys: alphanumeric, hyphens, underscores only
+                    apiKey: /^[a-zA-Z0-9_-]*$/,
+                    // URLs: basic URL pattern
+                    url: /^(https?:\/\/)?[a-zA-Z0-9.-]+(:[0-9]+)?(\/[^\s\n]*)?$/,
+                    // ZIP code: 5 digits or 5+4 format
+                    zipCode: /^[0-9]{5}(-[0-9]{4})?$/,
+                    // Password: no newlines or dangerous characters
+                    password: /^[^\n\r]*$/
+                };
+
+                // Map frontend names to env var names and their validators
+                const keyMap = {
+                    'openweather': { env: 'OPENWEATHER_API_KEY', validator: 'apiKey' },
+                    'nyt': { env: 'NYT_API_KEY', validator: 'apiKey' },
+                    'youtube': { env: 'YOUTUBE_API_KEY', validator: 'apiKey' },
+                    'alphavantage': { env: 'ALPHA_VANTAGE_API_KEY', validator: 'apiKey' },
+                    'spotifyClientId': { env: 'SPOTIFY_CLIENT_ID', validator: 'apiKey' },
+                    'spotifyRedirectUri': { env: 'SPOTIFY_REDIRECT_URI', validator: 'url' },
+                    'piholeUrl': { env: 'PIHOLE_API_URL', validator: 'url' },
+                    'piholePassword': { env: 'PIHOLE_PASSWORD', validator: 'password' },
+                    'zipCode': { env: 'ZIP_CODE', validator: 'zipCode' }
+                };
+
+                // Read existing .env file
+                let envContent = '';
+                try {
+                    envContent = fs.readFileSync(envPath, 'utf8');
+                } catch (e) {
+                    // File doesn't exist, create empty
+                    envContent = '';
+                }
+
+                // Track validation errors
+                const validationErrors = [];
+
+                // Update or add each key
+                for (const [frontendKey, value] of Object.entries(apiKeys)) {
+                    if (value === undefined || value === null) continue;
+
+                    const keyConfig = keyMap[frontendKey];
+                    if (!keyConfig) continue;
+
+                    const envKey = keyConfig.env;
+                    const stringValue = String(value).trim();
+
+                    // Skip placeholder values (user didn't change the field)
+                    if (stringValue === '••••••••••••••••' || stringValue === '') continue;
+
+                    // Validate the value
+                    const validator = validators[keyConfig.validator];
+                    if (validator && !validator.test(stringValue)) {
+                        validationErrors.push(`Invalid ${frontendKey}: contains disallowed characters`);
+                        continue;
+                    }
+
+                    // Escape any regex special chars in envKey for safety
+                    const escapedEnvKey = envKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`^${escapedEnvKey}\\s*=.*$`, 'm');
+
+                    if (regex.test(envContent)) {
+                        // Update existing key
+                        envContent = envContent.replace(regex, `${envKey}=${stringValue}`);
+                    } else {
+                        // Add new key
+                        envContent = envContent.trim() + `\n${envKey}=${stringValue}`;
+                    }
+                }
+
+                if (validationErrors.length > 0) {
+                    res.writeHead(400);
+                    res.end(JSON.stringify({ error: 'Validation failed', details: validationErrors }));
+                    return;
+                }
+
+                // Write updated .env file
+                fs.writeFileSync(envPath, envContent.trim() + '\n', 'utf8');
+
+                console.log('> API keys saved to .env file');
+                res.writeHead(200);
+                res.end(JSON.stringify({
+                    success: true,
+                    message: 'API keys saved. Server restart required for changes to take effect.'
+                }));
+            } catch (error) {
+                console.error('Error saving API keys:', error);
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: 'Failed to save API configuration' }));
+            }
+        });
+    } else if (pathname === '/config/apikeys/test' && req.method === 'POST') {
+        // Test an API key
+        res.setHeader('Content-Type', 'application/json');
+        let body = '';
+        const MAX_BODY_SIZE = 2000; // 2KB limit for test requests
+
+        req.on('data', chunk => {
+            body += chunk.toString();
+            if (body.length > MAX_BODY_SIZE) {
+                res.writeHead(413);
+                res.end(JSON.stringify({ error: 'Payload too large' }));
+                req.destroy();
+                return;
+            }
+        });
+
+        req.on('end', async () => {
+            try {
+                const { api, key, url } = JSON.parse(body);
+                let result = { success: false, message: 'Unknown API' };
+
+                switch (api) {
+                    case 'weather':
+                        // Test OpenWeatherMap API
+                        result = await testWeatherApi(key || ENV.OPENWEATHER_API_KEY);
+                        break;
+                    case 'nyt':
+                        // Test NY Times API
+                        result = await testNytApi(key || ENV.NYT_API_KEY);
+                        break;
+                    case 'youtube':
+                        // Test YouTube API
+                        result = await testYoutubeApi(key || ENV.YOUTUBE_API_KEY);
+                        break;
+                    case 'alphavantage':
+                        // Test Alpha Vantage API
+                        result = await testAlphaVantageApi(key || ENV.ALPHA_VANTAGE_API_KEY);
+                        break;
+                    case 'spotify':
+                        // Test Spotify - just check if client ID looks valid
+                        result = {
+                            success: key && key.length === 32,
+                            message: key && key.length === 32 ? 'Client ID format looks valid' : 'Client ID should be 32 characters'
+                        };
+                        break;
+                    case 'pihole':
+                        // Test Pi-hole connection
+                        result = await testPiholeApi(url || ENV.PIHOLE_API_URL);
+                        break;
+                }
+
+                res.writeHead(200);
+                res.end(JSON.stringify(result));
+            } catch (error) {
+                console.error('Error testing API:', error);
+                res.writeHead(500);
+                res.end(JSON.stringify({ success: false, message: error.message }));
+            }
+        });
     } else {
         // Serve static files with enhanced security
         let filePath = pathname === '/' ? '/index.html' : pathname;
