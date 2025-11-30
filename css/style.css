@@ -2053,14 +2053,77 @@ a.system-name:hover {
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    top: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 30%, transparent 70%);
     padding: 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
 }
 
+.video-play-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 3px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-size: 2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    box-shadow: 0 0 20px var(--neon-cyan);
+    z-index: 2;
+}
+
+.video-play-btn:hover {
+    background: var(--neon-cyan);
+    color: var(--terminal-black);
+    transform: scale(1.1);
+    box-shadow: 0 0 30px var(--neon-cyan);
+}
+
+.video-play-btn:active {
+    transform: scale(0.95);
+}
+
+.video-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.8);
+    text-align: center;
+}
+
+.video-title {
+    color: var(--text-primary);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.video-status {
+    color: var(--neon-green);
+    font-family: 'VT323', monospace;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Legacy play icon (for backwards compat) */
 .video-play-icon {
     font-size: 3rem;
     color: var(--neon-cyan);
@@ -2071,13 +2134,6 @@ a.system-name:hover {
 .video-thumbnail-container:hover .video-play-icon {
     transform: scale(1.2);
     text-shadow: 0 0 30px var(--neon-cyan);
-}
-
-.video-title {
-    color: var(--text-primary);
-    font-family: 'Share Tech Mono', monospace;
-    text-align: center;
-    font-size: 0.9rem;
 }
 
 .video-empty {
@@ -2117,6 +2173,153 @@ a.system-name:hover {
 .video-modal-container::-webkit-scrollbar-thumb:hover {
     background: var(--neon-green);
     box-shadow: 0 0 8px var(--neon-green);
+}
+
+/* Now Playing indicator */
+.video-modal-now-playing {
+    color: var(--neon-cyan);
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 255, 255, 0.1);
+    border-left: 3px solid var(--neon-cyan);
+    margin-bottom: 1rem;
+    font-family: 'VT323', monospace;
+}
+
+/* YouTube Search Container */
+.video-search-container {
+    margin-bottom: 1.5rem;
+    border: 2px solid var(--neon-cyan);
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.video-search-header {
+    color: var(--neon-cyan);
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    font-family: 'VT323', monospace;
+    text-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.video-search-box {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.video-search-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--neon-cyan);
+    color: var(--terminal-white);
+    padding: 0.75rem 1rem;
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+    outline: none;
+}
+
+.video-search-input:focus {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 10px var(--neon-green);
+}
+
+.video-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.video-search-btn {
+    background: var(--neon-cyan);
+    color: var(--terminal-black);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.video-search-btn:hover {
+    background: var(--neon-green);
+    box-shadow: 0 0 15px var(--neon-green);
+}
+
+.video-search-btn:active {
+    transform: scale(0.95);
+}
+
+/* Search Results */
+.video-search-results {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.video-search-loading,
+.video-search-empty,
+.video-search-error {
+    padding: 1rem;
+    text-align: center;
+    color: var(--neon-cyan);
+    font-family: 'VT323', monospace;
+}
+
+.video-search-error {
+    color: var(--neon-magenta);
+}
+
+.video-search-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+    transition: all 0.2s ease;
+}
+
+.video-search-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+    border-color: var(--neon-cyan);
+}
+
+.video-search-thumb {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border: 1px solid var(--neon-cyan);
+}
+
+.video-search-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.video-search-title {
+    color: var(--terminal-white);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 0.25rem;
+}
+
+.video-search-channel {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+}
+
+/* Search results scrollbar */
+.video-search-results::-webkit-scrollbar {
+    width: 8px;
+}
+
+.video-search-results::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.video-search-results::-webkit-scrollbar-thumb {
+    background: var(--neon-cyan);
 }
 
 /* ===================================================================
