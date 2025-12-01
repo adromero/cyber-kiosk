@@ -494,11 +494,17 @@
         flex-shrink: 0;
     }
 
-    /* Make container scrollable */
+    /* Let container grow with content, footer flows naturally */
     .container {
+        height: auto !important;
+        min-height: 100vh;
+        overflow: visible !important;
+    }
+
+    /* Body handles scrolling instead of container */
+    body {
         overflow-y: auto !important;
         overflow-x: hidden;
-        height: 100vh;
     }
 
     .bottom-row {
@@ -531,11 +537,17 @@
         overflow: hidden;
     }
 
-    /* Make container scrollable */
+    /* Let container grow with content, footer flows naturally */
     .container {
+        height: auto !important;
+        min-height: 100vh;
+        overflow: visible !important;
+    }
+
+    /* Body handles scrolling instead of container */
+    body {
         overflow-y: auto !important;
         overflow-x: hidden;
-        height: 100vh;
     }
 
     /* Compact header for landscape mobile */
