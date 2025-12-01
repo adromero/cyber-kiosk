@@ -470,9 +470,35 @@
    Adjust layout based on device orientation
    ============================================================================ */
 
-@media (orientation: portrait) and (max-width: 768px) {
+/* ----------------------------------------------------------------------------
+   MOBILE PORTRAIT - Stack all panels vertically (scrollable)
+   Targets phones and small tablets in portrait orientation
+   ---------------------------------------------------------------------------- */
+@media (max-width: 768px) and (orientation: portrait) {
     .main-grid {
-        grid-template-columns: 1fr;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: var(--panel-gap, 1rem);
+        height: auto !important;
+        min-height: auto;
+        overflow: visible !important;
+    }
+
+    .main-grid > .grid-panel {
+        /* Override any grid positioning from GridLayoutManager */
+        grid-column: unset !important;
+        grid-row: unset !important;
+        width: 100% !important;
+        min-height: 250px;
+        max-height: 400px;
+        flex-shrink: 0;
+    }
+
+    /* Make container scrollable */
+    .container {
+        overflow-y: auto !important;
+        overflow-x: hidden;
+        height: 100vh;
     }
 
     .bottom-row {
@@ -480,9 +506,119 @@
     }
 }
 
-@media (orientation: landscape) and (min-width: 481px) and (max-width: 1024px) {
+/* ----------------------------------------------------------------------------
+   MOBILE/TABLET LANDSCAPE - Auto-fit all panels in viewport (no scroll)
+   Dynamically arranges panels based on count to fill screen
+   ---------------------------------------------------------------------------- */
+@media (max-width: 1024px) and (orientation: landscape) {
     .main-grid {
-        grid-template-columns: 1fr 1fr;
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+        grid-template-rows: repeat(auto-fit, minmax(150px, 1fr)) !important;
+        grid-auto-rows: 1fr !important;
+        grid-template-areas: none !important;
+        gap: var(--panel-gap, 0.5rem);
+        height: calc(100vh - 100px) !important;
+        overflow: hidden !important;
+    }
+
+    .main-grid > .grid-panel {
+        /* Override fixed positioning - let auto-fit handle layout */
+        grid-column: unset !important;
+        grid-row: unset !important;
+        grid-area: unset !important;
+        min-height: 0;
+        max-height: none;
+        overflow: hidden;
+    }
+
+    /* Ensure container doesn't scroll */
+    .container {
+        overflow: hidden !important;
+        height: 100vh;
+    }
+
+    /* Compact header for landscape mobile */
+    .header {
+        padding: 0.25rem var(--spacing-sm);
+        min-height: auto;
+    }
+
+    .header-left .system-name {
+        font-size: 1rem;
+    }
+
+    .header-right {
+        gap: 0.5rem;
+    }
+
+    .header-right > * {
+        font-size: 0.85rem;
+    }
+
+    /* Hide profile name on small landscape to save space */
+    #profile-switcher-name {
+        display: none;
+    }
+
+    /* Compact footer */
+    .footer {
+        padding: 0.25rem var(--spacing-sm);
+        font-size: 0.7rem;
+    }
+
+    /* Compact widget headers and content */
+    .widget-header {
+        padding: 0.25rem 0.5rem;
+        min-height: auto;
+    }
+
+    .widget-title {
+        font-size: 0.85rem;
+    }
+
+    .widget-status {
+        font-size: 0.7rem;
+    }
+
+    .widget-content {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    /* Compact weather display */
+    .weather-temp {
+        font-size: 1.8rem !important;
+    }
+
+    .weather-condition {
+        font-size: 0.9rem !important;
+    }
+
+    .weather-details {
+        gap: 0.5rem;
+    }
+
+    .weather-detail {
+        font-size: 0.8rem !important;
+    }
+
+    /* Hide forecast on very small landscape screens */
+    .weather-forecast {
+        display: none;
+    }
+
+    /* Compact news items */
+    .news-item {
+        padding: 0.4rem 0;
+        font-size: 0.8rem;
+    }
+
+    /* Limit visible panels on very small landscape (phones) */
+    @media (max-height: 500px) {
+        .main-grid > .grid-panel:nth-child(n+5) {
+            display: none !important;
+        }
     }
 }
 
