@@ -507,34 +507,34 @@
 }
 
 /* ----------------------------------------------------------------------------
-   MOBILE/TABLET LANDSCAPE - Auto-fit all panels in viewport (no scroll)
-   Dynamically arranges panels based on count to fill screen
+   MOBILE/TABLET LANDSCAPE - 2-column grid layout (scrollable)
+   Panels arranged in 2 columns, scroll vertically if needed
    ---------------------------------------------------------------------------- */
 @media (max-width: 1024px) and (orientation: landscape) {
     .main-grid {
         display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
-        grid-template-rows: repeat(auto-fit, minmax(150px, 1fr)) !important;
-        grid-auto-rows: 1fr !important;
+        grid-template-columns: 1fr 1fr !important;
+        grid-auto-rows: minmax(200px, auto) !important;
         grid-template-areas: none !important;
         gap: var(--panel-gap, 0.5rem);
-        height: calc(100vh - 100px) !important;
-        overflow: hidden !important;
+        height: auto !important;
+        overflow: visible !important;
     }
 
     .main-grid > .grid-panel {
-        /* Override fixed positioning - let auto-fit handle layout */
+        /* Override fixed positioning - use simple 2-col grid */
         grid-column: unset !important;
         grid-row: unset !important;
         grid-area: unset !important;
-        min-height: 0;
-        max-height: none;
+        min-height: 200px;
+        max-height: 350px;
         overflow: hidden;
     }
 
-    /* Ensure container doesn't scroll */
+    /* Make container scrollable */
     .container {
-        overflow: hidden !important;
+        overflow-y: auto !important;
+        overflow-x: hidden;
         height: 100vh;
     }
 
@@ -612,13 +612,6 @@
     .news-item {
         padding: 0.4rem 0;
         font-size: 0.8rem;
-    }
-
-    /* Limit visible panels on very small landscape (phones) */
-    @media (max-height: 500px) {
-        .main-grid > .grid-panel:nth-child(n+5) {
-            display: none !important;
-        }
     }
 }
 
