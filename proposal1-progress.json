@@ -307,10 +307,10 @@
         {
           "id": "p4.8-t1",
           "description": "Test complete kiosk system on laptop browser window",
-          "status": "pending",
+          "status": "in_progress",
           "priority": "high",
           "dependencies": ["p4-t1"],
-          "notes": "Comprehensive testing of all features in desktop browser environment (Chrome/Firefox) on laptop"
+          "notes": "IN PROGRESS: Testing all features in desktop browser. BUG FIXED: Profile switching not persisting - switchProfile() was only saving to localStorage cache, not server. Added settingsService.save() call to persist profile change to server."
         }
       ]
     },
@@ -386,7 +386,7 @@
     }
   },
   "notes": {
-    "currentFocus": "Phase 4.7 COMPLETE - API Keys settings tab tested and working. Ready for Phase 4.8 (Full system testing) or Phase 5 (Install & Migration)",
+    "currentFocus": "Phase 4.8 IN PROGRESS - Testing complete kiosk system. Fixed profile switching bug (not persisting to server).",
     "blockers": [],
     "decisions": [
       "Used CSS clamp() for fluid typography instead of fixed breakpoint sizes - provides smoother scaling",
@@ -624,6 +624,16 @@
       "filesCreated": [],
       "filesModified": ["proposal1-progress.json"],
       "notes": "User confirmed API Keys settings tab (p4.7-t1) is working correctly after testing. Updated progress documentation. Phase 4 nearly complete - only p4.8 (full system testing) remains. Ready to proceed to Phase 5 (Install & Migration)."
+    },
+    {
+      "session": 18,
+      "timestamp": "2025-12-01T02:50:00Z",
+      "contextUsed": 10,
+      "description": "P4.8 Testing - Fixed profile switching bug",
+      "tasksCompleted": [],
+      "filesCreated": [],
+      "filesModified": ["js/profile-manager.js", "config/profiles/test_user.json", "proposal1-progress.json"],
+      "notes": "BUG FIX: Profile switching via settings page was not persisting across page reload. Root cause: switchProfile() in profile-manager.js only saved currentProfile to localStorage cache via settingsService.onSettingsChanged(), not to server. On page reload, settingsService.init() loaded from server first, which had old profile ID. Fix: Added await settingsService.save() after updating currentProfile to persist to server. Also updated test_user profile to use 'hiphop' theme to make profile switching visually distinguishable from dad profile (california theme)."
     }
   ]
 }

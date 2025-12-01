@@ -193,10 +193,13 @@ class ProfileManager {
             // Update current profile
             this.currentProfile = profile;
 
-            // Save current profile to SettingsService
+            // Save current profile to SettingsService and persist to server
             if (window.settingsService && window.settingsService.initialized) {
                 window.settingsService.settings.currentProfile = profileId;
                 window.settingsService.onSettingsChanged();
+                // Persist to server so the change survives page reload
+                await window.settingsService.save();
+                console.log('[ProfileManager] Profile change persisted to server');
             }
 
             // Apply profile settings
