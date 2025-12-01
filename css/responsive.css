@@ -494,14 +494,15 @@
         flex-shrink: 0;
     }
 
-    /* Let container grow with content, footer flows naturally */
+    /* Override flex layout - use block so footer flows naturally */
     .container {
+        display: block !important;
         height: auto !important;
-        min-height: 100vh;
+        min-height: auto !important;
         overflow: visible !important;
     }
 
-    /* Body handles scrolling instead of container */
+    /* Body handles scrolling */
     body {
         overflow-y: auto !important;
         overflow-x: hidden;
@@ -538,14 +539,15 @@
         overflow: hidden;
     }
 
-    /* Container should not stretch content */
+    /* Override flex layout - use block so footer flows naturally */
     .container {
+        display: block !important;
         height: auto !important;
         min-height: auto !important;
         overflow: visible !important;
     }
 
-    /* Body handles scrolling instead of container */
+    /* Body handles scrolling */
     body {
         overflow-y: auto !important;
         overflow-x: hidden;
