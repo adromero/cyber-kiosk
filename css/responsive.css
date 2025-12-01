@@ -524,6 +524,7 @@
         grid-template-areas: none !important;
         gap: var(--panel-gap, 0.5rem);
         height: auto !important;
+        flex: none !important;
         overflow: visible !important;
     }
 
@@ -537,10 +538,10 @@
         overflow: hidden;
     }
 
-    /* Let container grow with content, footer flows naturally */
+    /* Container should not stretch content */
     .container {
         height: auto !important;
-        min-height: 100vh;
+        min-height: auto !important;
         overflow: visible !important;
     }
 
