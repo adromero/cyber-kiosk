@@ -808,12 +808,12 @@ class SettingsManager {
             screenInfo.textContent = `${window.screen.width}x${window.screen.height}`;
         }
 
-        // Current layout (from LayoutManager if available)
-        const layoutInfo = document.getElementById('layout-info');
-        if (layoutInfo && window.layoutManager) {
-            layoutInfo.textContent = window.layoutManager.currentBreakpoint || 'Unknown';
-        } else if (layoutInfo) {
-            layoutInfo.textContent = 'N/A';
+        // Current theme
+        const themeInfo = document.getElementById('theme-info');
+        if (themeInfo) {
+            const themeName = this.currentSettings?.theme || 'Unknown';
+            // Capitalize first letter
+            themeInfo.textContent = themeName.charAt(0).toUpperCase() + themeName.slice(1);
         }
 
         // Active panels count
