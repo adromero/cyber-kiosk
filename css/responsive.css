@@ -514,10 +514,48 @@
 }
 
 /* ----------------------------------------------------------------------------
-   MOBILE/TABLET LANDSCAPE - 2-column grid layout (scrollable)
-   Panels arranged in 2 columns, scroll vertically if needed
+   7" KIOSK/TABLET LANDSCAPE - fit everything on screen, no scrolling
+   For displays 700-1024px wide in landscape (e.g., Raspberry Pi 7" touchscreen)
+   Preserves custom panel layouts defined in user-settings.json
    ---------------------------------------------------------------------------- */
-@media (max-width: 1024px) and (orientation: landscape) {
+@media (min-width: 700px) and (max-width: 1024px) and (orientation: landscape) {
+    /* Keep grid at full viewport height, no scrolling */
+    .main-grid {
+        height: calc(100vh - 80px) !important;
+        overflow: hidden !important;
+        /* Do NOT override grid-template-columns/rows/areas - let JS layout handle it */
+    }
+
+    .main-grid > .grid-panel {
+        min-height: 0;
+        max-height: none;
+        overflow: hidden;
+    }
+
+    .container {
+        overflow: hidden !important;
+        height: 100vh;
+    }
+
+    /* Header - keep readable size */
+    .header {
+        padding: 0.3rem var(--spacing-sm);
+        min-height: auto;
+    }
+
+    /* Footer */
+    .footer {
+        padding: 0.3rem var(--spacing-sm);
+        font-size: 0.85rem;
+    }
+}
+
+/* ----------------------------------------------------------------------------
+   MOBILE LANDSCAPE (PHONES) - 2-column grid layout (scrollable)
+   Panels arranged in 2 columns, scroll vertically if needed
+   For smaller screens under 700px in landscape
+   ---------------------------------------------------------------------------- */
+@media (max-width: 699px) and (orientation: landscape) {
     .main-grid {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
