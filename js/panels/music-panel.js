@@ -214,6 +214,34 @@ class MusicPanel extends BasePanel {
      * Set up event handlers
      */
     setupEventHandlers() {
+        // Listen for profile changes to refresh auth status
+        window.addEventListener('profileChanged', async (e) => {
+            this.log('Profile changed, refreshing Spotify auth status');
+            const wasAuthenticated = this.isAuthenticated;
+            await this.checkAuthStatus();
+
+            // If auth status changed, update UI
+            if (wasAuthenticated !== this.isAuthenticated) {
+                this.log(`Auth status changed: ${wasAuthenticated} -> ${this.isAuthenticated}`);
+
+                if (this.isAuthenticated) {
+                    // New profile is authenticated - initialize
+                    await this.initializeSDKPlayer();
+                    await this.loadDevices();
+                    this.chooseInitialMode();
+                    await this.updateCurrentTrack();
+                    this.setInterval('update', () => this.updateCurrentTrack(), this.updateInterval);
+                } else {
+                    // New profile is not authenticated - reset state
+                    this.currentTrack = null;
+                    this.isPlaying = false;
+                    this.clearInterval('update');
+                }
+
+                this.render();
+            }
+        });
+
         // Handle header click to open modal (set up regardless of content)
         if (this.elements.header) {
             this.elements.header.addEventListener('click', (e) => {

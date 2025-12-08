@@ -193,6 +193,21 @@ class ProfileManager {
             // Update current profile
             this.currentProfile = profile;
 
+            // Notify backend of active profile change (for per-profile Spotify tokens)
+            try {
+                const activeResponse = await fetch('/profiles/active', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profileId })
+                });
+                if (activeResponse.ok) {
+                    const activeData = await activeResponse.json();
+                    console.log(`[ProfileManager] Backend notified, Spotify connected: ${activeData.spotifyConnected}`);
+                }
+            } catch (err) {
+                console.warn('[ProfileManager] Failed to notify backend of profile switch:', err);
+            }
+
             // Save current profile to SettingsService and persist to server
             if (window.settingsService && window.settingsService.initialized) {
                 window.settingsService.settings.currentProfile = profileId;
@@ -205,7 +220,7 @@ class ProfileManager {
             // Apply profile settings
             this.applyProfileSettings(profile);
 
-            // Dispatch event for other components to react
+            // Dispatch event for other components to react (including music panel)
             window.dispatchEvent(new CustomEvent('profileChanged', {
                 detail: { profile }
             }));

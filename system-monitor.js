@@ -57,6 +57,28 @@ const SPOTIFY_REDIRECT_URI = ENV.SPOTIFY_REDIRECT_URI || `http://localhost:${POR
 let pkceVerifier = null;
 let pkceChallenge = null;
 
+// Active profile tracking (for per-profile Spotify tokens)
+let currentProfileId = null;
+
+// Load active profile from user-settings on startup
+function loadActiveProfile() {
+    const userSettingsFile = path.join(__dirname, 'config', 'user-settings.json');
+    try {
+        if (fs.existsSync(userSettingsFile)) {
+            const data = fs.readFileSync(userSettingsFile, 'utf8');
+            const settings = JSON.parse(data);
+            currentProfileId = settings.currentProfile || 'dad';
+            console.log('> Active profile loaded:', currentProfileId);
+        } else {
+            currentProfileId = 'dad';
+            console.log('> No user-settings.json, defaulting to profile: dad');
+        }
+    } catch (error) {
+        currentProfileId = 'dad';
+        console.error('> Error loading active profile:', error.message);
+    }
+}
+
 // PKCE helper functions
 const crypto = require('crypto');
 
@@ -1083,35 +1105,93 @@ function serveStaticFile(filePath, res) {
     });
 }
 
-// Spotify OAuth Token Management
+// Spotify OAuth Token Management (per-profile)
 let spotifyTokens = {
     access_token: null,
     refresh_token: null,
     expires_at: null
 };
 
-// Load saved Spotify tokens from file
+// Load Spotify tokens from active profile's JSON file
 function loadSpotifyTokens() {
-    const tokenFile = path.join(__dirname, '.spotify_tokens.json');
+    if (!currentProfileId) {
+        console.log('> No active profile, skipping Spotify token load');
+        return;
+    }
+
+    const profileFile = path.join(__dirname, 'config', 'profiles', `${currentProfileId}.json`);
     try {
-        if (fs.existsSync(tokenFile)) {
-            const data = fs.readFileSync(tokenFile, 'utf8');
-            spotifyTokens = JSON.parse(data);
-            console.log('> Spotify tokens loaded from file');
+        if (fs.existsSync(profileFile)) {
+            const data = fs.readFileSync(profileFile, 'utf8');
+            const profile = JSON.parse(data);
+            if (profile.spotify) {
+                spotifyTokens = {
+                    access_token: profile.spotify.access_token || null,
+                    refresh_token: profile.spotify.refresh_token || null,
+                    expires_at: profile.spotify.expires_at || null
+                };
+                console.log(`> Spotify tokens loaded for profile: ${currentProfileId}`);
+            } else {
+                // Profile exists but no Spotify connected
+                spotifyTokens = { access_token: null, refresh_token: null, expires_at: null };
+                console.log(`> No Spotify tokens for profile: ${currentProfileId}`);
+            }
+        } else {
+            spotifyTokens = { access_token: null, refresh_token: null, expires_at: null };
+            console.log(`> Profile file not found: ${currentProfileId}`);
         }
     } catch (error) {
         console.error('> Error loading Spotify tokens:', error.message);
+        spotifyTokens = { access_token: null, refresh_token: null, expires_at: null };
     }
 }
 
-// Save Spotify tokens to file
+// Save Spotify tokens to active profile's JSON file
 function saveSpotifyTokens() {
-    const tokenFile = path.join(__dirname, '.spotify_tokens.json');
+    if (!currentProfileId) {
+        console.error('> No active profile, cannot save Spotify tokens');
+        return;
+    }
+
+    const profileFile = path.join(__dirname, 'config', 'profiles', `${currentProfileId}.json`);
     try {
-        fs.writeFileSync(tokenFile, JSON.stringify(spotifyTokens, null, 2), 'utf8');
-        console.log('> Spotify tokens saved to file');
+        let profile = {};
+        if (fs.existsSync(profileFile)) {
+            const data = fs.readFileSync(profileFile, 'utf8');
+            profile = JSON.parse(data);
+        }
+
+        // Update spotify section in profile
+        profile.spotify = {
+            access_token: spotifyTokens.access_token,
+            refresh_token: spotifyTokens.refresh_token,
+            expires_at: spotifyTokens.expires_at
+        };
+
+        fs.writeFileSync(profileFile, JSON.stringify(profile, null, 2), 'utf8');
+        console.log(`> Spotify tokens saved for profile: ${currentProfileId}`);
     } catch (error) {
         console.error('> Error saving Spotify tokens:', error.message);
+    }
+}
+
+// Clear Spotify tokens from active profile
+function clearSpotifyTokens() {
+    spotifyTokens = { access_token: null, refresh_token: null, expires_at: null };
+
+    if (!currentProfileId) return;
+
+    const profileFile = path.join(__dirname, 'config', 'profiles', `${currentProfileId}.json`);
+    try {
+        if (fs.existsSync(profileFile)) {
+            const data = fs.readFileSync(profileFile, 'utf8');
+            const profile = JSON.parse(data);
+            delete profile.spotify;
+            fs.writeFileSync(profileFile, JSON.stringify(profile, null, 2), 'utf8');
+            console.log(`> Spotify tokens cleared for profile: ${currentProfileId}`);
+        }
+    } catch (error) {
+        console.error('> Error clearing Spotify tokens:', error.message);
     }
 }
 
@@ -1237,7 +1317,8 @@ async function spotifyApiRequest(endpoint, method = 'GET', body = null) {
     });
 }
 
-// Load Spotify tokens on startup
+// Load active profile and Spotify tokens on startup
+loadActiveProfile();
 loadSpotifyTokens();
 
 // HTTP Server
@@ -1690,6 +1771,51 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(500);
             res.end(JSON.stringify({ error: 'Failed to read profile' }));
         }
+    } else if (pathname === '/profiles/active' && req.method === 'POST') {
+        // Set active profile (for per-profile Spotify tokens)
+        res.setHeader('Content-Type', 'application/json');
+        let body = '';
+
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+
+        req.on('end', () => {
+            try {
+                const { profileId } = JSON.parse(body);
+                if (!profileId) {
+                    res.writeHead(400);
+                    res.end(JSON.stringify({ error: 'profileId is required' }));
+                    return;
+                }
+
+                const oldProfileId = currentProfileId;
+                currentProfileId = profileId;
+
+                // Reload Spotify tokens for new profile
+                loadSpotifyTokens();
+
+                console.log(`> Active profile switched: ${oldProfileId} -> ${currentProfileId}`);
+                res.writeHead(200);
+                res.end(JSON.stringify({
+                    success: true,
+                    profileId: currentProfileId,
+                    spotifyConnected: !!(spotifyTokens.access_token && spotifyTokens.refresh_token)
+                }));
+            } catch (error) {
+                console.error('Error setting active profile:', error);
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: 'Failed to set active profile' }));
+            }
+        });
+    } else if (pathname === '/profiles/active' && req.method === 'GET') {
+        // Get active profile info
+        res.setHeader('Content-Type', 'application/json');
+        res.writeHead(200);
+        res.end(JSON.stringify({
+            profileId: currentProfileId,
+            spotifyConnected: !!(spotifyTokens.access_token && spotifyTokens.refresh_token)
+        }));
     } else if (pathname.startsWith('/profiles/') && req.method === 'PUT') {
         // Update specific profile
         res.setHeader('Content-Type', 'application/json');
@@ -1936,24 +2062,12 @@ const server = http.createServer(async (req, res) => {
             hasCredentials: SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_ID !== 'demo'
         }));
     } else if (pathname === '/spotify/logout' && req.method === 'POST') {
-        // Logout - clear tokens
+        // Logout - clear tokens for current profile
         res.setHeader('Content-Type', 'application/json');
-        spotifyTokens = {
-            access_token: null,
-            refresh_token: null,
-            expires_at: null
-        };
-        const tokenFile = path.join(__dirname, '.spotify_tokens.json');
-        try {
-            if (fs.existsSync(tokenFile)) {
-                fs.unlinkSync(tokenFile);
-            }
-        } catch (error) {
-            console.error('> Error deleting token file:', error);
-        }
-        console.log('> Spotify logged out');
+        clearSpotifyTokens();
+        console.log(`> Spotify logged out for profile: ${currentProfileId}`);
         res.writeHead(200);
-        res.end(JSON.stringify({ success: true }));
+        res.end(JSON.stringify({ success: true, profileId: currentProfileId }));
     } else if (pathname === '/spotify/current' && req.method === 'GET') {
         // Get currently playing track
         res.setHeader('Content-Type', 'application/json');
