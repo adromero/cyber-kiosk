@@ -25,7 +25,7 @@ echo "╚═══════════════════════�
 echo -e "${NC}"
 
 # Step 1: Check Node.js
-echo -e "${CYAN}[1/7] Checking Node.js installation...${NC}"
+echo -e "${CYAN}[1/8] Checking Node.js installation...${NC}"
 if ! command -v node &> /dev/null; then
     echo -e "${RED}✗ Node.js not found!${NC}"
     echo -e "${YELLOW}Installing Node.js...${NC}"
@@ -37,7 +37,7 @@ else
 fi
 
 # Step 2: Check npm
-echo -e "${CYAN}[2/7] Checking npm installation...${NC}"
+echo -e "${CYAN}[2/8] Checking npm installation...${NC}"
 if ! command -v npm &> /dev/null; then
     echo -e "${RED}✗ npm not found!${NC}"
     sudo apt-get install -y npm
@@ -47,12 +47,12 @@ else
 fi
 
 # Step 3: Install npm dependencies
-echo -e "${CYAN}[3/7] Installing npm dependencies...${NC}"
+echo -e "${CYAN}[3/8] Installing npm dependencies...${NC}"
 npm install
 echo -e "${GREEN}✓ Dependencies installed${NC}"
 
 # Step 4: Check for Chromium
-echo -e "${CYAN}[4/7] Checking Chromium browser...${NC}"
+echo -e "${CYAN}[4/8] Checking Chromium browser...${NC}"
 if ! command -v chromium-browser &> /dev/null; then
     echo -e "${YELLOW}⚠ Chromium not found. Install it for kiosk mode:${NC}"
     echo "  sudo apt-get install chromium-browser"
@@ -61,7 +61,7 @@ else
 fi
 
 # Step 5: Create .env file
-echo -e "${CYAN}[5/7] Configuring API keys...${NC}"
+echo -e "${CYAN}[5/8] Configuring API keys...${NC}"
 if [ -f ".env" ]; then
     echo -e "${YELLOW}⚠ .env already exists. Skipping...${NC}"
     read -p "Do you want to reconfigure? (y/N): " -n 1 -r
@@ -112,8 +112,39 @@ if [ ! -f ".env" ]; then
     echo -e "${YELLOW}You can edit .env anytime to update your settings${NC}"
 fi
 
-# Step 6: Test system monitor
-echo -e "${CYAN}[6/7] Testing system monitor...${NC}"
+# Step 6: Panel Selection
+echo -e "${CYAN}[6/8] Configure dashboard panels...${NC}"
+echo ""
+echo -e "${YELLOW}Which panels would you like to enable?${NC}"
+echo -e "${YELLOW}Press Enter for default, Y to enable, N to disable${NC}"
+echo ""
+
+read -p "Enable Weather panel? [Y/n]: " PANEL_WEATHER
+read -p "Enable News panel? [Y/n]: " PANEL_NEWS
+read -p "Enable Markets panel? [y/N]: " PANEL_MARKETS
+read -p "Enable Video panel? [Y/n]: " PANEL_VIDEO
+read -p "Enable Music/Spotify panel? [y/N]: " PANEL_MUSIC
+read -p "Enable Timer & Alarm panel? [y/N]: " PANEL_TIMER
+read -p "Enable Cyberspace panel? [Y/n]: " PANEL_CYBERSPACE
+read -p "Enable System Monitor panel? [Y/n]: " PANEL_SYSTEM
+read -p "Enable Calendar panel? [y/N]: " PANEL_CALENDAR
+
+# Generate config using the script
+node scripts/generate-config.js \
+  --weather="${PANEL_WEATHER:-Y}" \
+  --news="${PANEL_NEWS:-Y}" \
+  --markets="${PANEL_MARKETS:-N}" \
+  --video="${PANEL_VIDEO:-Y}" \
+  --music="${PANEL_MUSIC:-N}" \
+  --timer="${PANEL_TIMER:-N}" \
+  --cyberspace="${PANEL_CYBERSPACE:-Y}" \
+  --system="${PANEL_SYSTEM:-Y}" \
+  --calendar="${PANEL_CALENDAR:-N}"
+
+echo -e "${GREEN}✓ Panel configuration saved${NC}"
+
+# Step 7: Test system monitor
+echo -e "${CYAN}[7/8] Testing system monitor...${NC}"
 node system-monitor.js &
 MONITOR_PID=$!
 sleep 3
@@ -126,8 +157,8 @@ fi
 
 kill $MONITOR_PID 2>/dev/null || true
 
-# Step 7: Optional - Setup autostart
-echo -e "${CYAN}[7/7] Setup autostart (optional)${NC}"
+# Step 8: Optional - Setup autostart
+echo -e "${CYAN}[8/8] Setup autostart (optional)${NC}"
 read -p "Do you want to setup autostart on boot? (y/N): " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then

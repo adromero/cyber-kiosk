@@ -342,16 +342,18 @@ class TimerPanel extends BasePanel {
         if (modalContent) {
             modalContent.innerHTML = this.renderModalContent();
 
-            // Scroll to section after a brief delay to allow rendering
-            setTimeout(() => {
-                const targetElement = section === 'alarm'
-                    ? modalContent.querySelector('.timer-section-divider')
-                    : modalContent.querySelector('.timer-controls');
+            // Reset scroll position to top first
+            modalContent.scrollTop = 0;
 
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 100);
+            // Only scroll to alarm section if specifically requested
+            if (section === 'alarm') {
+                setTimeout(() => {
+                    const targetElement = modalContent.querySelector('.timer-section-divider');
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 100);
+            }
         }
 
         // Show modal

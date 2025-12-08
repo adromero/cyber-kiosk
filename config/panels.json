@@ -104,6 +104,11 @@
       "refreshInterval": 5000,
       "defaultSize": "medium",
       "priority": 8
+    },
+    "calendar": {
+      "enabled": false,
+      "defaultSize": "medium",
+      "priority": 9
     }
   },
   "display": {
@@ -146,7 +151,7 @@
   "features": {
     "responsiveLayout": true,
     "panelCustomization": true,
-    "themeSwitch ing": true,
+    "themeSwitching": true,
     "touchOptimization": true,
     "burnInPrevention": true,
     "screensaver": true,
@@ -203,5 +208,5 @@
       "visible": false
     }
   ],
-  "lastUpdated": "2025-11-24T22:21:28.114Z"
+  "lastUpdated": "2025-12-08T21:16:07.974Z"
 }
