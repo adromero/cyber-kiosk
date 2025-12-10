@@ -33,16 +33,16 @@ CLAUDE.md
 # Personal systemd service files
 *.service
 
-# Backup files and scripts
+# Backup files
 *.backup
-setup-financial-api.sh
-config/backup/
 
 # Keep screenshots but ignore upload server
 screenshots/upload-server.py
 
+# Archived unused files
+/archived/
+
 # Planning and implementation notes (keep README.md and CONTRIBUTING.md)
 docs/archive/
-proposal1-progress.json
 Proposal1_FinalChanges.md
 PROPOSAL_3_SAAS_DASHBOARD.md

@@ -1,6 +1,0 @@
-# Labwc autostart
-# Launch PCManFM desktop
-pcmanfm --desktop --profile LXDE-pi &
-
-# Launch Cyber Kiosk
-/home/pi/cyber-kiosk/launch-kiosk.sh &
