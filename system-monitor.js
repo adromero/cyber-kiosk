@@ -1338,8 +1338,15 @@ const server = http.createServer(async (req, res) => {
         res.setHeader('Access-Control-Allow-Origin', `http://localhost:${PORT}`);
     }
 
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Handle CORS preflight requests
+    if (req.method === 'OPTIONS') {
+        res.writeHead(204);
+        res.end();
+        return;
+    }
 
     // Parse URL
     const parsedUrl = new URL(req.url, `http://localhost:${PORT}`);

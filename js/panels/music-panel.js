@@ -442,6 +442,9 @@ class MusicPanel extends BasePanel {
 
         // Stop frequent modal updates
         this.clearInterval('modalUpdate');
+
+        // Re-render main panel to reflect any state changes made in modal
+        this.render();
     }
 
     /**
@@ -714,19 +717,26 @@ class MusicPanel extends BasePanel {
      * Render devices tab
      */
     renderDevicesTab() {
-        const allDevices = [...this.devices];
+        // Filter out the SDK device from API response to avoid duplicates
+        const apiDevices = this.devices.filter(d => d.id !== this.sdkDeviceId);
+        const allDevices = [];
 
-        // Add SDK device if initialized
+        // Add SDK device first if initialized
         if (this.sdkPlayer && this.sdkPlayer.isPlayerReady()) {
+            // Check if SDK device is the active one from API response
+            const sdkFromApi = this.devices.find(d => d.id === this.sdkDeviceId);
             const sdkDevice = {
                 id: this.sdkDeviceId,
                 name: 'Cyber Kiosk (This Device)',
                 type: 'Computer',
-                is_active: this.playerMode === 'sdk' && this.isPlaying,
+                is_active: sdkFromApi?.is_active || false,
                 is_sdk: true
             };
-            allDevices.unshift(sdkDevice);
+            allDevices.push(sdkDevice);
         }
+
+        // Add remaining devices
+        allDevices.push(...apiDevices);
 
         return `
             <div class="music-devices-manager">
@@ -756,7 +766,7 @@ class MusicPanel extends BasePanel {
      */
     renderDeviceItem(device) {
         const icon = this.getDeviceIcon(device.type);
-        const isActive = device.is_active || (device.id === this.sdkDeviceId && this.playerMode === 'sdk');
+        const isActive = device.is_active;
 
         return `
             <div class="music-device-item ${isActive ? 'active' : ''} ${device.is_sdk ? 'sdk-device' : ''}"

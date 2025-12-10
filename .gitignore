@@ -36,24 +36,13 @@ CLAUDE.md
 # Backup files and scripts
 *.backup
 setup-financial-api.sh
+config/backup/
 
 # Keep screenshots but ignore upload server
 screenshots/upload-server.py
 
 # Planning and implementation notes (keep README.md and CONTRIBUTING.md)
-imageserver.md
-P4.3_HIP_HOP_REDESIGN_SUMMARY.md
-PROPOSAL_1_RESPONSIVE_KIOSK.md
-proposal1-start-here.md
-PROPOSAL_2_SERVER_PLATFORM.md
-PROPOSAL_3_SERVER_PLATFORM.md
-READY_TO_TEST.md
-SESSION_1_SUMMARY.md
-SESSION_4_STATUS.md
-SETTINGS_REFACTOR_TODO.md
-SPOTIFY_SETUP.md
-TESTING_BUGS.md
-TESTING_GUIDE.md
-TESTING_SHORTCUTS.md
-THEME_COMPARISON.md
+docs/archive/
 proposal1-progress.json
+Proposal1_FinalChanges.md
+PROPOSAL_3_SAAS_DASHBOARD.md
