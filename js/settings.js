@@ -470,16 +470,16 @@ class SettingsManager {
      * Update the current theme indicator
      */
     updateCurrentThemeIndicator() {
+        const theme = this.currentSettings?.theme || 'cyberpunk';
         const indicator = document.getElementById('current-theme-name');
         if (indicator) {
-            const themeName = this.currentSettings.theme.charAt(0).toUpperCase() +
-                             this.currentSettings.theme.slice(1);
+            const themeName = theme.charAt(0).toUpperCase() + theme.slice(1);
             indicator.textContent = themeName;
         }
 
         // Highlight active theme card
         document.querySelectorAll('.theme-card').forEach(card => {
-            if (card.getAttribute('data-theme') === this.currentSettings.theme) {
+            if (card.getAttribute('data-theme') === theme) {
                 card.classList.add('active');
             } else {
                 card.classList.remove('active');

@@ -160,10 +160,12 @@ class ProfileManager {
             console.log(`[ProfileManager] Deleted profile: ${profileId}`);
 
             // If we deleted the current profile, switch to another
-            if (this.currentProfile && this.currentProfile.id === profileId) {
-                // Reload profiles
-                await this.loadProfiles();
+            const wasCurrentProfile = this.currentProfile && this.currentProfile.id === profileId;
 
+            // Reload profiles first
+            await this.loadProfiles();
+
+            if (wasCurrentProfile) {
                 // Switch to first available profile or create new one
                 if (this.profiles.length > 0) {
                     await this.switchProfile(this.profiles[0].id);
@@ -240,7 +242,11 @@ class ProfileManager {
     applyProfileSettings(profile) {
         // Apply theme via ThemeManager (which uses SettingsService)
         if (profile.theme && window.themeManager) {
-            window.themeManager.applyTheme(profile.theme);
+            // Handle both string and object theme formats
+            const themeName = typeof profile.theme === 'string'
+                ? profile.theme
+                : profile.theme.current || 'cyberpunk';
+            window.themeManager.applyTheme(themeName);
         }
 
         // Apply display settings via SettingsService

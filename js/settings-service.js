@@ -599,17 +599,22 @@ class SettingsService {
      * Get settings in legacy format (for backwards compatibility with settings.js)
      */
     toLegacyFormat() {
+        // Ensure settings structure exists with defaults
+        const theme = this.settings?.theme || {};
+        const display = this.settings?.display || {};
+        const panels = this.settings?.panels || {};
+
         return {
-            theme: this.settings.theme.current,
-            crtEffects: this.settings.theme.crtEffects,
-            animations: this.settings.theme.animations,
-            fontSize: this.settings.display.fontSize,
-            refreshInterval: this.settings.display.refreshInterval.toString(),
-            panels: Object.entries(this.settings.panels.enabled).map(([id, visible]) => ({
+            theme: theme.current || 'cyberpunk',
+            crtEffects: theme.crtEffects ?? true,
+            animations: theme.animations ?? true,
+            fontSize: display.fontSize || 'medium',
+            refreshInterval: (display.refreshInterval || 300000).toString(),
+            panels: Object.entries(panels.enabled || {}).map(([id, visible]) => ({
                 id,
                 visible
             })),
-            layout: this.settings.panels.layout
+            layout: panels.layout || null
         };
     }
 
