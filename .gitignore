@@ -4,6 +4,10 @@ config.json
 device_id.txt
 .spotify_tokens.json
 
+# User-specific config (profiles, settings)
+config/profiles/
+config/user-settings.json
+
 # Logs
 *.log
 launch-kiosk.log
