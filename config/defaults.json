@@ -144,5 +144,14 @@
     "largeText": false,
     "screenReader": false,
     "keyboardNavigation": true
+  },
+  "meshtastic": {
+    "enabled": false,
+    "logPath": "",
+    "nodeName": "",
+    "nodeShortName": "",
+    "nodeId": "",
+    "nodeHex": "",
+    "refreshInterval": 30000
   }
 }

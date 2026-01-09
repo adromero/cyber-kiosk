@@ -57,7 +57,7 @@
                 </button>
                 <button class="settings-tab" data-tab="apikeys">
                     <span class="tab-icon">&#128273;</span>
-                    <span class="tab-label">API KEYS</span>
+                    <span class="tab-label">SERVICES</span>
                 </button>
                 <button class="settings-tab" data-tab="about">
                     <span class="tab-icon">&#8505;</span>
@@ -270,6 +270,18 @@
                                 </div>
                                 <label class="toggle-switch">
                                     <input type="checkbox" id="panel-system" data-panel="system">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="panel-config-card">
+                                <div class="panel-icon">&#128225;</div>
+                                <div class="panel-details">
+                                    <h3 class="panel-name">Meshtastic</h3>
+                                    <p class="panel-description">Mesh network status and leaderboard</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="panel-meshtastic" data-panel="meshtastic">
                                     <span class="toggle-slider"></span>
                                 </label>
                             </div>
@@ -545,6 +557,34 @@
                                     <input type="password" id="pihole-password" class="api-key-input" placeholder="Admin password...">
                                     <button class="api-key-toggle" data-target="pihole-password" title="Show/Hide">👁️</button>
                                     <button class="api-key-test" data-api="pihole" title="Test API">TEST</button>
+                                </div>
+                            </div>
+
+                            <!-- Meshtastic Configuration -->
+                            <div class="api-key-group">
+                                <div class="api-key-header">
+                                    <span class="api-key-icon">📡</span>
+                                    <div class="api-key-info">
+                                        <h3 class="api-key-title">Meshtastic</h3>
+                                        <p class="api-key-description">LoRa mesh network (meshing-around bot)</p>
+                                    </div>
+                                    <span class="api-key-status" id="meshtastic-api-status">●</span>
+                                </div>
+                                <div class="api-key-input-group">
+                                    <input type="text" id="meshtastic-log-path" class="api-key-input" placeholder="Log path (e.g., /home/user/meshing-around/logs/meshbot.log)">
+                                </div>
+                                <div class="api-key-input-group" style="margin-top: 0.5rem;">
+                                    <input type="text" id="meshtastic-node-name" class="api-key-input" placeholder="Node Name (optional, e.g., My Node)">
+                                </div>
+                                <div class="api-key-input-group" style="margin-top: 0.5rem;">
+                                    <input type="text" id="meshtastic-node-short" class="api-key-input" placeholder="Short Name (optional, 4 chars max)" maxlength="4">
+                                </div>
+                                <div class="api-key-input-group" style="margin-top: 0.5rem;">
+                                    <input type="text" id="meshtastic-node-id" class="api-key-input" placeholder="Node ID (optional, e.g., 123456789)">
+                                </div>
+                                <div class="api-key-input-group" style="margin-top: 0.5rem;">
+                                    <input type="text" id="meshtastic-node-hex" class="api-key-input" placeholder="Node Hex ID (optional, e.g., !xxxxxxxx)">
+                                    <button class="api-key-test" data-api="meshtastic" title="Test Connection">TEST</button>
                                 </div>
                             </div>
 

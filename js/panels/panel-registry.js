@@ -122,6 +122,19 @@ const AVAILABLE_PANELS = {
         description: 'System temperature, memory, and status information',
         enabled: true,
         priority: 9
+    },
+
+    meshtastic: {
+        id: 'meshtastic',
+        name: 'Meshtastic',
+        icon: '📡',
+        component: 'MeshtasticPanel',
+        minSize: 'small',
+        defaultSize: 'small',
+        category: 'system',
+        description: 'Meshtastic mesh network status and activity',
+        enabled: true,
+        priority: 10
     }
 };
 

@@ -29,16 +29,16 @@
         "height": 2
       },
       {
-        "id": "video",
+        "id": "music",
         "row": 2,
-        "col": 0,
+        "col": 1,
         "width": 1,
         "height": 2
       },
       {
-        "id": "music",
+        "id": "meshtastic",
         "row": 2,
-        "col": 1,
+        "col": 0,
         "width": 1,
         "height": 2
       }
@@ -109,6 +109,12 @@
       "enabled": false,
       "defaultSize": "medium",
       "priority": 9
+    },
+    "meshtastic": {
+      "enabled": true,
+      "refreshInterval": 30000,
+      "defaultSize": "small",
+      "priority": 10
     }
   },
   "display": {
@@ -206,7 +212,11 @@
     {
       "id": "calendar",
       "visible": false
+    },
+    {
+      "id": "meshtastic",
+      "visible": true
     }
   ],
-  "lastUpdated": "2025-12-08T21:16:07.974Z"
+  "lastUpdated": "2026-01-09T03:01:07.852Z"
 }

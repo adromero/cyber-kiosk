@@ -5940,3 +5940,649 @@ input:checked + .toggle-slider:before {
         width: 100%;
     }
 }
+
+/* ============================================
+   Meshtastic Panel Styles
+   ============================================ */
+
+/* Meshtastic Widget - whole panel hover effect */
+.meshtastic-widget {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.meshtastic-widget:hover {
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.5),
+                inset 0 0 25px rgba(0, 255, 255, 0.15);
+    transform: scale(1.02);
+}
+
+/* Compact Widget View */
+.mesh-widget-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem;
+    height: 100%;
+    cursor: pointer;
+}
+
+.mesh-stat-main {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.mesh-node-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--neon-green);
+    box-shadow: 0 0 10px var(--neon-green);
+    animation: meshPulse 2s infinite;
+}
+
+.mesh-node-indicator.offline {
+    background: var(--error-red);
+    box-shadow: 0 0 10px var(--error-red);
+    animation: none;
+}
+
+.mesh-node-indicator.reconnecting {
+    background: var(--neon-amber);
+    box-shadow: 0 0 10px var(--neon-amber);
+    animation: meshPulse 0.5s infinite;
+}
+
+@keyframes meshPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.9); }
+}
+
+.mesh-node-name {
+    font-size: 1.5rem;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.mesh-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    text-align: center;
+}
+
+.mesh-stat-item {
+    padding: 0.25rem;
+}
+
+.mesh-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+}
+
+.mesh-stat-value {
+    font-size: 1.25rem;
+    color: var(--neon-cyan);
+    font-weight: bold;
+}
+
+.mesh-stat-sub {
+    font-size: 0.7rem;
+    color: var(--neon-green);
+    margin-top: 1px;
+}
+
+.mesh-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 0.5rem;
+}
+
+.mesh-empty-icon {
+    font-size: 2rem;
+    opacity: 0.6;
+}
+
+.mesh-empty-text {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+/* Modal Overlay */
+.mesh-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+.mesh-modal-overlay.active {
+    display: flex;
+}
+
+.mesh-modal-container {
+    width: 90%;
+    max-width: 800px;
+    max-height: 85vh;
+    background: var(--dark-bg, #0a0a0a);
+    border: 2px solid var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.4),
+                inset 0 0 20px rgba(0, 255, 255, 0.05);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mesh-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: rgba(0, 255, 255, 0.05);
+    border-bottom: 1px solid var(--neon-cyan);
+}
+
+.mesh-modal-title {
+    font-size: 2rem;
+    color: var(--neon-cyan);
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.mesh-modal-close {
+    background: rgba(255, 0, 0, 0.1);
+    border: 2px solid #ff0055;
+    color: #ff0055;
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'VT323', monospace;
+    line-height: 1;
+}
+
+.mesh-modal-close:hover {
+    background: rgba(255, 0, 0, 0.3);
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+    transform: scale(1.1);
+}
+
+/* Tab Navigation */
+.mesh-modal-tabs {
+    display: flex;
+    border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+}
+
+.mesh-tab {
+    flex: 1;
+    padding: 1rem 1.25rem;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 2px;
+    position: relative;
+}
+
+.mesh-tab:hover {
+    background: rgba(0, 255, 255, 0.1);
+    color: var(--neon-cyan);
+}
+
+.mesh-tab.active {
+    background: rgba(0, 255, 255, 0.15);
+    color: var(--neon-cyan);
+}
+
+.mesh-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* Modal Content */
+.mesh-modal-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.mesh-loading {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--neon-cyan);
+    padding: 3rem;
+    animation: meshPulse 1s infinite;
+}
+
+.mesh-error {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--error-red);
+    padding: 3rem;
+}
+
+/* Status Tab */
+.mesh-status-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.mesh-node-info {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.mesh-node-name-large {
+    font-size: 1.8rem;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+}
+
+.mesh-node-id {
+    font-size: 1rem;
+    color: var(--text-dim);
+    margin-bottom: 0.75rem;
+}
+
+.mesh-node-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+}
+
+.mesh-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.mesh-telemetry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.mesh-telemetry-item {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    padding: 1rem;
+    text-align: center;
+}
+
+.mesh-telemetry-item .label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.mesh-telemetry-item .value {
+    display: block;
+    font-size: 1.7rem;
+    color: var(--neon-cyan);
+}
+
+.mesh-telemetry-item .value.green {
+    color: var(--neon-green);
+}
+
+.mesh-telemetry-item .error {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--error-red);
+    margin-top: 0.25rem;
+}
+
+.mesh-firmware {
+    text-align: center;
+    font-size: 1rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.mesh-modal-actions {
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+}
+
+.mesh-modal-refresh {
+    background: transparent;
+    border: 2px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    padding: 0.75rem 2rem;
+    font-family: inherit;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mesh-modal-refresh:hover {
+    background: var(--neon-cyan);
+    color: var(--dark-bg);
+    box-shadow: 0 0 20px var(--neon-cyan);
+}
+
+/* Leaderboard Tab */
+.mesh-leaderboard-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mesh-leaderboard-header {
+    text-align: center;
+    font-size: 1.4rem;
+    color: var(--neon-cyan);
+    letter-spacing: 3px;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.mesh-leaderboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.mesh-record-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.mesh-record-card:hover {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+.mesh-record-card.empty {
+    opacity: 0.5;
+}
+
+.mesh-record-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.mesh-record-category {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+}
+
+.mesh-record-value {
+    font-size: 1.8rem;
+    color: var(--neon-cyan);
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.mesh-record-node {
+    font-size: 1rem;
+    color: var(--neon-green);
+}
+
+.mesh-record-time {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-top: 0.25rem;
+}
+
+.mesh-leaderboard-footer {
+    text-align: center;
+    font-size: 1rem;
+    color: var(--text-dim);
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+/* Activity Tab */
+.mesh-activity-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mesh-activity-header {
+    font-size: 1.3rem;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.mesh-activity-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.mesh-activity-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+    transition: background 0.2s;
+}
+
+.mesh-activity-item:hover {
+    background: rgba(0, 255, 255, 0.05);
+}
+
+.mesh-activity-item.record {
+    border-left: 3px solid var(--neon-amber);
+}
+
+.mesh-activity-item.message {
+    border-left: 3px solid var(--neon-green);
+}
+
+.mesh-activity-time {
+    color: var(--text-dim);
+    font-size: 1rem;
+    min-width: 50px;
+    font-family: monospace;
+}
+
+.mesh-activity-icon {
+    font-size: 1.4rem;
+}
+
+.mesh-activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.mesh-activity-message {
+    color: var(--neon-cyan);
+    font-size: 1.1rem;
+    word-break: break-word;
+}
+
+.mesh-activity-node {
+    font-size: 0.95rem;
+    color: var(--neon-green);
+    margin-top: 0.25rem;
+}
+
+.mesh-activity-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 1rem;
+}
+
+.mesh-empty-sub {
+    font-size: 1rem;
+    color: var(--text-dim);
+    opacity: 0.7;
+}
+
+/* Messages Tab (LongFast / DMs) */
+.mesh-messages-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mesh-messages-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.mesh-messages-title {
+    font-size: 1.4rem;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+}
+
+.mesh-messages-count {
+    font-size: 1.1rem;
+    color: var(--text-dim);
+}
+
+.mesh-messages-list {
+    max-height: 450px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.mesh-message-item {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-left: 3px solid var(--neon-cyan);
+    padding: 1rem;
+    transition: all 0.2s;
+}
+
+.mesh-message-item:hover {
+    background: rgba(0, 255, 255, 0.05);
+    border-color: rgba(0, 255, 255, 0.4);
+}
+
+.mesh-message-item.dm {
+    border-left-color: var(--neon-magenta, #ff00ff);
+}
+
+.mesh-message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.mesh-message-from {
+    font-size: 1.2rem;
+    color: var(--neon-green);
+    font-weight: bold;
+}
+
+.mesh-message-time {
+    font-size: 1rem;
+    color: var(--text-dim);
+    font-family: monospace;
+}
+
+.mesh-message-text {
+    font-size: 1.3rem;
+    color: var(--neon-cyan);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .mesh-modal-container {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .mesh-tab {
+        font-size: 0.95rem;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .mesh-telemetry-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mesh-leaderboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .mesh-record-card {
+        padding: 0.75rem;
+    }
+
+    .mesh-record-value {
+        font-size: 1.2rem;
+    }
+}

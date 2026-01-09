@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-24T22:21:28.096Z",
+  "lastUpdated": "2026-01-09T03:07:18.406Z",
   "theme": {
     "current": "cyberpunk",
     "crtEffects": true,
@@ -20,7 +20,8 @@
       "cyberspace": true,
       "video": true,
       "system": true,
-      "calendar": false
+      "calendar": false,
+      "meshtastic": true
     },
     "layout": {
       "rows": 4,
@@ -41,21 +42,28 @@
           "height": 2
         },
         {
-          "id": "video",
+          "id": "music",
           "row": 2,
-          "col": 0,
+          "col": 1,
           "width": 1,
           "height": 2
         },
         {
-          "id": "music",
+          "id": "meshtastic",
           "row": 2,
-          "col": 1,
+          "col": 0,
           "width": 1,
           "height": 2
         }
       ]
     }
   },
-  "currentProfile": "dad"
+  "currentProfile": "dad",
+  "meshtastic": {
+    "logPath": "/home/alfon/Projects/meshtastic/meshing-around/logs/meshbot.log",
+    "nodeName": "VTNet BBS",
+    "nodeShortName": "VTBB",
+    "nodeId": "862524836",
+    "nodeHex": "!336915a4"
+  }
 }

@@ -116,9 +116,17 @@ class SettingsService {
                     cyberspace: true,
                     video: true,
                     system: true,
-                    calendar: false
+                    calendar: false,
+                    meshtastic: false
                 },
                 layout: null
+            },
+            meshtastic: {
+                logPath: '',
+                nodeName: '',
+                nodeShortName: '',
+                nodeId: '',
+                nodeHex: ''
             }
         };
     }
@@ -338,6 +346,27 @@ class SettingsService {
         return this.settings.panels.layout;
     }
 
+    /**
+     * Get meshtastic settings
+     */
+    getMeshtastic() {
+        return { ...(this.settings.meshtastic || {}) };
+    }
+
+    /**
+     * Get meshtastic log path
+     */
+    getMeshtasticLogPath() {
+        return this.settings.meshtastic?.logPath || '';
+    }
+
+    /**
+     * Check if meshtastic is configured
+     */
+    isMeshtasticConfigured() {
+        return !!this.settings.meshtastic?.logPath;
+    }
+
     // ==================== Setters ====================
 
     /**
@@ -434,6 +463,30 @@ class SettingsService {
     }
 
     /**
+     * Set meshtastic configuration
+     */
+    setMeshtastic(config) {
+        if (!this.settings.meshtastic) {
+            this.settings.meshtastic = {};
+        }
+        Object.assign(this.settings.meshtastic, config);
+        this.emit('meshtasticChange', this.settings.meshtastic);
+        this.onSettingsChanged();
+    }
+
+    /**
+     * Set meshtastic log path
+     */
+    setMeshtasticLogPath(path) {
+        if (!this.settings.meshtastic) {
+            this.settings.meshtastic = {};
+        }
+        this.settings.meshtastic.logPath = path;
+        this.emit('meshtasticChange', this.settings.meshtastic);
+        this.onSettingsChanged();
+    }
+
+    /**
      * Bulk update settings
      */
     update(updates) {
@@ -465,6 +518,13 @@ class SettingsService {
         }
         if (updates.layout !== undefined) {
             this.settings.panels.layout = updates.layout;
+            changed = true;
+        }
+        if (updates.meshtastic !== undefined) {
+            if (!this.settings.meshtastic) {
+                this.settings.meshtastic = {};
+            }
+            Object.assign(this.settings.meshtastic, updates.meshtastic);
             changed = true;
         }
 

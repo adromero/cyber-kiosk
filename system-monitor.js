@@ -301,6 +301,322 @@ async function getSystemStats() {
     }
 }
 
+// ============================================
+// Meshtastic Stats (log parsing)
+// ============================================
+
+// Meshtastic configuration loaded from user-settings.json
+let meshtasticCache = null;
+let meshtasticCacheTime = 0;
+const MESHTASTIC_CACHE_DURATION = 30000; // 30 second cache
+
+/**
+ * Load Meshtastic configuration from user-settings.json
+ * Returns config object with logPath, nodeName, nodeShortName, nodeId, nodeHex
+ */
+function getMeshtasticConfig() {
+    const userSettingsFile = path.join(__dirname, 'config', 'user-settings.json');
+    try {
+        if (fs.existsSync(userSettingsFile)) {
+            const data = fs.readFileSync(userSettingsFile, 'utf8');
+            const settings = JSON.parse(data);
+            return settings.meshtastic || {};
+        }
+    } catch (error) {
+        console.error('Error loading Meshtastic config:', error.message);
+    }
+    return {};
+}
+
+// Regex patterns for parsing meshbot.log
+const MESH_PATTERNS = {
+    telemetry: /Telemetry:\d+\s+numPacketsRx:(\d+)\s+numPacketsRxErr:(\d+)\s+numPacketsTx:(\d+)\s+numPacketsTxErr:(\d+)\s+ChUtil%:([0-9.]+)\s+AirTx%:([0-9.]+)\s+totalNodes:(\d+)\s+Online:(\d+)\s+Uptime:(\w+)\s+Volt:([0-9.]+)\s+Firmware:(.+)$/,
+    speed: /System: 🚓 New speed record: (\d+) km\/h from NodeID:(\d+) ShortName:(.+)$/,
+    coldest: /System: 🥶 New coldest temp record: ([0-9.]+)°?C from NodeID:(\d+) ShortName:(.+)$/,
+    hottest: /System: 🥵 New hottest temp record: ([0-9.]+)°?C from NodeID:(\d+) ShortName:(.+)$/,
+    altitude: /System: 🪜 New tallest node record: (\d+)m from NodeID:(\d+) ShortName:(.+)$/,
+    battery: /System: 🪫 New low battery record: ([0-9.]+)% from NodeID:(\d+) ShortName:(.+)$/,
+    airQuality: /System: 💨 New worst air quality record: IAQ ([0-9.]+) from NodeID:(\d+) ShortName:(.+)$/,
+    channelMessage: /Device:(\d+) Channel:(\d+) Ignoring Message: (.+) From: (.+)$/,
+    autoresponder: /System: Autoresponder Started for Device\d+ (.+?),(\w+)\. NodeID: (\d+), (![\da-f]+)/,
+    disconnection: /System: Abrupt Disconnection of Interface detected/
+};
+
+async function getMeshtasticStats() {
+    // Return cached data if fresh
+    if (meshtasticCache && (Date.now() - meshtasticCacheTime) < MESHTASTIC_CACHE_DURATION) {
+        return meshtasticCache;
+    }
+
+    // Get meshtastic configuration
+    const meshConfig = getMeshtasticConfig();
+    const logPath = meshConfig.logPath || '';
+
+    // Check if Meshtastic is configured
+    if (!logPath) {
+        return {
+            status: 'not_configured',
+            error: 'Meshtastic not configured. Set log path in Settings > SERVICES.',
+            lastUpdate: new Date().toISOString()
+        };
+    }
+
+    try {
+        // Check if log file exists
+        if (!fs.existsSync(logPath)) {
+            return {
+                status: 'offline',
+                error: 'Log file not found at configured path',
+                lastUpdate: new Date().toISOString()
+            };
+        }
+
+        // Read last 500 lines efficiently using tail
+        const logContent = await new Promise((resolve, reject) => {
+            exec(`tail -500 "${logPath}"`, { timeout: 5000, maxBuffer: 1024 * 1024 }, (error, stdout) => {
+                if (error) reject(error);
+                else resolve(stdout);
+            });
+        });
+
+        const lines = logContent.split('\n').filter(line => line.trim());
+
+        // Initialize result structure with node info from config (or generic placeholders)
+        const result = {
+            status: 'offline',
+            lastUpdate: new Date().toISOString(),
+            node: {
+                name: meshConfig.nodeName || 'My Node',
+                shortName: meshConfig.nodeShortName || 'NODE',
+                nodeId: meshConfig.nodeId || '',
+                nodeHex: meshConfig.nodeHex || ''
+            },
+            telemetry: null,
+            leaderboard: {
+                speed: null,
+                coldest: null,
+                hottest: null,
+                altitude: null,
+                lowBattery: null,
+                airQuality: null
+            },
+            messages: {
+                longfast: [],  // Channel 0
+                dms: []        // Direct messages
+            },
+            recentActivity: []
+        };
+
+        // Parse lines in reverse order (newest first) to get latest values
+        for (let i = lines.length - 1; i >= 0; i--) {
+            const line = lines[i];
+            const timestamp = line.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/)?.[1];
+
+            // Parse telemetry (get most recent)
+            if (!result.telemetry) {
+                const telMatch = line.match(MESH_PATTERNS.telemetry);
+                if (telMatch) {
+                    result.telemetry = {
+                        packetsRx: parseInt(telMatch[1]),
+                        packetsRxErr: parseInt(telMatch[2]),
+                        packetsTx: parseInt(telMatch[3]),
+                        packetsTxErr: parseInt(telMatch[4]),
+                        channelUtilization: parseFloat(telMatch[5]),
+                        airTxTime: parseFloat(telMatch[6]),
+                        totalNodes: parseInt(telMatch[7]),
+                        onlineNodes: parseInt(telMatch[8]),
+                        uptime: telMatch[9],
+                        voltage: parseFloat(telMatch[10]),
+                        firmware: telMatch[11].trim()
+                    };
+                    result.status = 'online';
+                }
+            }
+
+            // Parse leaderboard records (get most recent of each type)
+            if (!result.leaderboard.speed) {
+                const speedMatch = line.match(MESH_PATTERNS.speed);
+                if (speedMatch) {
+                    result.leaderboard.speed = {
+                        value: parseInt(speedMatch[1]),
+                        unit: 'km/h',
+                        nodeId: speedMatch[2],
+                        shortName: speedMatch[3].trim(),
+                        timestamp
+                    };
+                }
+            }
+
+            if (!result.leaderboard.coldest) {
+                const coldMatch = line.match(MESH_PATTERNS.coldest);
+                if (coldMatch) {
+                    result.leaderboard.coldest = {
+                        value: parseFloat(coldMatch[1]),
+                        unit: '°C',
+                        nodeId: coldMatch[2],
+                        shortName: coldMatch[3].trim(),
+                        timestamp
+                    };
+                }
+            }
+
+            if (!result.leaderboard.hottest) {
+                const hotMatch = line.match(MESH_PATTERNS.hottest);
+                if (hotMatch) {
+                    result.leaderboard.hottest = {
+                        value: parseFloat(hotMatch[1]),
+                        unit: '°C',
+                        nodeId: hotMatch[2],
+                        shortName: hotMatch[3].trim(),
+                        timestamp
+                    };
+                }
+            }
+
+            if (!result.leaderboard.altitude) {
+                const altMatch = line.match(MESH_PATTERNS.altitude);
+                if (altMatch) {
+                    result.leaderboard.altitude = {
+                        value: parseInt(altMatch[1]),
+                        unit: 'm',
+                        nodeId: altMatch[2],
+                        shortName: altMatch[3].trim(),
+                        timestamp
+                    };
+                }
+            }
+
+            if (!result.leaderboard.lowBattery) {
+                const battMatch = line.match(MESH_PATTERNS.battery);
+                if (battMatch) {
+                    result.leaderboard.lowBattery = {
+                        value: parseFloat(battMatch[1]),
+                        unit: '%',
+                        nodeId: battMatch[2],
+                        shortName: battMatch[3].trim(),
+                        timestamp
+                    };
+                }
+            }
+
+            if (!result.leaderboard.airQuality) {
+                const aqMatch = line.match(MESH_PATTERNS.airQuality);
+                if (aqMatch) {
+                    result.leaderboard.airQuality = {
+                        value: parseFloat(aqMatch[1]),
+                        unit: 'IAQ',
+                        nodeId: aqMatch[2],
+                        shortName: aqMatch[3].trim(),
+                        timestamp
+                    };
+                }
+            }
+
+            // Build recent activity (last 20 events)
+            if (result.recentActivity.length < 20) {
+                // Check for record events
+                const recordTypes = [
+                    { pattern: MESH_PATTERNS.speed, type: 'record', category: 'speed', icon: '🚓' },
+                    { pattern: MESH_PATTERNS.coldest, type: 'record', category: 'coldest', icon: '🥶' },
+                    { pattern: MESH_PATTERNS.hottest, type: 'record', category: 'hottest', icon: '🥵' },
+                    { pattern: MESH_PATTERNS.altitude, type: 'record', category: 'altitude', icon: '🪜' },
+                    { pattern: MESH_PATTERNS.battery, type: 'record', category: 'battery', icon: '🪫' },
+                    { pattern: MESH_PATTERNS.airQuality, type: 'record', category: 'airQuality', icon: '💨' }
+                ];
+
+                for (const rt of recordTypes) {
+                    const match = line.match(rt.pattern);
+                    if (match) {
+                        result.recentActivity.push({
+                            type: rt.type,
+                            category: rt.category,
+                            icon: rt.icon,
+                            message: line.split('System: ')[1]?.split(' from NodeID')[0] || '',
+                            nodeShortName: match[3]?.trim() || '',
+                            timestamp
+                        });
+                        break;
+                    }
+                }
+
+                // Check for channel messages (add to activity)
+                const msgMatch = line.match(MESH_PATTERNS.channelMessage);
+                if (msgMatch) {
+                    const channelNum = parseInt(msgMatch[2]);
+                    const messageObj = {
+                        type: 'message',
+                        category: channelNum === 0 ? 'longfast' : 'channel',
+                        channel: channelNum,
+                        icon: '💬',
+                        message: msgMatch[3].substring(0, 150),
+                        nodeShortName: msgMatch[4].trim(),
+                        timestamp
+                    };
+
+                    result.recentActivity.push(messageObj);
+                }
+            }
+
+            // Check for channel messages (add to message tabs - separate from activity limit)
+            const msgMatchForTabs = line.match(MESH_PATTERNS.channelMessage);
+            if (msgMatchForTabs) {
+                const channelNum = parseInt(msgMatchForTabs[2]);
+                const messageObj = {
+                    type: 'message',
+                    category: channelNum === 0 ? 'longfast' : 'channel',
+                    channel: channelNum,
+                    icon: '💬',
+                    message: msgMatchForTabs[3].substring(0, 150),
+                    nodeShortName: msgMatchForTabs[4].trim(),
+                    timestamp
+                };
+
+                // Add to specific message arrays (limit to 30 each)
+                if (channelNum === 0 && result.messages.longfast.length < 30) {
+                    result.messages.longfast.push(messageObj);
+                }
+            }
+
+            // Update node info from autoresponder message
+            const autoMatch = line.match(MESH_PATTERNS.autoresponder);
+            if (autoMatch) {
+                result.node = {
+                    name: autoMatch[1],
+                    shortName: autoMatch[2],
+                    nodeId: autoMatch[3],
+                    nodeHex: autoMatch[4]
+                };
+            }
+
+            // Check for disconnection
+            if (MESH_PATTERNS.disconnection.test(line)) {
+                if (result.status === 'offline') {
+                    result.status = 'reconnecting';
+                }
+            }
+        }
+
+        // Sort activity by timestamp (newest first) - they were added in reverse order
+        result.recentActivity.reverse();
+        result.messages.longfast.reverse();
+        result.messages.dms.reverse();
+
+        // Cache the result
+        meshtasticCache = result;
+        meshtasticCacheTime = Date.now();
+
+        return result;
+
+    } catch (error) {
+        console.error('Error getting Meshtastic stats:', error.message);
+        return {
+            status: 'error',
+            error: error.message,
+            lastUpdate: new Date().toISOString()
+        };
+    }
+}
+
 // Financial data cache
 let financialCache = null;
 let lastFetchTime = 0;
@@ -1396,6 +1712,18 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(500);
             res.end(JSON.stringify({ error: 'Failed to get network stats' }));
         }
+    } else if (pathname === '/meshtastic' && req.method === 'GET') {
+        // Meshtastic mesh network stats (parsed from meshing-around log)
+        res.setHeader('Content-Type', 'application/json');
+        try {
+            const meshtasticStats = await getMeshtasticStats();
+            res.writeHead(200);
+            res.end(JSON.stringify(meshtasticStats));
+        } catch (error) {
+            console.error('Meshtastic stats error:', error);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: 'Failed to get Meshtastic stats' }));
+        }
     } else if (pathname === '/api/weather' && req.method === 'GET') {
         // Weather API proxy
         res.setHeader('Content-Type', 'application/json');
@@ -2464,7 +2792,7 @@ const server = http.createServer(async (req, res) => {
 
         req.on('end', async () => {
             try {
-                const { api, key, url } = JSON.parse(body);
+                const { api, key, url, logPath } = JSON.parse(body);
                 let result = { success: false, message: 'Unknown API' };
 
                 switch (api) {
@@ -2494,6 +2822,16 @@ const server = http.createServer(async (req, res) => {
                     case 'pihole':
                         // Test Pi-hole connection
                         result = await testPiholeApi(url || ENV.PIHOLE_API_URL);
+                        break;
+                    case 'meshtastic':
+                        // Test Meshtastic log file exists
+                        if (!logPath) {
+                            result = { success: false, message: 'Log path is required' };
+                        } else if (!fs.existsSync(logPath)) {
+                            result = { success: false, message: 'Log file not found at specified path' };
+                        } else {
+                            result = { success: true, message: 'Log file found at specified path' };
+                        }
                         break;
                 }
 
@@ -2527,7 +2865,7 @@ if (ENV.EPAPER_SERVER_URL) {
 
 server.listen(PORT, () => {
     console.log(`> SYSTEM MONITOR SERVER RUNNING ON PORT ${PORT}`);
-    console.log(`> ENDPOINTS: /stats, /financial, /pihole, /network, /health`);
+    console.log(`> ENDPOINTS: /stats, /financial, /pihole, /network, /meshtastic, /health`);
     console.log(`> API PROXIES: /api/weather, /api/weather/forecast, /api/nytimes, /api/youtube/search`);
     console.log(`> SPOTIFY: /spotify/login, /spotify/status, /spotify/current, /spotify/player, /spotify/playlists`);
     console.log(`> WEB INTERFACE: http://localhost:${PORT}`);

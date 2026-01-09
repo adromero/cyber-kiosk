@@ -940,8 +940,52 @@ class SettingsManager {
                 }
             }
 
+            // Load Meshtastic settings from user-settings (separate from API keys)
+            await this.loadMeshtasticSettings();
+
         } catch (error) {
             console.error('[Settings] Error loading API keys:', error);
+        }
+    }
+
+    /**
+     * Load Meshtastic settings from user-settings.json
+     */
+    async loadMeshtasticSettings() {
+        try {
+            // Get meshtastic settings from settings service
+            if (window.settingsService && window.settingsService.settings) {
+                const meshConfig = window.settingsService.getMeshtastic();
+
+                // Populate form fields
+                const logPathInput = document.getElementById('meshtastic-log-path');
+                const nodeNameInput = document.getElementById('meshtastic-node-name');
+                const nodeShortInput = document.getElementById('meshtastic-node-short');
+                const nodeIdInput = document.getElementById('meshtastic-node-id');
+                const nodeHexInput = document.getElementById('meshtastic-node-hex');
+                const statusEl = document.getElementById('meshtastic-api-status');
+
+                if (logPathInput) logPathInput.value = meshConfig.logPath || '';
+                if (nodeNameInput) nodeNameInput.value = meshConfig.nodeName || '';
+                if (nodeShortInput) nodeShortInput.value = meshConfig.nodeShortName || '';
+                if (nodeIdInput) nodeIdInput.value = meshConfig.nodeId || '';
+                if (nodeHexInput) nodeHexInput.value = meshConfig.nodeHex || '';
+
+                // Update status indicator
+                if (statusEl) {
+                    if (meshConfig.logPath) {
+                        statusEl.classList.add('configured');
+                        statusEl.classList.remove('not-configured', 'error');
+                    } else {
+                        statusEl.classList.add('not-configured');
+                        statusEl.classList.remove('configured', 'error');
+                    }
+                }
+
+                console.log('[Settings] Loaded Meshtastic settings:', meshConfig);
+            }
+        } catch (error) {
+            console.error('[Settings] Error loading Meshtastic settings:', error);
         }
     }
 
@@ -973,7 +1017,10 @@ class SettingsManager {
             const data = await response.json();
 
             if (data.success) {
-                this.showModal('API Keys Saved', data.message);
+                // Also save Meshtastic settings to user-settings
+                await this.saveMeshtasticSettings();
+
+                this.showModal('Settings Saved', data.message);
                 this.clearUnsavedChanges();
                 // Reload to update status indicators
                 await this.loadApiKeys();
@@ -983,7 +1030,28 @@ class SettingsManager {
 
         } catch (error) {
             console.error('[Settings] Error saving API keys:', error);
-            this.showModal('Error', 'Failed to save API keys: ' + error.message);
+            this.showModal('Error', 'Failed to save settings: ' + error.message);
+        }
+    }
+
+    /**
+     * Save Meshtastic settings to user-settings.json
+     */
+    async saveMeshtasticSettings() {
+        const meshConfig = {
+            logPath: document.getElementById('meshtastic-log-path')?.value || '',
+            nodeName: document.getElementById('meshtastic-node-name')?.value || '',
+            nodeShortName: document.getElementById('meshtastic-node-short')?.value || '',
+            nodeId: document.getElementById('meshtastic-node-id')?.value || '',
+            nodeHex: document.getElementById('meshtastic-node-hex')?.value || ''
+        };
+
+        console.log('[Settings] Saving Meshtastic settings:', meshConfig);
+
+        // Update settings service
+        if (window.settingsService) {
+            window.settingsService.setMeshtastic(meshConfig);
+            await window.settingsService.save();
         }
     }
 
@@ -996,6 +1064,8 @@ class SettingsManager {
         // Get the relevant input values
         let key = null;
         let url = null;
+
+        let logPath = null;
 
         switch (api) {
             case 'weather':
@@ -1016,6 +1086,9 @@ class SettingsManager {
             case 'pihole':
                 url = document.getElementById('pihole-api-url')?.value;
                 break;
+            case 'meshtastic':
+                logPath = document.getElementById('meshtastic-log-path')?.value;
+                break;
         }
 
         // Update button state
@@ -1030,7 +1103,8 @@ class SettingsManager {
             'youtube': 'youtube-api-status',
             'alphavantage': 'alphavantage-api-status',
             'spotify': 'spotify-api-status',
-            'pihole': 'pihole-api-status'
+            'pihole': 'pihole-api-status',
+            'meshtastic': 'meshtastic-api-status'
         };
 
         const statusEl = document.getElementById(statusMap[api]);
@@ -1043,7 +1117,7 @@ class SettingsManager {
             const response = await fetch('/config/apikeys/test', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ api, key, url })
+                body: JSON.stringify({ api, key, url, logPath })
             });
 
             const result = await response.json();

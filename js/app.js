@@ -274,6 +274,42 @@ function initSystemPanel() {
     }
 }
 
+// Meshtastic Panel - Mesh network monitoring
+let meshtasticPanel;
+function initMeshtasticPanel() {
+    const container = document.getElementById('meshtastic-panel-container');
+
+    if (!container) {
+        console.error('> MESHTASTIC PANEL: Container not found');
+        return;
+    }
+
+    if (typeof MeshtasticPanel === 'undefined') {
+        console.error('> MESHTASTIC PANEL: MeshtasticPanel class not loaded');
+        return;
+    }
+
+    try {
+        meshtasticPanel = new MeshtasticPanel({
+            id: 'meshtastic',
+            title: 'MESH',
+            container: container,
+            settings: {
+                autoUpdate: true
+            }
+        });
+
+        meshtasticPanel.init();
+        console.log('> MESHTASTIC PANEL: INITIALIZED');
+
+        // Make meshtastic panel globally accessible
+        window.meshtasticPanelInstance = meshtasticPanel;
+
+    } catch (error) {
+        console.error('> ERROR INITIALIZING MESHTASTIC PANEL:', error);
+    }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('> CYBER TERMINAL INITIALIZING...');
@@ -320,6 +356,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize System Panel
     initSystemPanel();
+
+    // Initialize Meshtastic Panel
+    initMeshtasticPanel();
 
     // Set up header click handlers now that panels are ready
     setupHeaderClickHandlers();
