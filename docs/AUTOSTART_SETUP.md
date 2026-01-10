@@ -15,7 +15,7 @@ nano ~/.config/lxsession/LXDE-pi/autostart
 @lxpanel --profile LXDE-pi
 @pcmanfm --desktop --profile LXDE-pi
 @xscreensaver -no-splash
-@/home/pi/cyber-kiosk/launch-kiosk.sh
+@/home/YOUR_USERNAME/cyber-kiosk/launch-kiosk.sh
 ```
 
 3. Save and exit (Ctrl+X, Y, Enter)
@@ -29,7 +29,7 @@ sudo reboot
 
 If you don't want auto-start, launch manually from terminal:
 ```bash
-/home/pi/cyber-kiosk/launch-kiosk.sh
+~/cyber-kiosk/launch-kiosk.sh
 ```
 
 Or double-click `launch-kiosk.sh` from the file manager.
@@ -45,7 +45,7 @@ nano ~/.config/lxsession/LXDE-pi/autostart
 
 2. Remove or comment out the kiosk line:
 ```
-#@/home/pi/cyber-kiosk/launch-kiosk.sh
+#@/home/YOUR_USERNAME/cyber-kiosk/launch-kiosk.sh
 ```
 
 3. Save and reboot.
@@ -85,7 +85,7 @@ sudo apt-get install unclutter
 ### Kiosk doesn't start
 Check the launcher script is executable:
 ```bash
-chmod +x /home/pi/cyber-kiosk/launch-kiosk.sh
+chmod +x ~/cyber-kiosk/launch-kiosk.sh
 ```
 
 View system logs:

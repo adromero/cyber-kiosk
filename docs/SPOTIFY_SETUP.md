@@ -42,7 +42,7 @@ The music panel uses Spotify's Web API with OAuth 2.0 authentication to:
 
 1. Open or create the `.env` file in your cyber-kiosk directory:
    ```bash
-   cd /home/alfon/Projects/cyber-kiosk
+   cd ~/Projects/cyber-kiosk  # or wherever you cloned the repo
    nano .env
    ```
 

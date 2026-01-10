@@ -39,11 +39,9 @@ const INACTIVITY_TIMEOUT = 1800000; // Change value (in milliseconds)
 ```
 
 ### Adjust Video Thumbnail Rotation Speed
-Edit `config.json` in your project directory:
-```json
-{
-  "imageChangeInterval": 30000
-}
+Edit the CONFIG section in `js/app.js`:
+```javascript
+imageChangeInterval: 30000
 ```
 Values in milliseconds:
 - 30000 = 30 seconds

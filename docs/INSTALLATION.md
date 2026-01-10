@@ -35,7 +35,7 @@ Complete step-by-step installation instructions for Raspberry Pi.
    The script will:
    - Check for Node.js and install if missing
    - Install npm dependencies
-   - Create config.json from template
+   - Create `.env` from template
    - Prompt for API keys
    - Test the system monitor
    - (Optional) Setup systemd service
@@ -77,19 +77,21 @@ npm install
 #### Step 4: Configure API Keys
 
 ```bash
-cp config.example.json config.json
-nano config.json
+cp .env.example .env
+nano .env
 ```
 
 Edit the file with your API keys and zip code:
 
-```json
-{
-  "zipCode": "90210",
-  "weatherApiKey": "YOUR_OPENWEATHERMAP_API_KEY",
-  "nytApiKey": "YOUR_NYT_API_KEY",
-  "youtubeApiKey": "YOUR_YOUTUBE_API_KEY"
-}
+```bash
+# Configuration
+ZIP_CODE=90210
+
+# API Keys
+OPENWEATHER_API_KEY=YOUR_OPENWEATHERMAP_API_KEY
+NYT_API_KEY=YOUR_NYT_API_KEY
+YOUTUBE_API_KEY=YOUR_YOUTUBE_API_KEY
+ALPHA_VANTAGE_API_KEY=YOUR_ALPHAVANTAGE_API_KEY
 ```
 
 Save and exit (Ctrl+X, Y, Enter).

@@ -48,6 +48,8 @@ const PORT = parseInt(ENV.PORT) || 3001;
 const NETWORK_INTERFACE = ENV.NETWORK_INTERFACE || 'auto';
 const ALPHA_VANTAGE_API_KEY = ENV.ALPHA_VANTAGE_API_KEY || 'demo';
 const PIHOLE_API_URL = ENV.PIHOLE_API_URL || '';
+// Derive admin URL from API URL for fallback iframe (strips /api if present, adds /admin)
+const PIHOLE_ADMIN_URL = PIHOLE_API_URL ? PIHOLE_API_URL.replace(/\/api\/?$/, '') + '/admin' : '';
 const PIHOLE_PASSWORD = ENV.PIHOLE_PASSWORD || '';
 // Spotify Configuration - PKCE flow (no client secret needed!)
 const SPOTIFY_CLIENT_ID = ENV.SPOTIFY_CLIENT_ID || 'demo'; // Will prompt user to set up their own
@@ -790,7 +792,7 @@ async function getPiholeStats() {
         return {
             status: 'error',
             error: 'Pi-hole API URL not configured',
-            fallback_iframe: 'http://100.90.104.35/admin'
+            fallback_iframe: PIHOLE_ADMIN_URL
         };
     }
 
@@ -822,7 +824,7 @@ async function getPiholeStats() {
                             resolve({
                                 status: 'error',
                                 error: 'Failed to authenticate with Pi-hole',
-                                fallback_iframe: 'http://100.90.104.35/admin'
+                                fallback_iframe: PIHOLE_ADMIN_URL
                             });
                             return;
                         }
@@ -865,7 +867,7 @@ async function getPiholeStats() {
                                         resolve({
                                             status: 'error',
                                             error: 'Pi-hole API authentication rejected',
-                                            fallback_iframe: 'http://100.90.104.35/admin'
+                                            fallback_iframe: PIHOLE_ADMIN_URL
                                         });
                                         return;
                                     }
@@ -879,7 +881,7 @@ async function getPiholeStats() {
                                         resolve({
                                             status: 'error',
                                             error: 'No queries data in response',
-                                            fallback_iframe: 'http://100.90.104.35/admin'
+                                            fallback_iframe: PIHOLE_ADMIN_URL
                                         });
                                         return;
                                     }
@@ -958,7 +960,7 @@ async function getPiholeStats() {
                                     resolve({
                                         status: 'error',
                                         error: 'Failed to parse summary: ' + error.message,
-                                        fallback_iframe: 'http://100.90.104.35/admin'
+                                        fallback_iframe: PIHOLE_ADMIN_URL
                                     });
                                 }
                             });
@@ -969,7 +971,7 @@ async function getPiholeStats() {
                             resolve({
                                 status: 'error',
                                 error: 'Failed to fetch summary: ' + error.message,
-                                fallback_iframe: 'http://100.90.104.35/admin'
+                                fallback_iframe: PIHOLE_ADMIN_URL
                             });
                         });
 
@@ -979,7 +981,7 @@ async function getPiholeStats() {
                         resolve({
                             status: 'error',
                             error: 'Failed to parse login response: ' + error.message,
-                            fallback_iframe: 'http://100.90.104.35/admin'
+                            fallback_iframe: PIHOLE_ADMIN_URL
                         });
                     }
                 });
@@ -990,7 +992,7 @@ async function getPiholeStats() {
                 resolve({
                     status: 'error',
                     error: 'Failed to authenticate: ' + error.message,
-                    fallback_iframe: 'http://100.90.104.35/admin'
+                    fallback_iframe: PIHOLE_ADMIN_URL
                 });
             });
 
@@ -1002,7 +1004,7 @@ async function getPiholeStats() {
         return {
             status: 'error',
             error: error.message,
-            fallback_iframe: 'http://100.90.104.35/admin'
+            fallback_iframe: PIHOLE_ADMIN_URL
         };
     }
 }

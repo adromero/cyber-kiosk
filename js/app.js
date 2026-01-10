@@ -888,8 +888,9 @@ async function fetchHackerNews() {
             const comments = story.descendants || 0;
             const url = story.url || `https://news.ycombinator.com/item?id=${story.id}`;
 
+            const safeUrl = sanitizeUrl(url);
             return `
-                <div class="news-item" onclick="window.open('${url}', '_blank')">
+                <div class="news-item"${safeUrl ? ` onclick="window.open('${safeUrl}', '_blank')"` : ''}>
                     <div>
                         <span class="news-rank">${index + 1}.</span>
                         <span class="news-title">${escapeHtml(story.title)}</span>
@@ -941,11 +942,11 @@ async function fetchNYTimes() {
         const stories = data.results.slice(0, 15);
 
         feedEl.innerHTML = stories.map((story, index) => {
-            const url = story.url;
+            const safeUrl = sanitizeUrl(story.url);
             const abstract = story.abstract || 'No description available';
 
             return `
-                <div class="news-item" onclick="window.open('${url}', '_blank')">
+                <div class="news-item"${safeUrl ? ` onclick="window.open('${safeUrl}', '_blank')"` : ''}>
                     <div>
                         <span class="news-rank">${index + 1}.</span>
                         <span class="news-title">${escapeHtml(story.title)}</span>
@@ -993,10 +994,10 @@ async function fetchReddit() {
             const postData = post.data;
             const score = postData.score || 0;
             const comments = postData.num_comments || 0;
-            const url = `https://www.reddit.com${postData.permalink}`;
+            const safeUrl = sanitizeUrl(`https://www.reddit.com${postData.permalink}`);
 
             return `
-                <div class="news-item" onclick="window.open('${url}', '_blank')">
+                <div class="news-item"${safeUrl ? ` onclick="window.open('${safeUrl}', '_blank')"` : ''}>
                     <div>
                         <span class="news-rank">${index + 1}.</span>
                         <span class="news-title">${escapeHtml(postData.title)}</span>
@@ -1039,11 +1040,11 @@ async function fetchDevTo() {
         feedEl.innerHTML = topArticles.map((article, index) => {
             const reactions = article.public_reactions_count || 0;
             const comments = article.comments_count || 0;
-            const url = article.url;
+            const safeUrl = sanitizeUrl(article.url);
             const tags = article.tag_list ? article.tag_list.slice(0, 3).join(', ').toUpperCase() : '';
 
             return `
-                <div class="news-item" onclick="window.open('${url}', '_blank')">
+                <div class="news-item"${safeUrl ? ` onclick="window.open('${safeUrl}', '_blank')"` : ''}>
                     <div>
                         <span class="news-rank">${index + 1}.</span>
                         <span class="news-title">${escapeHtml(article.title)}</span>
@@ -1075,6 +1076,16 @@ function escapeHtml(text) {
         "'": '&#039;'
     };
     return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// Utility function to sanitize URLs for use in onclick handlers
+// Prevents XSS via javascript: protocol and attribute breakout
+function sanitizeUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    // Only allow http/https URLs
+    if (!/^https?:\/\//i.test(url)) return '';
+    // Escape single quotes to prevent breaking out of onclick attribute
+    return url.replace(/'/g, "\\'");
 }
 
 // Initialize Cyberspace Widget
@@ -2139,8 +2150,10 @@ async function showNewsModal() {
         const content = `
             <div class="modal-news-section">
                 <div class="modal-news-source-title">&gt; HACKER NEWS</div>
-                ${cachedNewsData.hackernews.map((story, index) => `
-                    <div class="modal-news-item" onclick="window.open('${story.url}', '_blank')">
+                ${cachedNewsData.hackernews.map((story, index) => {
+                    const safeUrl = sanitizeUrl(story.url);
+                    return `
+                    <div class="modal-news-item"${safeUrl ? ` onclick="window.open('${safeUrl}', '_blank')"` : ''}>
                         <div>
                             <span class="news-rank">${index + 1}.</span>
                             <span class="modal-news-title">${escapeHtml(story.title)}</span>
@@ -2150,13 +2163,15 @@ async function showNewsModal() {
                             <span>${story.comments} COMMENTS</span>
                         </div>
                     </div>
-                `).join('')}
+                `}).join('')}
             </div>
 
             <div class="modal-news-section">
                 <div class="modal-news-source-title">&gt; NEW YORK TIMES</div>
-                ${cachedNewsData.nytimes.map((story, index) => `
-                    <div class="modal-news-item" onclick="window.open('${story.url}', '_blank')">
+                ${cachedNewsData.nytimes.map((story, index) => {
+                    const safeUrl = sanitizeUrl(story.url);
+                    return `
+                    <div class="modal-news-item"${safeUrl ? ` onclick="window.open('${safeUrl}', '_blank')"` : ''}>
                         <div>
                             <span class="news-rank">${index + 1}.</span>
                             <span class="modal-news-title">${escapeHtml(story.title)}</span>
@@ -2166,13 +2181,15 @@ async function showNewsModal() {
                             <span>${story.section}</span> | <span>${story.byline || 'NYT'}</span>
                         </div>
                     </div>
-                `).join('')}
+                `}).join('')}
             </div>
 
             <div class="modal-news-section">
                 <div class="modal-news-source-title">&gt; DEV.TO</div>
-                ${cachedNewsData.devto.map((story, index) => `
-                    <div class="modal-news-item" onclick="window.open('${story.url}', '_blank')">
+                ${cachedNewsData.devto.map((story, index) => {
+                    const safeUrl = sanitizeUrl(story.url);
+                    return `
+                    <div class="modal-news-item"${safeUrl ? ` onclick="window.open('${safeUrl}', '_blank')"` : ''}>
                         <div>
                             <span class="news-rank">${index + 1}.</span>
                             <span class="modal-news-title">${escapeHtml(story.title)}</span>
@@ -2183,7 +2200,7 @@ async function showNewsModal() {
                             ${story.tags ? ` | <span>${story.tags}</span>` : ''}
                         </div>
                     </div>
-                `).join('')}
+                `}).join('')}
             </div>
         `;
 

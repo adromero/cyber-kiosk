@@ -27,7 +27,7 @@ The `.env` file contains environment variables that configure the dashboard:
 
 ```bash
 # Configuration
-ZIP_CODE=45249
+ZIP_CODE=90210
 
 # API Keys
 OPENWEATHER_API_KEY=your_openweathermap_api_key
@@ -39,7 +39,7 @@ ALPHA_VANTAGE_API_KEY=your_alphavantage_api_key
 ### Option Details
 
 #### `ZIP_CODE`
-- **Default:** `45249`
+- **Default:** `90210`
 - **Description:** US ZIP code for weather data
 - **Example:** `10001`, `90210`, `60601`
 
@@ -246,7 +246,7 @@ let CONFIG = {
 ### Minimal Mode (Minimal API Keys)
 Edit `.env`:
 ```bash
-ZIP_CODE=45249
+ZIP_CODE=90210
 OPENWEATHER_API_KEY=your_openweathermap_api_key
 NYT_API_KEY=
 YOUTUBE_API_KEY=

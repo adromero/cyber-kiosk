@@ -86,7 +86,7 @@ A Neuromancer-inspired cyberpunk dashboard for Raspberry Pi with touchscreen. Fe
 
    ```bash
    # Configuration
-   ZIP_CODE=45249
+   ZIP_CODE=90210
 
    # API Keys
    OPENWEATHER_API_KEY=your_openweathermap_api_key
@@ -121,7 +121,7 @@ All settings are in `.env`:
 
 ```bash
 # Configuration
-ZIP_CODE=45249
+ZIP_CODE=90210
 
 # API Keys
 OPENWEATHER_API_KEY=your_key_here

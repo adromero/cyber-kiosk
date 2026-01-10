@@ -10,11 +10,11 @@ Common issues and solutions for Cyber Kiosk.
 
 **Solution:**
 ```bash
-# Create config.json if missing
-cp config.example.json config.json
+# Create .env if missing
+cp .env.example .env
 
 # Edit and add your API keys
-nano config.json
+nano .env
 
 # Hard refresh browser
 # Press Ctrl+Shift+R
@@ -37,10 +37,10 @@ nano config.json
    Look for error messages
    ```
 
-2. **Verify config.json exists:**
+2. **Verify .env exists:**
    ```bash
-   ls -la config.json
-   # If missing: cp config.example.json config.json
+   ls -la .env
+   # If missing: cp .env.example .env
    ```
 
 3. **Check system monitor is running:**
@@ -70,11 +70,9 @@ nano config.json
    - OpenWeatherMap free tier: 1,000 calls/day
    - May hit limit if refreshing too frequently
 
-3. **Verify ZIP code format:**
-   ```json
-   {
-     "zipCode": "90210"  // US ZIP, 5 digits
-   }
+3. **Verify ZIP code format in .env:**
+   ```bash
+   ZIP_CODE=90210  # US ZIP, 5 digits
    ```
 
 4. **Check browser console:**
@@ -153,7 +151,7 @@ Get free key: https://www.alphavantage.co/support/#api-key
 
 4. **Check rotation:**
    - Sources cycle every 5 minutes by default
-   - Change in `config.json`: `newsUpdateInterval`
+   - Change `newsUpdateInterval` in `js/app.js` CONFIG section
 
 ## System Monitor Issues
 
@@ -382,12 +380,10 @@ Get free key: https://www.alphavantage.co/support/#api-key
    sudo reboot
    ```
 
-2. **Reduce update frequencies in config.json:**
-   ```json
-   {
-     "imageChangeInterval": 60000,
-     "systemUpdateInterval": 60000
-   }
+2. **Reduce update frequencies in `js/app.js` CONFIG section:**
+   ```javascript
+   imageChangeInterval: 60000,
+   systemUpdateInterval: 60000
    ```
 
 3. **Disable CRT effects temporarily:**
@@ -415,11 +411,9 @@ Get free key: https://www.alphavantage.co/support/#api-key
    # Press 'P' to sort by CPU usage
    ```
 
-2. **Reduce system monitor frequency:**
-   ```json
-   {
-     "systemUpdateInterval": 60000
-   }
+2. **Reduce system monitor frequency in `js/app.js`:**
+   ```javascript
+   systemUpdateInterval: 60000
    ```
 
 3. **Check for runaway processes:**
@@ -466,12 +460,10 @@ Get free key: https://www.alphavantage.co/support/#api-key
 
 **Solutions:**
 
-1. **Increase update intervals:**
-   ```json
-   {
-     "weatherUpdateInterval": 1800000,
-     "newsUpdateInterval": 600000
-   }
+1. **Increase update intervals in `js/app.js` CONFIG section:**
+   ```javascript
+   weatherUpdateInterval: 1800000,
+   newsUpdateInterval: 600000
    ```
 
 2. **Check API quotas:**
@@ -547,7 +539,7 @@ cat launch-kiosk.log
 curl -v http://localhost:3001/health
 
 # Config (remove API keys before sharing!)
-cat config.json
+cat .env
 ```
 
 ### Report an Issue
@@ -574,7 +566,7 @@ sudo systemctl stop cyber-kiosk-monitor
 pkill chromium-browser
 
 # Reset config
-cp config.example.json config.json
+cp .env.example .env
 
 # Reinstall dependencies
 rm -rf node_modules
